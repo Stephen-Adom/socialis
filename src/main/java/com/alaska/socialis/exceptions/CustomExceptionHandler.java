@@ -16,8 +16,8 @@ import com.alaska.socialis.model.responseModel.ValidationErrorResponse;
 @ResponseStatus
 public class CustomExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException exception) {
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(EntityNotFoundException exception) {
         return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getStatus(), exception.getMessage()),
                 exception.getStatus());
     }

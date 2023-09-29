@@ -2,11 +2,11 @@ package com.alaska.socialis.exceptions;
 
 import org.springframework.http.HttpStatus;
 
-public class UserNotFoundException extends Exception {
+public class EntityNotFoundException extends Exception {
 
     private HttpStatus status;
 
-    public UserNotFoundException(String message, HttpStatus status) {
+    public EntityNotFoundException(String message, HttpStatus status) {
         super(message);
         this.status = status;
     }

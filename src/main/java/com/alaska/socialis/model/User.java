@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.alaska.socialis.model.validationGroups.LoginValidationGroup;
 import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -94,7 +95,7 @@ public class User implements UserDetails {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<Post> posts = new ArrayList<Post>();
 
     @Override
