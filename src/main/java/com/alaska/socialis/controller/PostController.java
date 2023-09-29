@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
+import com.alaska.socialis.model.dto.SuccessMessage;
+import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.model.requestModel.NewPostRequest;
 import com.alaska.socialis.model.requestModel.UpdatePostRequest;
-import com.alaska.socialis.model.responseModel.SuccessMessage;
-import com.alaska.socialis.model.responseModel.SuccessResponse;
 import com.alaska.socialis.services.PostService;
 
 import jakarta.validation.Valid;

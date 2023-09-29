@@ -1,7 +1,4 @@
-package com.alaska.socialis.model.responseModel;
-
-import java.util.ArrayList;
-import java.util.List;
+package com.alaska.socialis.model.dto;
 
 import org.springframework.http.HttpStatus;
 
@@ -14,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ValidationErrorResponse {
+public class SuccessMessage {
     private HttpStatus status;
-    List<String> messages = new ArrayList<>();
+    private String message;
 }

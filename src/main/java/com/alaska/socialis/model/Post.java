@@ -28,7 +28,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
 @Data
@@ -61,6 +60,9 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<PostImage> postImages = new ArrayList<PostImage>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    List<Comment> comments = new ArrayList<Comment>();
 
     @Override
     public String toString() {

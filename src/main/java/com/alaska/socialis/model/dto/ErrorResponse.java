@@ -1,4 +1,4 @@
-package com.alaska.socialis.model.responseModel;
+package com.alaska.socialis.model.dto;
 
 import org.springframework.http.HttpStatus;
 
@@ -11,9 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthResponse {
+public class ErrorResponse {
     private HttpStatus status;
-    private Object data;
-    private String accessToken;
-    private String refreshToken;
+    private String message;
 }

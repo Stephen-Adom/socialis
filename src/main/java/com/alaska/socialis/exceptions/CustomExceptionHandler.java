@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.alaska.socialis.model.responseModel.ErrorResponse;
-import com.alaska.socialis.model.responseModel.ValidationErrorResponse;
+import com.alaska.socialis.model.dto.ErrorResponse;
+import com.alaska.socialis.model.dto.ValidationErrorResponse;
 
 @ControllerAdvice
 @ResponseStatus

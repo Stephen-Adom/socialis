@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.swing.text.html.parser.Entity;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
@@ -22,8 +21,6 @@ import com.alaska.socialis.model.requestModel.UpdatePostRequest;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.PostServiceInterface;
-
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Service

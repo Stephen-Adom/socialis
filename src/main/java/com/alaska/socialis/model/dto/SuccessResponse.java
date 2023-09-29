@@ -1,4 +1,4 @@
-package com.alaska.socialis.model.responseModel;
+package com.alaska.socialis.model.dto;
 
 import org.springframework.http.HttpStatus;
 
