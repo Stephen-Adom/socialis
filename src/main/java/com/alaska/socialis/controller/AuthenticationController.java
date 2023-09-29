@@ -52,6 +52,8 @@ public class AuthenticationController {
         AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.CREATED)
                 .data(this.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
 
+        // ! dispatch an event to send email for accout created
+
         return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.CREATED);
     }
 
