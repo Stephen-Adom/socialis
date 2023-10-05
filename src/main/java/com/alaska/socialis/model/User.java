@@ -87,6 +87,9 @@ public class User implements UserDetails {
 
     private final boolean enabled = true;
 
+    @Builder.Default
+    private int loginCount = 0;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -124,6 +127,14 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public int getLoginCount() {
+        return this.loginCount;
+    }
+
+    public void setLoginCount(int count) {
+        this.loginCount = count;
     }
 
 }

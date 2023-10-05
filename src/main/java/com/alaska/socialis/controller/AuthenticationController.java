@@ -1,5 +1,6 @@
 package com.alaska.socialis.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.AuthResponse;
+import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.validationGroups.LoginValidationGroup;
 import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
 import com.alaska.socialis.services.AuthenticationService;
@@ -62,11 +64,13 @@ public class AuthenticationController {
             BindingResult validationResult, HttpServletRequest request) throws ValidationErrorsException {
         User authUser = this.authService.authenticateUser(validationResult, user);
 
-        String token = this.authService.generateJwt(authUser, request);
-        String refreshToken = this.jwtService.generateRefreshToken(authUser);
+        User updatedAuthUser = this.authService.updateLoginCount(authUser);
+
+        String token = this.authService.generateJwt(updatedAuthUser, request);
+        String refreshToken = this.jwtService.generateRefreshToken(updatedAuthUser);
 
         AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.OK)
-                .data(this.buildDto(authUser)).accessToken(token).refreshToken(refreshToken).build();
+                .data(this.buildDto(updatedAuthUser)).accessToken(token).refreshToken(refreshToken).build();
 
         return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.OK);
     }
@@ -86,9 +90,22 @@ public class AuthenticationController {
         return new ResponseEntity<Map<String, String>>(accessToken, HttpStatus.OK);
     }
 
+    @PostMapping("/validate_email")
+    public ResponseEntity<Map<String, Object>> validateEmailAddress(
+            @Valid @RequestBody UserEmailValidationRequest userEmail, BindingResult validationBindingResult)
+            throws ValidationErrorsException {
+        Map<String, Object> errorBody = new HashMap<String, Object>();
+        Boolean emailExist = this.authService.validateEmailAddress(userEmail, validationBindingResult);
+        errorBody.put("status", HttpStatus.OK);
+        errorBody.put("email_exist", emailExist);
+
+        return new ResponseEntity<Map<String, Object>>(errorBody, HttpStatus.OK);
+    }
+
     private UserDto buildDto(User newUser) {
         return UserDto.builder().id(newUser.getId()).firstname(newUser.getFirstname()).lastname(newUser.getLastname())
                 .email(newUser.getEmail()).username(newUser.getUsername()).createdAt(newUser.getCreatedAt())
-                .updatedAt(newUser.getUpdatedAt()).enabled(newUser.isEnabled()).build();
+                .updatedAt(newUser.getUpdatedAt()).enabled(newUser.isEnabled()).loginCount(newUser.getLoginCount())
+                .build();
     }
 }

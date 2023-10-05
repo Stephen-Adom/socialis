@@ -10,6 +10,7 @@ import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -21,4 +22,9 @@ public interface AuthenticationServiceInterface {
 
         public Map<String, String> requestAccessToken(TokenRequest refreshToken, HttpServletRequest request)
                         throws UnauthorizedRequestException, TokenExpiredException;
+
+        public User updateLoginCount(User user);
+
+        public Boolean validateEmailAddress(UserEmailValidationRequest userEmail,
+                        BindingResult validationBindingResult) throws ValidationErrorsException;
 }

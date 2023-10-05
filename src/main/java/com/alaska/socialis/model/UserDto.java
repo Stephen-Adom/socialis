@@ -20,5 +20,6 @@ public class UserDto {
     private boolean enabled;
     private Date createdAt;
     private Date updatedAt;
+    private int loginCount;
 
 }

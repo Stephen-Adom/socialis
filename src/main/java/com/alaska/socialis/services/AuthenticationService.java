@@ -17,6 +17,7 @@ import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.AuthenticationServiceInterface;
 
@@ -99,6 +100,22 @@ public class AuthenticationService implements AuthenticationServiceInterface {
         } catch (ExpiredJwtException e) {
             throw new TokenExpiredException("Refresh token is expired", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @Override
+    public User updateLoginCount(User user) {
+        user.setLoginCount(user.getLoginCount() + 1);
+
+        return this.userRepository.save(user);
+    }
+
+    @Override
+    public Boolean validateEmailAddress(UserEmailValidationRequest userEmail, BindingResult validationResult)
+            throws ValidationErrorsException {
+        if (validationResult.hasErrors()) {
+            throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        return this.userRepository.existsByEmail(userEmail.getEmail());
     }
 
     public String generateJwt(User user, HttpServletRequest request) {
