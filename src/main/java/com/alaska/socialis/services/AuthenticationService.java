@@ -55,7 +55,7 @@ public class AuthenticationService implements AuthenticationServiceInterface {
         }
 
         User newUser = User.builder().firstname(user.getFirstname()).lastname(user.getLastname())
-                .email(user.getLastname()).username(user.getUsername())
+                .email(user.getEmail()).username(user.getUsername())
                 .password(this.passwordEncoder.encode(user.getPassword())).build();
 
         return this.userRepository.save(newUser);
