@@ -11,6 +11,7 @@ import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
+import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -26,5 +27,8 @@ public interface AuthenticationServiceInterface {
         public User updateLoginCount(User user);
 
         public Boolean validateEmailAddress(UserEmailValidationRequest userEmail,
+                        BindingResult validationBindingResult) throws ValidationErrorsException;
+
+        public Boolean validateUsername(UsernameValidationRequest username,
                         BindingResult validationBindingResult) throws ValidationErrorsException;
 }

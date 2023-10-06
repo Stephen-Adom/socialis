@@ -18,6 +18,7 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
+import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.AuthenticationServiceInterface;
 
@@ -116,6 +117,16 @@ public class AuthenticationService implements AuthenticationServiceInterface {
             throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
         return this.userRepository.existsByEmail(userEmail.getEmail());
+    }
+
+    @Override
+    public Boolean validateUsername(UsernameValidationRequest username, BindingResult validationResult)
+            throws ValidationErrorsException {
+
+        if (validationResult.hasErrors()) {
+            throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        return this.userRepository.existsByUsername(username.getUsername());
     }
 
     public String generateJwt(User user, HttpServletRequest request) {

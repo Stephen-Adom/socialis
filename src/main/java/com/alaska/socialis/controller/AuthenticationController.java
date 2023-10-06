@@ -22,6 +22,7 @@ import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.AuthResponse;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
+import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 import com.alaska.socialis.model.validationGroups.LoginValidationGroup;
 import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
 import com.alaska.socialis.services.AuthenticationService;
@@ -98,6 +99,18 @@ public class AuthenticationController {
         Boolean emailExist = this.authService.validateEmailAddress(userEmail, validationBindingResult);
         errorBody.put("status", HttpStatus.OK);
         errorBody.put("email_exist", emailExist);
+
+        return new ResponseEntity<Map<String, Object>>(errorBody, HttpStatus.OK);
+    }
+
+    @PostMapping("/validate_username")
+    public ResponseEntity<Map<String, Object>> validateUsername(
+            @Valid @RequestBody UsernameValidationRequest username, BindingResult validationBindingResult)
+            throws ValidationErrorsException {
+        Map<String, Object> errorBody = new HashMap<String, Object>();
+        Boolean usernameExist = this.authService.validateUsername(username, validationBindingResult);
+        errorBody.put("status", HttpStatus.OK);
+        errorBody.put("username_exist", usernameExist);
 
         return new ResponseEntity<Map<String, Object>>(errorBody, HttpStatus.OK);
     }
