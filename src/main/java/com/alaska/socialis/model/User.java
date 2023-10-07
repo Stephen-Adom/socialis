@@ -25,6 +25,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -103,6 +104,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<Comment>();
+
+    @OneToOne(mappedBy = "user")
+    private EmailVerificationToken verificationToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

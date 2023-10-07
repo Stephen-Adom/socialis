@@ -31,4 +31,6 @@ public interface AuthenticationServiceInterface {
 
         public Boolean validateUsername(UsernameValidationRequest username,
                         BindingResult validationBindingResult) throws ValidationErrorsException;
+
+        public void saveEmailVerificationToken(User user, String token);
 }

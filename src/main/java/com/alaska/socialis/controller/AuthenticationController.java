@@ -61,8 +61,7 @@ public class AuthenticationController {
                 .data(this.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
 
         // ! dispatch an event to send email for account created
-
-        this.publisher.publishEvent(new RegistrationCompleteEvent(newUser, "url"));
+        this.publisher.publishEvent(new RegistrationCompleteEvent(newUser, this.authService.applicationUrl(request)));
 
         return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.CREATED);
     }

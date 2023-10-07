@@ -55,7 +55,6 @@ public class PostService implements PostServiceInterface {
         newPost.setContent(post.getContent());
         newPost.setNumberOfComments(0);
         newPost.setNumberOfLikes(0);
-        newPost.setPostImages(allMedia);
 
         if (post.getPostImages().size() > 0) {
             for (PostImage image : post.getPostImages()) {

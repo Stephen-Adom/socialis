@@ -15,10 +15,12 @@ import com.alaska.socialis.exceptions.TokenExpiredException;
 import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
+import com.alaska.socialis.model.EmailVerificationToken;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
+import com.alaska.socialis.repository.EmailVerificationTokenRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.AuthenticationServiceInterface;
 
@@ -39,6 +41,9 @@ public class AuthenticationService implements AuthenticationServiceInterface {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private EmailVerificationTokenRepository tokenRepository;
 
     @Override
     public User registerUser(BindingResult validationResult, User user)
@@ -129,6 +134,12 @@ public class AuthenticationService implements AuthenticationServiceInterface {
         return this.userRepository.existsByUsername(username.getUsername());
     }
 
+    @Override
+    public void saveEmailVerificationToken(User user, String token) {
+        EmailVerificationToken verificationToken = new EmailVerificationToken(user, token);
+        this.tokenRepository.save(verificationToken);
+    }
+
     public String generateJwt(User user, HttpServletRequest request) {
         Map<String, Object> userClaims = new HashMap<String, Object>();
         userClaims.put("iss", request.getServerName());
@@ -139,5 +150,9 @@ public class AuthenticationService implements AuthenticationServiceInterface {
 
     public String generateRefreshToken(User user) {
         return this.jwtService.generateRefreshToken(user);
+    }
+
+    public String applicationUrl(HttpServletRequest request) {
+        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 }
