@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alaska.socialis.event.RegistrationCompleteEvent;
 import com.alaska.socialis.exceptions.TokenExpiredException;
 import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
@@ -41,6 +43,9 @@ public class AuthenticationController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private ApplicationEventPublisher publisher;
+
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(
             @Validated(RegisterValidationGroup.class) @RequestBody User user,
@@ -55,7 +60,9 @@ public class AuthenticationController {
         AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.CREATED)
                 .data(this.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
 
-        // ! dispatch an event to send email for accout created
+        // ! dispatch an event to send email for account created
+
+        this.publisher.publishEvent(new RegistrationCompleteEvent(newUser, "url"));
 
         return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.CREATED);
     }
