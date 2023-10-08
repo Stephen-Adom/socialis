@@ -2,6 +2,8 @@ package com.alaska.socialis.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -9,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,6 @@ import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.NewPasswordModel;
-import com.alaska.socialis.model.ResetPasswordModel;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
@@ -38,7 +38,6 @@ import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
 import com.alaska.socialis.services.AuthenticationService;
 import com.alaska.socialis.services.JwtService;
 
-import io.jsonwebtoken.lang.Objects;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +56,8 @@ public class AuthenticationController {
     @Autowired
     private ApplicationEventPublisher publisher;
 
+    private ExecutorService executorService = Executors.newFixedThreadPool(4);
+
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(
             @Validated(RegisterValidationGroup.class) @RequestBody User user,
@@ -72,7 +73,8 @@ public class AuthenticationController {
                 .data(this.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
 
         // ! dispatch an event to send email for account created
-        this.publisher.publishEvent(new RegistrationCompleteEvent(newUser, this.authService.applicationUrl(request)));
+        executorService.submit(() -> this.publisher
+                .publishEvent(new RegistrationCompleteEvent(newUser, this.authService.applicationUrl(request))));
 
         return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.CREATED);
     }
