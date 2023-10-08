@@ -41,4 +41,6 @@ public interface AuthenticationServiceInterface {
 
         public User resend_verification_link(String userEmail)
                         throws EntityNotFoundException;
+
+        public User resend_verification_token(String verificationToken) throws UnauthorizedRequestException;
 }

@@ -42,10 +42,6 @@ public class EmailVerificationToken {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
-    @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
-
     public EmailVerificationToken(User user, String token2) {
         super();
         this.user = user;

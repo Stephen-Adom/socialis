@@ -19,12 +19,14 @@ import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.EmailVerificationToken;
+import com.alaska.socialis.model.RevokedTokens;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 import com.alaska.socialis.repository.EmailVerificationTokenRepository;
+import com.alaska.socialis.repository.RevokedTokenRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.AuthenticationServiceInterface;
 
@@ -50,6 +52,9 @@ public class AuthenticationService implements AuthenticationServiceInterface {
 
     @Autowired
     private EmailVerificationTokenRepository tokenRepository;
+
+    @Autowired
+    private RevokedTokenRepository revokedTokenRepository;
 
     @Override
     public User registerUser(BindingResult validationResult, User user)
@@ -162,6 +167,11 @@ public class AuthenticationService implements AuthenticationServiceInterface {
         Long currentDateInMillis = new Date().getTime();
 
         if (tokenExist.get().getExpirationTime().getTime() - currentDateInMillis <= 0) {
+            RevokedTokens token = new RevokedTokens();
+            token.setToken(tokenExist.get().getToken());
+            token.setUser(tokenExist.get().getUser());
+
+            this.revokedTokenRepository.save(token);
             this.tokenRepository.delete(tokenExist.get());
             return false;
         }
@@ -171,6 +181,7 @@ public class AuthenticationService implements AuthenticationServiceInterface {
         user.setEnabled(true);
 
         this.userRepository.save(user);
+        this.tokenRepository.delete(tokenExist.get());
 
         return true;
     }
@@ -179,8 +190,6 @@ public class AuthenticationService implements AuthenticationServiceInterface {
     public User resend_verification_link(String userEmail)
             throws EntityNotFoundException {
         Optional<User> user = this.userRepository.findByEmail(userEmail);
-        log.info(userEmail);
-        // System.out.println(user.get());
 
         if (user.isEmpty()) {
             throw new EntityNotFoundException("User with email " + userEmail + " does not exist", HttpStatus.NOT_FOUND);
@@ -193,6 +202,18 @@ public class AuthenticationService implements AuthenticationServiceInterface {
         }
 
         return user.get();
+    }
+
+    @Override
+    public User resend_verification_token(String verificationToken) throws UnauthorizedRequestException {
+        Optional<RevokedTokens> tokenExist = this.revokedTokenRepository.findByToken(verificationToken);
+        if (tokenExist.isEmpty()) {
+            throw new UnauthorizedRequestException("Invalid Token request", HttpStatus.UNAUTHORIZED);
+        }
+
+        User user = tokenExist.get().getUser();
+        this.revokedTokenRepository.delete(tokenExist.get());
+        return user;
     }
 
     public String generateJwt(User user, HttpServletRequest request) {

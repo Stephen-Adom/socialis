@@ -159,6 +159,21 @@ public class AuthenticationController {
 
     }
 
+    @GetMapping("/resend_verification_token")
+    public ResponseEntity<Map<String, Object>> resend_verification_token(
+            @RequestParam("token") String verificationToken, HttpServletRequest request)
+            throws UnauthorizedRequestException {
+        User user = this.authService.resend_verification_token(verificationToken);
+
+        this.publisher.publishEvent(new RegistrationCompleteEvent(user, this.authService.applicationUrl(request)));
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "Email verification link sent");
+        responseBody.put("status", HttpStatus.OK);
+
+        return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
+    }
+
     private UserDto buildDto(User newUser) {
         return UserDto.builder().id(newUser.getId()).firstname(newUser.getFirstname()).lastname(newUser.getLastname())
                 .email(newUser.getEmail()).username(newUser.getUsername()).createdAt(newUser.getCreatedAt())
