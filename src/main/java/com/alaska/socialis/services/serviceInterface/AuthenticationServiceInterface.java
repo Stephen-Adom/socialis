@@ -9,9 +9,12 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.TokenExpiredException;
 import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
+import com.alaska.socialis.model.NewPasswordModel;
+import com.alaska.socialis.model.ResetPasswordModel;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 
@@ -43,4 +46,10 @@ public interface AuthenticationServiceInterface {
                         throws EntityNotFoundException;
 
         public User resend_verification_token(String verificationToken) throws UnauthorizedRequestException;
+
+        public void resetPassword(ResetPasswordRequest userEmail, BindingResult validationResult,
+                        HttpServletRequest request) throws ValidationErrorsException, EntityNotFoundException;
+
+        public void changePassword(String passwordToken, NewPasswordModel newPassword, BindingResult validationResult)
+                        throws UnauthorizedRequestException, ValidationErrorsException;
 }

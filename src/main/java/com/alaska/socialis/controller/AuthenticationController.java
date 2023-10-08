@@ -23,11 +23,14 @@ import com.alaska.socialis.exceptions.TokenExpiredException;
 import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
+import com.alaska.socialis.model.NewPasswordModel;
+import com.alaska.socialis.model.ResetPasswordModel;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.AuthResponse;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 import com.alaska.socialis.model.validationGroups.LoginValidationGroup;
@@ -169,6 +172,33 @@ public class AuthenticationController {
 
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("message", "Email verification link sent");
+        responseBody.put("status", HttpStatus.OK);
+
+        return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
+    }
+
+    @PostMapping("/reset_password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody @Valid ResetPasswordRequest userEmail,
+            BindingResult validationResult, HttpServletRequest request)
+            throws ValidationErrorsException, EntityNotFoundException {
+        this.authService.resetPassword(userEmail, validationResult, request);
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "Password Reset link sent");
+        responseBody.put("status", HttpStatus.OK);
+
+        return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
+    }
+
+    @PostMapping("/change_password")
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @RequestParam(name = "token", required = true) String passwordToken,
+            @RequestBody @Valid NewPasswordModel newPassword, BindingResult validationResult)
+            throws UnauthorizedRequestException, ValidationErrorsException {
+        this.authService.changePassword(passwordToken, newPassword, validationResult);
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "New Password has been set successfully");
         responseBody.put("status", HttpStatus.OK);
 
         return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);

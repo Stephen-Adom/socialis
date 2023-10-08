@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,19 +14,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
+import com.alaska.socialis.event.ResetPasswordEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.TokenExpiredException;
 import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.EmailVerificationToken;
+import com.alaska.socialis.model.NewPasswordModel;
+import com.alaska.socialis.model.ResetPasswordModel;
 import com.alaska.socialis.model.RevokedTokens;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 import com.alaska.socialis.repository.EmailVerificationTokenRepository;
+import com.alaska.socialis.repository.ResetPasswordRepository;
 import com.alaska.socialis.repository.RevokedTokenRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.AuthenticationServiceInterface;
@@ -55,6 +61,12 @@ public class AuthenticationService implements AuthenticationServiceInterface {
 
     @Autowired
     private RevokedTokenRepository revokedTokenRepository;
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
+
+    @Autowired
+    private ResetPasswordRepository resetPasswordRepository;
 
     @Override
     public User registerUser(BindingResult validationResult, User user)
@@ -214,6 +226,52 @@ public class AuthenticationService implements AuthenticationServiceInterface {
         User user = tokenExist.get().getUser();
         this.revokedTokenRepository.delete(tokenExist.get());
         return user;
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequest userEmail, BindingResult validationResult,
+            HttpServletRequest request)
+            throws ValidationErrorsException, EntityNotFoundException {
+        if (validationResult.hasErrors()) {
+            throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        Optional<User> user = this.userRepository.findByEmail(userEmail.getEmail());
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with email " + userEmail.getEmail() + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        this.publisher.publishEvent(new ResetPasswordEvent(user.get(), this.applicationUrl(request)));
+    }
+
+    @Override
+    public void changePassword(String passwordToken, NewPasswordModel newPassword, BindingResult validationResult)
+            throws UnauthorizedRequestException, ValidationErrorsException {
+        Optional<ResetPasswordModel> resetPassword = this.resetPasswordRepository.findByToken(passwordToken);
+
+        if (resetPassword.isEmpty()) {
+            throw new UnauthorizedRequestException("Invalid Token", HttpStatus.UNAUTHORIZED);
+        }
+
+        ResetPasswordModel resetPasswordExist = resetPassword.get();
+
+        if (resetPasswordExist.getExpirationDate().getTime() - new Date().getTime() <= 0) {
+            this.resetPasswordRepository.delete(resetPasswordExist);
+            throw new UnauthorizedRequestException(
+                    "Invalid Token: Token provided has expiried. Provide your email to get a new token",
+                    HttpStatus.UNAUTHORIZED);
+        }
+
+        if (validationResult.hasErrors()) {
+            throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        User user = resetPasswordExist.getUser();
+        user.setPassword(this.passwordEncoder.encode(newPassword.getPassword()));
+        this.userRepository.save(user);
+        this.resetPasswordRepository.delete(resetPasswordExist);
     }
 
     public String generateJwt(User user, HttpServletRequest request) {
