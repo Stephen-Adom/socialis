@@ -9,9 +9,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alaska.socialis.event.RegistrationCompleteEvent;
@@ -32,11 +35,14 @@ import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
 import com.alaska.socialis.services.AuthenticationService;
 import com.alaska.socialis.services.JwtService;
 
+import io.jsonwebtoken.lang.Objects;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/auth")
+@Slf4j
 public class AuthenticationController {
 
     @Autowired
@@ -133,6 +139,24 @@ public class AuthenticationController {
         responseBody.put("status", HttpStatus.OK);
 
         return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
+    }
+
+    @GetMapping("/resend_verification_link")
+    public ResponseEntity<Map<String, Object>> resend_verification_link(
+            @RequestParam(name = "email", required = true) String userEmail,
+            HttpServletRequest request)
+            throws EntityNotFoundException {
+
+        User user = this.authService.resend_verification_link(userEmail);
+
+        this.publisher.publishEvent(new RegistrationCompleteEvent(user, this.authService.applicationUrl(request)));
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "Email verification link sent");
+        responseBody.put("status", HttpStatus.OK);
+
+        return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
+
     }
 
     private UserDto buildDto(User newUser) {

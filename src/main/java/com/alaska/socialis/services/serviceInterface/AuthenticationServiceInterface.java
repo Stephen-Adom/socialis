@@ -38,4 +38,7 @@ public interface AuthenticationServiceInterface {
 
         public Boolean verifyEmailToken(EmailValidationTokenRequest emailToken, BindingResult validationResult)
                         throws ValidationErrorsException, EntityNotFoundException;
+
+        public User resend_verification_link(String userEmail)
+                        throws EntityNotFoundException;
 }

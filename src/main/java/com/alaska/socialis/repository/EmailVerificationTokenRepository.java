@@ -8,4 +8,6 @@ import com.alaska.socialis.model.EmailVerificationToken;
 
 public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationToken, Long> {
     public Optional<EmailVerificationToken> findByToken(String token);
+
+    public Optional<EmailVerificationToken> findByUserId(Long userid);
 }

@@ -86,7 +86,8 @@ public class User implements UserDetails {
     @NotBlank(message = "Password is required", groups = { RegisterValidationGroup.class, LoginValidationGroup.class })
     private String password;
 
-    private final boolean enabled = true;
+    @Builder.Default
+    private boolean enabled = false;
 
     @Builder.Default
     private int loginCount = 0;
@@ -131,6 +132,10 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public int getLoginCount() {

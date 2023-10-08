@@ -30,8 +30,10 @@ import com.alaska.socialis.services.serviceInterface.AuthenticationServiceInterf
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class AuthenticationService implements AuthenticationServiceInterface {
 
     @Autowired
@@ -164,7 +166,33 @@ public class AuthenticationService implements AuthenticationServiceInterface {
             return false;
         }
 
+        User user = tokenExist.get().getUser();
+
+        user.setEnabled(true);
+
+        this.userRepository.save(user);
+
         return true;
+    }
+
+    @Override
+    public User resend_verification_link(String userEmail)
+            throws EntityNotFoundException {
+        Optional<User> user = this.userRepository.findByEmail(userEmail);
+        log.info(userEmail);
+        // System.out.println(user.get());
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with email " + userEmail + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        Optional<EmailVerificationToken> verificationToken = this.tokenRepository.findByUserId(user.get().getId());
+
+        if (verificationToken.isPresent()) {
+            this.tokenRepository.delete(verificationToken.get());
+        }
+
+        return user.get();
     }
 
     public String generateJwt(User user, HttpServletRequest request) {
