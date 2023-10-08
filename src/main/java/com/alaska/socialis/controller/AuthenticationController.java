@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alaska.socialis.event.RegistrationCompleteEvent;
+import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.TokenExpiredException;
 import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
@@ -23,6 +24,7 @@ import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.AuthResponse;
+import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 import com.alaska.socialis.model.validationGroups.LoginValidationGroup;
@@ -101,24 +103,36 @@ public class AuthenticationController {
     public ResponseEntity<Map<String, Object>> validateEmailAddress(
             @Valid @RequestBody UserEmailValidationRequest userEmail, BindingResult validationBindingResult)
             throws ValidationErrorsException {
-        Map<String, Object> errorBody = new HashMap<String, Object>();
+        Map<String, Object> responseBody = new HashMap<String, Object>();
         Boolean emailExist = this.authService.validateEmailAddress(userEmail, validationBindingResult);
-        errorBody.put("status", HttpStatus.OK);
-        errorBody.put("email_exist", emailExist);
+        responseBody.put("status", HttpStatus.OK);
+        responseBody.put("email_exist", emailExist);
 
-        return new ResponseEntity<Map<String, Object>>(errorBody, HttpStatus.OK);
+        return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
     }
 
     @PostMapping("/validate_username")
     public ResponseEntity<Map<String, Object>> validateUsername(
             @Valid @RequestBody UsernameValidationRequest username, BindingResult validationBindingResult)
             throws ValidationErrorsException {
-        Map<String, Object> errorBody = new HashMap<String, Object>();
+        Map<String, Object> responseBody = new HashMap<String, Object>();
         Boolean usernameExist = this.authService.validateUsername(username, validationBindingResult);
-        errorBody.put("status", HttpStatus.OK);
-        errorBody.put("username_exist", usernameExist);
+        responseBody.put("status", HttpStatus.OK);
+        responseBody.put("username_exist", usernameExist);
 
-        return new ResponseEntity<Map<String, Object>>(errorBody, HttpStatus.OK);
+        return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
+    }
+
+    @PostMapping("/verify_email_token")
+    public ResponseEntity<Map<String, Object>> verifyEmailToken(@RequestBody EmailValidationTokenRequest emailToken,
+            BindingResult validationResult) throws ValidationErrorsException, EntityNotFoundException {
+        Boolean tokenIsValid = this.authService.verifyEmailToken(emailToken, validationResult);
+
+        Map<String, Object> responseBody = new HashMap<String, Object>();
+        responseBody.put("token_valid", tokenIsValid);
+        responseBody.put("status", HttpStatus.OK);
+
+        return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
     }
 
     private UserDto buildDto(User newUser) {

@@ -1,7 +1,9 @@
 package com.alaska.socialis.services;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
+import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.TokenExpiredException;
 import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
@@ -18,6 +21,7 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.EmailVerificationToken;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 import com.alaska.socialis.repository.EmailVerificationTokenRepository;
@@ -138,6 +142,29 @@ public class AuthenticationService implements AuthenticationServiceInterface {
     public void saveEmailVerificationToken(User user, String token) {
         EmailVerificationToken verificationToken = new EmailVerificationToken(user, token);
         this.tokenRepository.save(verificationToken);
+    }
+
+    @Override
+    public Boolean verifyEmailToken(EmailValidationTokenRequest emailToken, BindingResult validationResult)
+            throws ValidationErrorsException, EntityNotFoundException {
+        if (validationResult.hasErrors()) {
+            throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        Optional<EmailVerificationToken> tokenExist = this.tokenRepository.findByToken(emailToken.getToken());
+
+        if (tokenExist.isEmpty()) {
+            throw new EntityNotFoundException("Token does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        Long currentDateInMillis = new Date().getTime();
+
+        if (tokenExist.get().getExpirationTime().getTime() - currentDateInMillis <= 0) {
+            this.tokenRepository.delete(tokenExist.get());
+            return false;
+        }
+
+        return true;
     }
 
     public String generateJwt(User user, HttpServletRequest request) {

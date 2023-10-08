@@ -5,11 +5,13 @@ import java.util.Map;
 import org.springframework.validation.BindingResult;
 
 import com.alaska.socialis.exceptions.ValidationErrorsException;
+import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.TokenExpiredException;
 import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
 
@@ -33,4 +35,7 @@ public interface AuthenticationServiceInterface {
                         BindingResult validationBindingResult) throws ValidationErrorsException;
 
         public void saveEmailVerificationToken(User user, String token);
+
+        public Boolean verifyEmailToken(EmailValidationTokenRequest emailToken, BindingResult validationResult)
+                        throws ValidationErrorsException, EntityNotFoundException;
 }
