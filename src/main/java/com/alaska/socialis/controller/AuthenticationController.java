@@ -56,7 +56,7 @@ public class AuthenticationController {
     @Autowired
     private ApplicationEventPublisher publisher;
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(4);
+    private ExecutorService executorService = Executors.newFixedThreadPool(2);
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(

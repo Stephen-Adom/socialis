@@ -220,7 +220,8 @@ public class AuthenticationService implements AuthenticationServiceInterface {
     public User resend_verification_token(String verificationToken) throws UnauthorizedRequestException {
         Optional<RevokedTokens> tokenExist = this.revokedTokenRepository.findByToken(verificationToken);
         if (tokenExist.isEmpty()) {
-            throw new UnauthorizedRequestException("Invalid Token request", HttpStatus.UNAUTHORIZED);
+            throw new UnauthorizedRequestException("Invalid Token request. Email already validated",
+                    HttpStatus.BAD_REQUEST);
         }
 
         User user = tokenExist.get().getUser();
@@ -287,6 +288,6 @@ public class AuthenticationService implements AuthenticationServiceInterface {
     }
 
     public String applicationUrl(HttpServletRequest request) {
-        return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        return "http://localhost:4200/auth" + request.getContextPath();
     }
 }
