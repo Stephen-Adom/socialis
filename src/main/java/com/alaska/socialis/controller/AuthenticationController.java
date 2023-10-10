@@ -135,7 +135,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify_email_token")
-    public ResponseEntity<Map<String, Object>> verifyEmailToken(@RequestBody EmailValidationTokenRequest emailToken,
+    public ResponseEntity<Map<String, Object>> verifyEmailToken(
+            @RequestBody @Valid EmailValidationTokenRequest emailToken,
             BindingResult validationResult) throws ValidationErrorsException, EntityNotFoundException {
         Boolean tokenIsValid = this.authService.verifyEmailToken(emailToken, validationResult);
 

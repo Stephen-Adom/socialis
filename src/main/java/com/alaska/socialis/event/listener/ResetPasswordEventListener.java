@@ -1,5 +1,6 @@
 package com.alaska.socialis.event.listener;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,13 @@ public class ResetPasswordEventListener implements ApplicationListener<ResetPass
     public void onApplicationEvent(ResetPasswordEvent event) {
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
-        String applicationUrl = event.getApplicationUrl() + "/resetPassword?token=" + token;
+        String applicationUrl = event.getApplicationUrl() + "/reset-password?token=" + token;
+
+        Optional<ResetPasswordModel> resetPasswordToken = this.resetPasswordRepository.findByUserId(user.getId());
+
+        if (resetPasswordToken.isPresent()) {
+            this.resetPasswordRepository.delete(resetPasswordToken.get());
+        }
 
         this.resetPasswordRepository.save(new ResetPasswordModel(token, user));
 
