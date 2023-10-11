@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.model.requestModel.NewPostRequest;
 import com.alaska.socialis.model.requestModel.UpdatePostRequest;
+import com.alaska.socialis.services.ImageUploadService;
 import com.alaska.socialis.services.PostService;
 
 import jakarta.validation.Valid;
@@ -43,6 +45,9 @@ import lombok.extern.slf4j.Slf4j;
 public class PostController {
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private ImageUploadService imageUploadService;
 
     @GetMapping("/{userid}/posts")
     public ResponseEntity<SuccessResponse> fetchAllPost(@PathVariable Long userid) throws EntityNotFoundException {
@@ -74,28 +79,28 @@ public class PostController {
             throws ValidationErrorsException, EntityNotFoundException, IOException {
 
         System.out.println("------------------------------- file upload-------------------------");
-        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
-        Path postImagesPath = Paths.get("/post/images");
+        Map<String, Object> result = this.imageUploadService.uploadImageToCloud(multipartFile);
+        // String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        // Path postImagesPath = Paths.get("/post/images");
 
-        if (!Files.exists(postImagesPath)) {
-            Files.createDirectories(postImagesPath);
-        }
+        // if (!Files.exists(postImagesPath)) {
+        // Files.createDirectories(postImagesPath);
+        // }
 
-        try {
-            InputStream imageInputStream = multipartFile.getInputStream();
-            Path filePath = postImagesPath.resolve(fileName);
-            Files.copy(imageInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new IOException("Could not save image file", e);
-        }
+        // try {
+        // InputStream imageInputStream = multipartFile.getInputStream();
+        // Path filePath = postImagesPath.resolve(fileName);
+        // Files.copy(imageInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+        // } catch (IOException e) {
+        // throw new IOException("Could not save image file", e);
+        // }
 
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/post/images/")
-                .path(fileName)
-                .toUriString();
+        // String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+        // .path("/post/images/")
+        // .path(fileName)
+        // .toUriString();
 
-        System.out.println(fileDownloadUri);
-        System.out.println(System.getProperty("user.dir"));
+        System.out.println(result);
 
         // Post newPost = this.postService.createPost(post, validationResult);
 
