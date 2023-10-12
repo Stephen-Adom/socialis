@@ -51,7 +51,7 @@ public class PostService implements PostServiceInterface {
             throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
-        if (Arrays.asList(multipartFiles).size() > 0) {
+        if (Objects.nonNull(multipartFiles) && Arrays.asList(multipartFiles).size() > 0) {
             Arrays.asList(multipartFiles).forEach((file) -> {
                 Map<String, Object> result;
                 try {

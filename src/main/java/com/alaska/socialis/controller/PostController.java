@@ -48,7 +48,8 @@ public class PostController {
     @PostMapping(value = "/post", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<SuccessResponse> createPost(@RequestParam(required = true, value = "user_id") Long userId,
             @RequestParam(required = true, value = "content") String postContent,
-            @RequestParam("images") MultipartFile[] multipartFile) throws EntityNotFoundException {
+            @RequestParam(required = false, value = "images") MultipartFile[] multipartFile)
+            throws EntityNotFoundException {
 
         Post newPost = this.postService.createPost(userId, postContent, multipartFile);
 
