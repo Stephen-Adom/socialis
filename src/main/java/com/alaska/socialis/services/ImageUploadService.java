@@ -19,7 +19,6 @@ public class ImageUploadService {
     public Map<String, Object> uploadImageToCloud(MultipartFile file) throws IOException {
         Map<String, String> params = ObjectUtils.asMap(
                 "resource_type", "image",
-                "public_id", "socialis/post/images",
                 "folder", "socialis/post/images");
 
         Map<String, Object> uploadResult = this.cloudinary.uploader().upload(file.getBytes(), params);

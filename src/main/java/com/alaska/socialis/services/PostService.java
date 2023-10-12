@@ -1,6 +1,9 @@
 package com.alaska.socialis.services;
 
+import java.util.Map;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
@@ -33,41 +37,46 @@ public class PostService implements PostServiceInterface {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private ImageUploadService imageUploadService;
+
     @Override
     @Transactional
-    public Post createPost(NewPostRequest post, BindingResult validationResult)
-            throws ValidationErrorsException, EntityNotFoundException {
+    public Post createPost(Long userId, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
         List<PostImage> allMedia = new ArrayList<PostImage>();
-        Post newPost = new Post();
-
-        if (validationResult.hasErrors()) {
-            throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-
-        Optional<User> author = this.userRepository.findById(post.getUser_id());
+        Optional<User> author = this.userRepository.findById(userId);
+        Post postObj = new Post();
 
         if (author.isEmpty()) {
-            throw new EntityNotFoundException("User with id " + post.getUser_id() + " does not exist",
-                    HttpStatus.NOT_FOUND);
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
-        newPost.setUser(author.get());
-        newPost.setContent(post.getContent());
-        newPost.setNumberOfComments(0);
-        newPost.setNumberOfLikes(0);
+        if (Arrays.asList(multipartFiles).size() > 0) {
+            Arrays.asList(multipartFiles).forEach((file) -> {
+                Map<String, Object> result;
+                try {
+                    result = this.imageUploadService.uploadImageToCloud(file);
 
-        if (post.getPostImages().size() > 0) {
-            for (PostImage image : post.getPostImages()) {
-                PostImage postMedia = PostImage.builder().post(newPost).mediaType(image.getMediaType())
-                        .mediaUrl(image.getMediaUrl())
-                        .build();
+                    PostImage uploadedImage = PostImage.builder().post(postObj)
+                            .mediaType((String) result.get("resource_type"))
+                            .mediaUrl((String) result.get("secure_url"))
+                            .build();
 
-                allMedia.add(postMedia);
-            }
+                    allMedia.add(uploadedImage);
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                }
+            });
         }
-        newPost.setPostImages(allMedia);
 
-        return this.postRepository.save(newPost);
+        postObj.setUser(author.get());
+        postObj.setContent(content);
+        postObj.setNumberOfComments(0);
+        postObj.setNumberOfLikes(0);
+        postObj.setPostImages(allMedia);
+
+        return this.postRepository.save(postObj);
+
     }
 
     @Override
