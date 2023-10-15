@@ -55,13 +55,13 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @Getter(AccessLevel.NONE)
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<PostImage> postImages = new ArrayList<PostImage>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @Getter(AccessLevel.NONE)
     List<Comment> comments = new ArrayList<Comment>();
 
     @Override

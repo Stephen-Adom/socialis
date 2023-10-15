@@ -20,7 +20,6 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.User;
-import com.alaska.socialis.model.requestModel.NewPostRequest;
 import com.alaska.socialis.model.requestModel.UpdatePostRequest;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
@@ -39,6 +38,11 @@ public class PostService implements PostServiceInterface {
 
     @Autowired
     private ImageUploadService imageUploadService;
+
+    @Override
+    public List<Post> fetchAllPost() {
+        return this.postRepository.findAllByOrderByCreatedAtDesc();
+    }
 
     @Override
     @Transactional
@@ -77,17 +81,6 @@ public class PostService implements PostServiceInterface {
 
         return this.postRepository.save(postObj);
 
-    }
-
-    @Override
-    @Transactional
-    public List<Post> fetchAllPost(Long userId) throws EntityNotFoundException {
-        if (!this.userRepository.existsById(userId)) {
-            throw new EntityNotFoundException("User with id " + userId + " does not exist",
-                    HttpStatus.NOT_FOUND);
-        }
-
-        return this.postRepository.findByUserId(userId).get();
     }
 
     @Override

@@ -1,10 +1,17 @@
 package com.alaska.socialis.controller;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +27,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
+import com.alaska.socialis.model.UserDto;
+import com.alaska.socialis.model.dto.PostDto;
+import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
+import com.alaska.socialis.model.requestModel.NewPostRequest;
 import com.alaska.socialis.model.requestModel.UpdatePostRequest;
 import com.alaska.socialis.services.PostService;
 
@@ -35,29 +46,43 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    @GetMapping("/{userid}/posts")
-    public ResponseEntity<SuccessResponse> fetchAllPost(@PathVariable Long userid) throws EntityNotFoundException {
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
-        List<Post> allPost = this.postService.fetchAllPost(userid);
+    @GetMapping("/all_posts")
+    public ResponseEntity<Map<String, Object>> fetchAllPost() {
 
-        SuccessResponse response = SuccessResponse.builder().data(allPost).status(HttpStatus.OK).build();
+        List<Post> allPost = this.postService.fetchAllPost();
 
-        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+        List<PostDto> postDto = this.buildPostDto(allPost);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("data", postDto);
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
     @PostMapping(value = "/post", headers = "Content-Type=multipart/form-data")
-    public ResponseEntity<SuccessResponse> createPost(@RequestParam(required = true, value = "user_id") Long userId,
+    public ResponseEntity<Map<String, Object>> createPost(@RequestParam(required = true, value = "user_id") Long userId,
             @RequestParam(required = true, value = "content") String postContent,
             @RequestParam(required = false, value = "images") MultipartFile[] multipartFile)
             throws EntityNotFoundException {
 
-        Post newPost = this.postService.createPost(userId, postContent, multipartFile);
+        Post newPost = this.postService.createPost(userId, postContent,
+                multipartFile);
 
-        SuccessResponse response = SuccessResponse.builder().data(newPost).status(HttpStatus.CREATED).build();
+        PostDto formattedPost = this.buildPostDto(newPost);
+
+        messagingTemplate.convertAndSend("/feed/post/new", formattedPost);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.CREATED);
+        response.put("message", "New Post Created");
 
         // ! dispatch an event to notify followers
 
-        return new ResponseEntity<SuccessResponse>(response, HttpStatus.CREATED);
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @PatchMapping("/post/{id}/edit")
@@ -79,5 +104,35 @@ public class PostController {
                 .build();
 
         return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
+    }
+
+    private List<PostDto> buildPostDto(List<Post> allPost) {
+
+        List<PostDto> allBuildPosts = allPost.stream().map((post) -> {
+            SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
+                    .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
+                    .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
+
+            return PostDto.builder().id(post.getId()).content(post.getContent())
+                    .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                    .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
+                    .postImages(post.getPostImages()).build();
+        }).collect(Collectors.toList());
+
+        return allBuildPosts;
+    }
+
+    private PostDto buildPostDto(Post post) {
+
+        SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
+                .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
+                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
+
+        PostDto buildPost = PostDto.builder().id(post.getId()).content(post.getContent())
+                .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
+                .postImages(post.getPostImages()).build();
+
+        return buildPost;
     }
 }

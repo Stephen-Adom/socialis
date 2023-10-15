@@ -14,7 +14,7 @@ public interface PostServiceInterface {
         public Post createPost(Long userId, String content, MultipartFile[] multipartFiles)
                         throws EntityNotFoundException;
 
-        public List<Post> fetchAllPost(Long userId) throws EntityNotFoundException;
+        public List<Post> fetchAllPost();
 
         public Post editPost(Long id, UpdatePostRequest post, BindingResult validationResult)
                         throws ValidationErrorsException, EntityNotFoundException;
