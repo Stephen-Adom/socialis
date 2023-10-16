@@ -72,7 +72,7 @@ public class PostController {
         Post newPost = this.postService.createPost(userId, postContent,
                 multipartFile);
 
-        PostDto formattedPost = this.buildPostDto(newPost);
+        PostDto formattedPost = this.postService.buildPostDto(newPost);
 
         messagingTemplate.convertAndSend("/feed/post/new", formattedPost);
 
@@ -120,19 +120,5 @@ public class PostController {
         }).collect(Collectors.toList());
 
         return allBuildPosts;
-    }
-
-    private PostDto buildPostDto(Post post) {
-
-        SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
-                .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
-                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
-
-        PostDto buildPost = PostDto.builder().id(post.getId()).content(post.getContent())
-                .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
-                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
-                .postImages(post.getPostImages()).build();
-
-        return buildPost;
     }
 }

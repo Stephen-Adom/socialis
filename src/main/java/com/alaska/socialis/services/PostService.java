@@ -20,6 +20,8 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.dto.PostDto;
+import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.requestModel.UpdatePostRequest;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
@@ -59,7 +61,7 @@ public class PostService implements PostServiceInterface {
             Arrays.asList(multipartFiles).forEach((file) -> {
                 Map<String, Object> result;
                 try {
-                    result = this.imageUploadService.uploadImageToCloud(file);
+                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
 
                     PostImage uploadedImage = PostImage.builder().post(postObj)
                             .mediaType((String) result.get("resource_type"))
@@ -126,5 +128,19 @@ public class PostService implements PostServiceInterface {
         }
 
         this.postRepository.deleteById(id);
+    }
+
+    public PostDto buildPostDto(Post post) {
+
+        SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
+                .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
+                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
+
+        PostDto buildPost = PostDto.builder().id(post.getId()).content(post.getContent())
+                .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
+                .postImages(post.getPostImages()).build();
+
+        return buildPost;
     }
 }

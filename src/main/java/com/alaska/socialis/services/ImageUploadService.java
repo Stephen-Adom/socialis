@@ -16,10 +16,10 @@ public class ImageUploadService {
     @Autowired
     private Cloudinary cloudinary;
 
-    public Map<String, Object> uploadImageToCloud(MultipartFile file) throws IOException {
+    public Map<String, Object> uploadImageToCloud(String path, MultipartFile file) throws IOException {
         Map<String, String> params = ObjectUtils.asMap(
                 "resource_type", "image",
-                "folder", "socialis/post/images");
+                "folder", path);
 
         Map<String, Object> uploadResult = this.cloudinary.uploader().upload(file.getBytes(), params);
         return uploadResult;
