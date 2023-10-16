@@ -9,5 +9,5 @@ import com.alaska.socialis.model.Comment;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    public List<Comment> findByPostId(Long postId);
+    public List<Comment> findByPostIdOrderByCreatedAtDesc(Long postId);
 }

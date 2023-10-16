@@ -48,7 +48,7 @@ public class CommentService implements CommentServiceInterface {
     @Override
     public List<CommentDto> getAllComments(Long postId) {
         Optional<Post> post = this.postRepository.findById(postId);
-        List<Comment> allComments = this.commentRepository.findByPostId(postId);
+        List<Comment> allComments = this.commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         List<CommentDto> parsedComments = allComments.stream()
                 .map((comment) -> this.buildCommentDto(post.get(), comment)).collect(Collectors.toList());
