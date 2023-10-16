@@ -21,5 +21,6 @@ public class UserDto {
     private Date createdAt;
     private Date updatedAt;
     private int loginCount;
+    private String imageUrl;
 
 }

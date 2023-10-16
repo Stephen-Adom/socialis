@@ -211,6 +211,7 @@ public class AuthenticationController {
         return UserDto.builder().id(newUser.getId()).firstname(newUser.getFirstname()).lastname(newUser.getLastname())
                 .email(newUser.getEmail()).username(newUser.getUsername()).createdAt(newUser.getCreatedAt())
                 .updatedAt(newUser.getUpdatedAt()).enabled(newUser.isEnabled()).loginCount(newUser.getLoginCount())
+                .imageUrl(newUser.getImageUrl())
                 .build();
     }
 }
