@@ -20,7 +20,6 @@ import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.User;
-import com.alaska.socialis.model.dto.AllCommentDto;
 import com.alaska.socialis.model.dto.CommentDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
@@ -47,27 +46,12 @@ public class CommentService implements CommentServiceInterface {
     private PostService postService;
 
     @Override
-    public List<AllCommentDto> getAllComments(Long userId, Long postId) {
-        List<Comment> allComments = this.commentRepository.findByUserIdAndPostId(userId, postId);
+    public List<CommentDto> getAllComments(Long postId) {
+        Optional<Post> post = this.postRepository.findById(postId);
+        List<Comment> allComments = this.commentRepository.findByPostId(postId);
 
-        List<AllCommentDto> parsedComments = allComments.stream().map(
-                (comment) -> {
-                    AllCommentDto commentDto = new AllCommentDto();
-                    Map<String, String> userInfo = new HashMap<String, String>();
-                    userInfo.put("username", comment.getUser().getUsername());
-                    userInfo.put("image", comment.getUser().getImageUrl());
-                    userInfo.put("id", comment.getUser().getId().toString());
-
-                    commentDto.setId(comment.getId());
-                    commentDto.setContent(comment.getContent());
-                    commentDto.setCreatedAt(comment.getCreatedAt());
-                    commentDto.setUpdatedAt(comment.getUpdatedAt());
-                    commentDto.setUser(userInfo);
-
-                    return commentDto;
-
-                }).collect(Collectors.toList());
-
+        List<CommentDto> parsedComments = allComments.stream()
+                .map((comment) -> this.buildCommentDto(post.get(), comment)).collect(Collectors.toList());
         return parsedComments;
     }
 
@@ -119,7 +103,7 @@ public class CommentService implements CommentServiceInterface {
 
         Post updatedPost = this.postRepository.save(existpost.get());
 
-        CommentDto commentDto = this.buildCommentDto(existuser.get(), existpost.get(), savedComment);
+        CommentDto commentDto = this.buildCommentDto(existpost.get(), savedComment);
 
         PostDto postDto = this.postService.buildPostDto(updatedPost);
 
@@ -130,7 +114,7 @@ public class CommentService implements CommentServiceInterface {
         return response;
     }
 
-    private CommentDto buildCommentDto(User user, Post post, Comment comment) {
+    private CommentDto buildCommentDto(Post post, Comment comment) {
         SimpleUserDto userInfo = SimpleUserDto.builder().id(post.getUser().getId())
                 .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
                 .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();

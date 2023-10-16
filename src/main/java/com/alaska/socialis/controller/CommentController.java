@@ -19,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.services.CommentService;
-import com.alaska.socialis.model.dto.AllCommentDto;
+import com.alaska.socialis.model.dto.CommentDto;
 
 @RestController
 @RequestMapping("/api")
@@ -30,9 +30,9 @@ public class CommentController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @GetMapping("/{userId}/{postId}/comments")
-    public ResponseEntity<SuccessResponse> getAllComments(@PathVariable Long userId, @PathVariable Long postId) {
-        List<AllCommentDto> comments = this.commentService.getAllComments(userId, postId);
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<SuccessResponse> getAllComments(@PathVariable Long postId) {
+        List<CommentDto> comments = this.commentService.getAllComments(postId);
 
         SuccessResponse response = SuccessResponse.builder().status(HttpStatus.OK).data(comments).build();
 
