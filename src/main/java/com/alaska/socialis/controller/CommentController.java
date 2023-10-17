@@ -42,14 +42,15 @@ public class CommentController {
     @PostMapping(value = "/comment", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<Map<String, Object>> createComment(
             @RequestParam(required = true, value = "user_id") Long userId,
-            @RequestParam(required = true, value = "post_id") Long postId, @RequestParam("content") String content,
-            @RequestParam("images") MultipartFile[] multipartFile)
+            @RequestParam(required = true, value = "post_id") Long postId,
+            @RequestParam(required = false, value = "content") String content,
+            @RequestParam(required = false, value = "images") MultipartFile[] multipartFile)
             throws EntityNotFoundException {
         Map<String, Object> commentResponse = this.commentService.createComment(userId, postId, content,
                 multipartFile);
 
         this.messagingTemplate.convertAndSend("/feed/comment/new", commentResponse.get("commentDto"));
-        this.messagingTemplate.convertAndSend("/feed/post/update", commentResponse.get("commentDto"));
+        this.messagingTemplate.convertAndSend("/feed/post/update", commentResponse.get("postDto"));
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("status", HttpStatus.CREATED);

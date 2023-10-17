@@ -91,7 +91,7 @@ public class CommentService implements CommentServiceInterface {
             });
         }
 
-        commentObj.setContent(content);
+        commentObj.setContent(Objects.nonNull(content) ? content : "");
         commentObj.setUser(existuser.get());
         commentObj.setPost(existpost.get());
         commentObj.setCommentImages(allMedia);
