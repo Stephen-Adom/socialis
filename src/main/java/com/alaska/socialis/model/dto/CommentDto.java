@@ -22,6 +22,8 @@ public class CommentDto {
     private List<CommentImages> commentImages = new ArrayList<CommentImages>();
     private Date createdAt;
     private Date updatedAt;
+    private int numberOfLikes;
+    private int numberOfReplies;
     private SimpleUserDto user;
 
 }

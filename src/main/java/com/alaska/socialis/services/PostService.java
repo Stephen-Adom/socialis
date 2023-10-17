@@ -76,7 +76,7 @@ public class PostService implements PostServiceInterface {
         }
 
         postObj.setUser(author.get());
-        postObj.setContent(content);
+        postObj.setContent(Objects.nonNull(content) ? content : "");
         postObj.setNumberOfComments(0);
         postObj.setNumberOfLikes(0);
         postObj.setPostImages(allMedia);

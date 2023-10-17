@@ -8,7 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +16,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AccessLevel;
@@ -32,45 +30,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "comments")
-public class Comment {
+public class Reply {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "post_id", referencedColumnName = "id")
-    @Getter(AccessLevel.NONE)
-    private Post post;
-
-    @Column(columnDefinition = "VARCHAR(255)")
     private String content;
-
-    @Builder.Default
-    private int numberOfLikes = 0;
-
-    @Builder.Default
-    private int numberOfReplies = 0;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at", nullable = false, updatable = false)
     private Date updatedAt;
 
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    List<CommentImages> commentImages = new ArrayList<CommentImages>();
-
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "comment_id", referencedColumnName = "id")
     @Getter(AccessLevel.NONE)
-    List<Reply> replies = new ArrayList<Reply>();
+    private Comment comment;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "reply")
+    List<ReplyImage> replyImages = new ArrayList<ReplyImage>();
 }
