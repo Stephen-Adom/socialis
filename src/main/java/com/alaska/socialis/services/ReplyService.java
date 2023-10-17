@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -99,6 +100,11 @@ public class ReplyService implements ReplyServiceInterface {
         response.put("replyDto", replyDto);
 
         return response;
+    }
+
+    public List<ReplyDto> fetchAllReplies(Long commentId) {
+        List<Reply> allReplies = this.replyRepository.findByCommentIdOrderByCreatedAtDesc(commentId);
+        return allReplies.stream().map((reply) -> this.buildReplyDto(reply)).collect(Collectors.toList());
     }
 
     private ReplyDto buildReplyDto(Reply reply) {
