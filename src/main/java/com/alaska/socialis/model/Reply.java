@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,6 +39,9 @@ public class Reply {
 
     private String content;
 
+    @Builder.Default
+    private int numberOfLikes = 0;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -50,6 +54,10 @@ public class Reply {
     @JoinColumn(name = "comment_id", referencedColumnName = "id")
     @Getter(AccessLevel.NONE)
     private Comment comment;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "reply")
     List<ReplyImage> replyImages = new ArrayList<ReplyImage>();
