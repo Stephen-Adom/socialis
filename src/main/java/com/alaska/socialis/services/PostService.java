@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.requestModel.UpdatePostRequest;
@@ -143,6 +145,14 @@ public class PostService implements PostServiceInterface {
 
     public PostDto buildPostDto(Post post) {
 
+        List<LikeDto> likes = post.getLikes().stream().map((like) -> {
+            LikeDto currentLike = new LikeDto();
+            currentLike.setImageUrl(like.getUser().getImageUrl());
+            currentLike.setUsername(like.getUser().getUsername());
+
+            return currentLike;
+        }).collect(Collectors.toList());
+
         SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
                 .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
                 .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
@@ -150,7 +160,7 @@ public class PostService implements PostServiceInterface {
         PostDto buildPost = PostDto.builder().id(post.getId()).content(post.getContent())
                 .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                 .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
-                .postImages(post.getPostImages()).build();
+                .postImages(post.getPostImages()).likes(likes).build();
 
         return buildPost;
     }

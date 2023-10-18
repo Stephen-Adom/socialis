@@ -25,4 +25,5 @@ public class PostDto {
     private Date updatedAt;
     private SimpleUserDto user;
     List<PostImage> postImages = new ArrayList<PostImage>();
+    List<LikeDto> likes = new ArrayList<LikeDto>();
 }
