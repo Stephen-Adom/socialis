@@ -80,6 +80,20 @@ public class PostController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{id}/post")
+    public ResponseEntity<Map<String, Object>> fetchPostDetail(@PathVariable("id") Long postId)
+            throws EntityNotFoundException {
+        Post post = this.postService.fetchPostById(postId);
+
+        PostDto postDto = this.buildPostDto(post);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("data", postDto);
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
     @PatchMapping("/post/{id}/edit")
     public ResponseEntity<SuccessResponse> editPost(@PathVariable Long id, @RequestBody @Valid UpdatePostRequest post,
             BindingResult validationResult) throws ValidationErrorsException, EntityNotFoundException {
@@ -115,5 +129,17 @@ public class PostController {
         }).collect(Collectors.toList());
 
         return allBuildPosts;
+    }
+
+    private PostDto buildPostDto(Post post) {
+
+        SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
+                .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
+                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
+
+        return PostDto.builder().id(post.getId()).content(post.getContent())
+                .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
+                .postImages(post.getPostImages()).build();
     }
 }

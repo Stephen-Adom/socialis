@@ -86,6 +86,17 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
+    public Post fetchPostById(Long postId) throws EntityNotFoundException {
+        Optional<Post> post = this.postRepository.findById(postId);
+
+        if (post.isEmpty()) {
+            throw new EntityNotFoundException("Post with id " + postId + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        return post.get();
+    }
+
+    @Override
     @Transactional
     public Post editPost(Long id, UpdatePostRequest post, BindingResult validationResult)
             throws ValidationErrorsException, EntityNotFoundException {
