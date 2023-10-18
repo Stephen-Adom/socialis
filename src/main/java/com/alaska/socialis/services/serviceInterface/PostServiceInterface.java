@@ -8,15 +8,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
+import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.requestModel.UpdatePostRequest;
 
 public interface PostServiceInterface {
         public Post createPost(Long userId, String content, MultipartFile[] multipartFiles)
                         throws EntityNotFoundException;
 
-        public Post fetchPostById(Long postId) throws EntityNotFoundException;
+        public PostDto fetchPostById(Long postId) throws EntityNotFoundException;
 
-        public List<Post> fetchAllPost();
+        public List<PostDto> fetchAllPost();
 
         public Post editPost(Long id, UpdatePostRequest post, BindingResult validationResult)
                         throws ValidationErrorsException, EntityNotFoundException;

@@ -47,9 +47,7 @@ public class PostController {
     @GetMapping("/all_posts")
     public ResponseEntity<Map<String, Object>> fetchAllPost() {
 
-        List<Post> allPost = this.postService.fetchAllPost();
-
-        List<PostDto> postDto = this.buildPostDto(allPost);
+        List<PostDto> postDto = this.postService.fetchAllPost();
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("status", HttpStatus.OK);
@@ -83,9 +81,8 @@ public class PostController {
     @GetMapping("/{id}/post")
     public ResponseEntity<Map<String, Object>> fetchPostDetail(@PathVariable("id") Long postId)
             throws EntityNotFoundException {
-        Post post = this.postService.fetchPostById(postId);
 
-        PostDto postDto = this.buildPostDto(post);
+        PostDto postDto = this.postService.fetchPostById(postId);
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("status", HttpStatus.OK);
@@ -113,33 +110,5 @@ public class PostController {
                 .build();
 
         return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
-    }
-
-    private List<PostDto> buildPostDto(List<Post> allPost) {
-
-        List<PostDto> allBuildPosts = allPost.stream().map((post) -> {
-            SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
-                    .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
-                    .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
-
-            return PostDto.builder().id(post.getId()).content(post.getContent())
-                    .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
-                    .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
-                    .postImages(post.getPostImages()).build();
-        }).collect(Collectors.toList());
-
-        return allBuildPosts;
-    }
-
-    private PostDto buildPostDto(Post post) {
-
-        SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
-                .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
-                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
-
-        return PostDto.builder().id(post.getId()).content(post.getContent())
-                .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
-                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
-                .postImages(post.getPostImages()).build();
     }
 }

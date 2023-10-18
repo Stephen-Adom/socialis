@@ -44,8 +44,10 @@ public class PostService implements PostServiceInterface {
     private ImageUploadService imageUploadService;
 
     @Override
-    public List<Post> fetchAllPost() {
-        return this.postRepository.findAllByOrderByCreatedAtDesc();
+    public List<PostDto> fetchAllPost() {
+        List<Post> allPost = this.postRepository.findAllByOrderByCreatedAtDesc();
+
+        return this.buildPostDto(allPost);
     }
 
     @Override
@@ -88,14 +90,14 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    public Post fetchPostById(Long postId) throws EntityNotFoundException {
+    public PostDto fetchPostById(Long postId) throws EntityNotFoundException {
         Optional<Post> post = this.postRepository.findById(postId);
 
         if (post.isEmpty()) {
             throw new EntityNotFoundException("Post with id " + postId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
-        return post.get();
+        return this.buildPostDto(post.get());
     }
 
     @Override
@@ -163,5 +165,29 @@ public class PostService implements PostServiceInterface {
                 .postImages(post.getPostImages()).likes(likes).build();
 
         return buildPost;
+    }
+
+    public List<PostDto> buildPostDto(List<Post> allPost) {
+
+        List<PostDto> allBuildPosts = allPost.stream().map((post) -> {
+            List<LikeDto> likes = post.getLikes().stream().map((like) -> {
+                LikeDto currentLike = new LikeDto();
+                currentLike.setImageUrl(like.getUser().getImageUrl());
+                currentLike.setUsername(like.getUser().getUsername());
+
+                return currentLike;
+            }).collect(Collectors.toList());
+
+            SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
+                    .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
+                    .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
+
+            return PostDto.builder().id(post.getId()).content(post.getContent())
+                    .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                    .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
+                    .postImages(post.getPostImages()).likes(likes).build();
+        }).collect(Collectors.toList());
+
+        return allBuildPosts;
     }
 }
