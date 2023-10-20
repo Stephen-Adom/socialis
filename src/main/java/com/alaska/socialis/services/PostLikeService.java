@@ -1,8 +1,6 @@
 package com.alaska.socialis.services;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,9 +8,7 @@ import org.springframework.stereotype.Service;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostLike;
 import com.alaska.socialis.model.User;
-import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
-import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.repository.PostLikesRepository;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;

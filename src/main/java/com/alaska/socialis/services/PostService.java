@@ -151,6 +151,8 @@ public class PostService implements PostServiceInterface {
             LikeDto currentLike = new LikeDto();
             currentLike.setImageUrl(like.getUser().getImageUrl());
             currentLike.setUsername(like.getUser().getUsername());
+            currentLike.setFirstname(like.getUser().getFirstname());
+            currentLike.setLastname(like.getUser().getLastname());
 
             return currentLike;
         }).collect(Collectors.toList());
@@ -174,6 +176,8 @@ public class PostService implements PostServiceInterface {
                 LikeDto currentLike = new LikeDto();
                 currentLike.setImageUrl(like.getUser().getImageUrl());
                 currentLike.setUsername(like.getUser().getUsername());
+                currentLike.setFirstname(like.getUser().getFirstname());
+                currentLike.setLastname(like.getUser().getLastname());
 
                 return currentLike;
             }).collect(Collectors.toList());
