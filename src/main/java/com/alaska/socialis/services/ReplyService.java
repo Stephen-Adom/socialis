@@ -23,6 +23,7 @@ import com.alaska.socialis.model.Reply;
 import com.alaska.socialis.model.ReplyImage;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.CommentDto;
+import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.ReplyDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.repository.CommentRepository;
@@ -110,14 +111,24 @@ public class ReplyService implements ReplyServiceInterface {
         return allReplies.stream().map((reply) -> this.buildReplyDto(reply)).collect(Collectors.toList());
     }
 
-    private ReplyDto buildReplyDto(Reply reply) {
+    public ReplyDto buildReplyDto(Reply reply) {
+        List<LikeDto> likes = reply.getLikes().stream().map((like) -> {
+            LikeDto currentLike = new LikeDto();
+            currentLike.setImageUrl(like.getUser().getImageUrl());
+            currentLike.setUsername(like.getUser().getUsername());
+            currentLike.setFirstname(like.getUser().getFirstname());
+            currentLike.setLastname(like.getUser().getLastname());
+
+            return currentLike;
+        }).collect(Collectors.toList());
+
         SimpleUserDto userInfo = SimpleUserDto.builder().id(reply.getUser().getId())
                 .firstname(reply.getUser().getFirstname()).lastname(reply.getUser().getLastname())
                 .username(reply.getUser().getUsername()).imageUrl(reply.getUser().getImageUrl()).build();
 
         return ReplyDto.builder().id(reply.getId()).user(userInfo)
                 .content(reply.getContent()).replyImages(reply.getReplyImages())
-                .numberOfLikes(reply.getNumberOfLikes())
+                .numberOfLikes(reply.getNumberOfLikes()).likes(likes)
                 .createdAt(reply.getCreatedAt()).updatedAt(reply.getUpdatedAt())
                 .build();
     }

@@ -61,4 +61,7 @@ public class Reply {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "reply")
     List<ReplyImage> replyImages = new ArrayList<ReplyImage>();
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "reply")
+    List<ReplyLike> likes = new ArrayList<ReplyLike>();
 }
