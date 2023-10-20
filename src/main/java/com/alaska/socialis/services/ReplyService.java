@@ -44,6 +44,9 @@ public class ReplyService implements ReplyServiceInterface {
     @Autowired
     private ImageUploadService imageUploadService;
 
+    @Autowired
+    private CommentService commentService;
+
     @Override
     public Map<String, Object> createReply(Long userId, Long commentId, String content, MultipartFile[] multipartFiles)
             throws EntityNotFoundException {
@@ -93,7 +96,7 @@ public class ReplyService implements ReplyServiceInterface {
         Comment updatedComment = this.commentRepository.save(comment.get());
 
         ReplyDto replyDto = this.buildReplyDto(result);
-        CommentDto commentDto = this.buildCommentDto(updatedComment);
+        CommentDto commentDto = this.commentService.buildCommentDto(updatedComment);
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("commentDto", commentDto);
@@ -116,18 +119,6 @@ public class ReplyService implements ReplyServiceInterface {
                 .content(reply.getContent()).replyImages(reply.getReplyImages())
                 .numberOfLikes(reply.getNumberOfLikes())
                 .createdAt(reply.getCreatedAt()).updatedAt(reply.getUpdatedAt())
-                .build();
-    }
-
-    private CommentDto buildCommentDto(Comment comment) {
-        SimpleUserDto userInfo = SimpleUserDto.builder().id(comment.getUser().getId())
-                .firstname(comment.getUser().getFirstname()).lastname(comment.getUser().getLastname())
-                .username(comment.getUser().getUsername()).imageUrl(comment.getUser().getImageUrl()).build();
-
-        return CommentDto.builder().id(comment.getId()).user(userInfo)
-                .content(comment.getContent()).commentImages(comment.getCommentImages())
-                .numberOfLikes(comment.getNumberOfLikes()).numberOfReplies(comment.getNumberOfReplies())
-                .createdAt(comment.getCreatedAt()).updatedAt(comment.getUpdatedAt())
                 .build();
     }
 
