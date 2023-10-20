@@ -60,7 +60,7 @@ public class CommentService implements CommentServiceInterface {
     public Map<String, Object> createComment(Long userId, Long postId, String content, MultipartFile[] multipartFiles)
             throws EntityNotFoundException {
         List<CommentImages> allMedia = new ArrayList<CommentImages>();
-        Optional<Post> existpost = this.postRepository.findByIdAndUserId(postId, userId);
+        Optional<Post> existpost = this.postRepository.findById(postId);
         Optional<User> existuser = this.userRepository.findById(userId);
         Comment commentObj = new Comment();
 
@@ -70,7 +70,7 @@ public class CommentService implements CommentServiceInterface {
 
         if (existpost.isEmpty()) {
             throw new EntityNotFoundException(
-                    "Post with user id " + userId + " and id" + postId + "not found",
+                    "Post with id " + postId + " not found",
                     HttpStatus.NOT_FOUND);
         }
 

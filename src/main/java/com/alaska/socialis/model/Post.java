@@ -64,7 +64,7 @@ public class Post {
     @Getter(AccessLevel.NONE)
     List<Comment> comments = new ArrayList<Comment>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
     List<PostLike> likes = new ArrayList<PostLike>();
 
     @Override

@@ -27,6 +27,7 @@ public class ReplyLikeController {
     @GetMapping("/{userId}/{replyId}/reply_like")
     public ResponseEntity<Map<String, Object>> toggleReplyLike(@PathVariable("userId") Long userId,
             @PathVariable("replyId") Long replyId) {
+
         ReplyDto replyDto = this.replyLikeService.toggleReplyLike(userId, replyId);
 
         this.messagingTemplate.convertAndSend("/feed/reply/update", replyDto);

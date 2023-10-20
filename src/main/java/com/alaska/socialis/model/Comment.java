@@ -74,6 +74,6 @@ public class Comment {
     @Getter(AccessLevel.NONE)
     List<Reply> replies = new ArrayList<Reply>();
 
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "comment", fetch = FetchType.EAGER)
     List<CommentLike> likes = new ArrayList<CommentLike>();
 }

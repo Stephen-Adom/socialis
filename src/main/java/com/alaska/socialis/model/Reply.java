@@ -10,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -62,6 +61,6 @@ public class Reply {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "reply")
     List<ReplyImage> replyImages = new ArrayList<ReplyImage>();
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "reply")
+    @OneToMany(mappedBy = "reply", fetch = FetchType.EAGER)
     List<ReplyLike> likes = new ArrayList<ReplyLike>();
 }

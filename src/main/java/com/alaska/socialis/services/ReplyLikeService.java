@@ -37,12 +37,14 @@ public class ReplyLikeService implements ReplyLikeServiceInterface {
         Optional<User> user = this.userRepository.findById(userId);
         Optional<Reply> reply = this.replyRepository.findById(replyId);
 
-        return this.checkLikeEntity(replyLike, user, reply);
+        return this.checkReplyLikeEntity(replyLike, user, reply);
     }
 
-    private ReplyDto checkLikeEntity(Optional<ReplyLike> replyLike, Optional<User> user,
-            Optional<Reply> reply) {
+    private ReplyDto checkReplyLikeEntity(Optional<ReplyLike> replyLike, Optional<User> user, Optional<Reply> reply) {
+
         if (replyLike.isEmpty()) {
+            System.out.println(reply.get().getNumberOfLikes());
+
             ReplyLike newLike = ReplyLike.builder().user(user.get()).reply(reply.get()).build();
             this.replyLikeRepository.save(newLike);
             reply.get().setNumberOfLikes(reply.get().getNumberOfLikes() + 1);
@@ -50,9 +52,10 @@ public class ReplyLikeService implements ReplyLikeServiceInterface {
 
             return this.replyService.buildReplyDto(updatedReply);
         } else {
-            this.replyLikeRepository.delete(replyLike.get());
+
             reply.get().setNumberOfLikes(reply.get().getNumberOfLikes() - 1);
             Reply updatedreply = this.replyRepository.save(reply.get());
+            this.replyLikeRepository.deleteById(replyLike.get().getId());
 
             return this.replyService.buildReplyDto(updatedreply);
         }
