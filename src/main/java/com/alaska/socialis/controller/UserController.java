@@ -55,8 +55,9 @@ public class UserController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", HttpStatus.OK);
-        response.put("message", "Cover image background updated!");
+        response.put("message", "Profile image updated!");
 
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
+
 }
