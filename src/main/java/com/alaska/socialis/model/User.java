@@ -69,9 +69,6 @@ public class User implements UserDetails {
     private String address;
 
     @Column(nullable = true)
-    private String location;
-
-    @Column(nullable = true)
     private String phonenumber;
 
     @Column(name = "image_url", nullable = true)

@@ -22,5 +22,8 @@ public class UserDto {
     private Date updatedAt;
     private int loginCount;
     private String imageUrl;
+    private String bio;
+    private String coverImageUrl;
+    private String phonenumber;
 
 }

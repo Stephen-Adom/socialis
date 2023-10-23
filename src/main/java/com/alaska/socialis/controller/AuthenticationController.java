@@ -37,6 +37,7 @@ import com.alaska.socialis.model.validationGroups.LoginValidationGroup;
 import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
 import com.alaska.socialis.services.AuthenticationService;
 import com.alaska.socialis.services.JwtService;
+import com.alaska.socialis.services.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -52,6 +53,9 @@ public class AuthenticationController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ApplicationEventPublisher publisher;
@@ -70,7 +74,7 @@ public class AuthenticationController {
         String refreshToken = this.jwtService.generateRefreshToken(newUser);
 
         AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.CREATED)
-                .data(this.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
+                .data(this.userService.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
 
         // ! dispatch an event to send email for account created
         executorService.submit(() -> this.publisher
@@ -90,7 +94,7 @@ public class AuthenticationController {
         String refreshToken = this.jwtService.generateRefreshToken(updatedAuthUser);
 
         AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.OK)
-                .data(this.buildDto(updatedAuthUser)).accessToken(token).refreshToken(refreshToken).build();
+                .data(this.userService.buildDto(updatedAuthUser)).accessToken(token).refreshToken(refreshToken).build();
 
         return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.OK);
     }
@@ -205,13 +209,5 @@ public class AuthenticationController {
         responseBody.put("status", HttpStatus.OK);
 
         return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
-    }
-
-    private UserDto buildDto(User newUser) {
-        return UserDto.builder().id(newUser.getId()).firstname(newUser.getFirstname()).lastname(newUser.getLastname())
-                .email(newUser.getEmail()).username(newUser.getUsername()).createdAt(newUser.getCreatedAt())
-                .updatedAt(newUser.getUpdatedAt()).enabled(newUser.isEnabled()).loginCount(newUser.getLoginCount())
-                .imageUrl(newUser.getImageUrl())
-                .build();
     }
 }
