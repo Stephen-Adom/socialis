@@ -48,9 +48,9 @@ public class CommentLikeService implements CommentLikeServiceInterface {
 
             return this.commentService.buildCommentDto(updatedComment);
         } else {
-            this.commentLikeRepository.delete(commentLike.get());
             comment.get().setNumberOfLikes(comment.get().getNumberOfLikes() - 1);
             Comment updatedcomment = this.commentRepository.save(comment.get());
+            this.commentLikeRepository.delete(commentLike.get());
 
             return this.commentService.buildCommentDto(updatedcomment);
         }

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,7 +50,6 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    @Transactional
     public Post createPost(Long userId, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
         List<PostImage> allMedia = new ArrayList<PostImage>();
         Optional<User> author = this.userRepository.findById(userId);
@@ -101,7 +99,6 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    @Transactional
     public Post editPost(Long id, UpdatePostRequest post, BindingResult validationResult)
             throws ValidationErrorsException, EntityNotFoundException {
         if (validationResult.hasErrors()) {
@@ -133,7 +130,6 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    @Transactional
     public void deletePost(Long userId, Long id) throws EntityNotFoundException {
         Optional<Post> existPost = this.postRepository.findByIdAndUserId(id, userId);
 

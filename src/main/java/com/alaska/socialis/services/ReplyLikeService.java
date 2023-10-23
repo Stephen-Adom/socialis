@@ -55,7 +55,7 @@ public class ReplyLikeService implements ReplyLikeServiceInterface {
 
             reply.get().setNumberOfLikes(reply.get().getNumberOfLikes() - 1);
             Reply updatedreply = this.replyRepository.save(reply.get());
-            this.replyLikeRepository.deleteById(replyLike.get().getId());
+            this.replyLikeRepository.delete(replyLike.get());
 
             return this.replyService.buildReplyDto(updatedreply);
         }

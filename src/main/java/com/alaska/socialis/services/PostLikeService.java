@@ -46,11 +46,17 @@ public class PostLikeService implements PostLikeServiceInterface {
             post.get().setNumberOfLikes(post.get().getNumberOfLikes() + 1);
             Post updatedPost = this.postRepository.save(post.get());
 
+            System.out.println("=======================saving post like======================");
+            System.out.println(updatedPost.getLikes().size());
+
             return this.postService.buildPostDto(updatedPost);
         } else {
-            this.postLikeRepository.delete(postLike.get());
             post.get().setNumberOfLikes(post.get().getNumberOfLikes() - 1);
             Post updatedPost = this.postRepository.save(post.get());
+            this.postLikeRepository.delete(postLike.get());
+
+            System.out.println("=======================removing post like======================");
+            System.out.println(updatedPost.getLikes().size());
 
             return this.postService.buildPostDto(updatedPost);
         }

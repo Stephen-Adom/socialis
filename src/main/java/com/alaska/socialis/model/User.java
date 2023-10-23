@@ -109,6 +109,15 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private EmailVerificationToken verificationToken;
 
+    @OneToMany(mappedBy = "user")
+    List<PostLike> postLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    List<CommentLike> commentLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    List<ReplyLike> replyLikes = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("USER"));
