@@ -25,5 +25,6 @@ public class UserDto {
     private String bio;
     private String coverImageUrl;
     private String phonenumber;
+    private String address;
 
 }

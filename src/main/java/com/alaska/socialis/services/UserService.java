@@ -116,7 +116,7 @@ public class UserService implements UserServiceInterface {
                 .email(newUser.getEmail()).username(newUser.getUsername()).createdAt(newUser.getCreatedAt())
                 .updatedAt(newUser.getUpdatedAt()).enabled(newUser.isEnabled()).loginCount(newUser.getLoginCount())
                 .imageUrl(newUser.getImageUrl()).bio(newUser.getBio()).coverImageUrl(newUser.getCoverImageUrl())
-                .phonenumber(newUser.getPhonenumber())
+                .phonenumber(newUser.getPhonenumber()).address(newUser.getAddress())
                 .build();
     }
 }
