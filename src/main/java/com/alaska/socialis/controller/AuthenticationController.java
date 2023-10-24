@@ -30,6 +30,7 @@ import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.AuthResponse;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.PhoneValidationRequeset;
 import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
@@ -134,6 +135,18 @@ public class AuthenticationController {
         Boolean usernameExist = this.authService.validateUsername(username, validationBindingResult);
         responseBody.put("status", HttpStatus.OK);
         responseBody.put("username_exist", usernameExist);
+
+        return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
+    }
+
+    @PostMapping("/validate_phonenumber")
+    public ResponseEntity<Map<String, Object>> validatePhoneumber(
+            @Valid @RequestBody PhoneValidationRequeset phonenumber, BindingResult validationBindingResult)
+            throws ValidationErrorsException {
+        Map<String, Object> responseBody = new HashMap<String, Object>();
+        Boolean phoneExist = this.authService.validatePhonenumber(phonenumber, validationBindingResult);
+        responseBody.put("status", HttpStatus.OK);
+        responseBody.put("phone_exist", phoneExist);
 
         return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
     }

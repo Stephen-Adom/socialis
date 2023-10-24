@@ -27,6 +27,7 @@ import com.alaska.socialis.model.RevokedTokens;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.PhoneValidationRequeset;
 import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
@@ -155,6 +156,17 @@ public class AuthenticationService implements AuthenticationServiceInterface {
             throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
         return this.userRepository.existsByUsername(username.getUsername());
+    }
+
+    @Override
+    public Boolean validatePhonenumber(PhoneValidationRequeset phone, BindingResult validationBindingResult)
+            throws ValidationErrorsException {
+
+        if (validationBindingResult.hasErrors()) {
+            throw new ValidationErrorsException(validationBindingResult.getFieldErrors(),
+                    HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        return this.userRepository.existsByPhonenumber(phone.getPhonenumber());
     }
 
     @Override

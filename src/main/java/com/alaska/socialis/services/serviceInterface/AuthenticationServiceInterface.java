@@ -14,6 +14,7 @@ import com.alaska.socialis.model.ResetPasswordModel;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.PhoneValidationRequeset;
 import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
 import com.alaska.socialis.model.requestModel.UsernameValidationRequest;
@@ -35,6 +36,9 @@ public interface AuthenticationServiceInterface {
                         BindingResult validationBindingResult) throws ValidationErrorsException;
 
         public Boolean validateUsername(UsernameValidationRequest username,
+                        BindingResult validationBindingResult) throws ValidationErrorsException;
+
+        public Boolean validatePhonenumber(PhoneValidationRequeset username,
                         BindingResult validationBindingResult) throws ValidationErrorsException;
 
         public void saveEmailVerificationToken(User user, String token);
