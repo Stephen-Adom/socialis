@@ -12,14 +12,14 @@ import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 
 public interface UserServiceInterface {
-    public UserDetails fetchUserDetailsByUsername(String username) throws EntityNotFoundException;
+        public UserDetails fetchUserDetailsByUsername(String username) throws EntityNotFoundException;
 
-    public UserDto updateUserCoverImage(Long userId, MultipartFile multipartFile)
-            throws EntityNotFoundException, IOException;
+        public UserDto updateUserCoverImage(Long userId, MultipartFile multipartFile)
+                        throws EntityNotFoundException, IOException;
 
-    public UserDto updateUserProfileImage(Long userId, MultipartFile multipartFile)
-            throws EntityNotFoundException, IOException;
+        public UserDto updateUserProfileImage(Long userId, MultipartFile multipartFile)
+                        throws EntityNotFoundException, IOException;
 
-    public UserDto updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
-            throws EntityNotFoundException, ValidationErrorsException;
+        public UserDto updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
+                        throws EntityNotFoundException, ValidationErrorsException;
 }

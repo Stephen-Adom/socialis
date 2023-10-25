@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,8 @@ public class UserService implements UserServiceInterface {
     @Autowired
     private ImageUploadService imageUploadService;
 
+    private ExecutorService executorService = Executors.newFixedThreadPool(1);
+
     @Override
     public UserDetails fetchUserDetailsByUsername(String username) {
         UserDetails user = this.userRepository.findByUsername(username);
@@ -39,6 +43,7 @@ public class UserService implements UserServiceInterface {
     public UserDto updateUserCoverImage(Long userId, MultipartFile multipartFile)
             throws EntityNotFoundException, IOException {
         Optional<User> user = this.userRepository.findById(userId);
+        String currentImage = user.get().getCoverImageUrl();
 
         if (user.isEmpty()) {
             throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
@@ -46,6 +51,13 @@ public class UserService implements UserServiceInterface {
 
         Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/user/cover_images",
                 multipartFile);
+
+        if (Objects.nonNull(currentImage)) {
+
+            this.executorService.execute(() -> this.imageUploadService
+                    .deleteUploadedImage("socialis/user/cover_images/", currentImage));
+        }
+
         user.get().setCoverImageUrl((String) result.get("secure_url"));
 
         User updatedUser = this.userRepository.save(user.get());

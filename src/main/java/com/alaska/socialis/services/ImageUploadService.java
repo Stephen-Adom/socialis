@@ -24,4 +24,17 @@ public class ImageUploadService {
         Map<String, Object> uploadResult = this.cloudinary.uploader().upload(file.getBytes(), params);
         return uploadResult;
     }
+
+    public void deleteUploadedImage(String delimiter, String imageUrl) {
+        try {
+            String[] imagUrlArray = imageUrl.split(delimiter);
+            String imageName = imagUrlArray[1].split("\\.")[0];
+            String public_id = delimiter + imageName;
+            System.out.println("================================ delete image ======================================");
+            System.out.println(public_id);
+            this.cloudinary.uploader().destroy(public_id, null);
+        } catch (IOException e) {
+            System.out.println("An error has occured: " + e);
+        }
+    }
 }
