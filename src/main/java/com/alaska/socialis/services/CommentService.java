@@ -20,6 +20,7 @@ import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
+import com.alaska.socialis.model.ReplyImage;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.CommentDto;
 import com.alaska.socialis.model.dto.LikeDto;
@@ -164,6 +165,41 @@ public class CommentService implements CommentServiceInterface {
         updatedComment.get().setCommentImages(updatedImages);
 
         return updatedComment.get();
+    }
+
+    @Override
+    public void deleteComment(Long id) throws EntityNotFoundException {
+        Optional<Comment> existComment = this.commentRepository.findById(id);
+
+        if (existComment.isEmpty()) {
+            throw new EntityNotFoundException("Comment with id " + id + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        this.deleteAllCommentImages(existComment.get());
+
+        this.postRepository.deleteById(id);
+    }
+
+    private void deleteAllCommentImages(Comment comment) {
+        List<String> images = new ArrayList<String>();
+
+        images.addAll(
+                comment.getCommentImages().stream().map(CommentImages::getMediaUrl).collect(Collectors.toList()));
+
+        comment.getReplies().stream().forEach((reply) -> {
+            images.addAll(reply.getReplyImages().stream().map(ReplyImage::getMediaUrl).collect(Collectors.toList()));
+        });
+
+        if (images.size() > 0) {
+            images.stream().forEach((imageUrl) -> {
+                System.out.println("============================ all images ==================================");
+                System.out.println(imageUrl);
+                this.imageUploadService.deleteUploadedImage("socialis/post/images/",
+                        imageUrl);
+            });
+        }
+
     }
 
     public CommentDto buildCommentDto(Comment comment) {

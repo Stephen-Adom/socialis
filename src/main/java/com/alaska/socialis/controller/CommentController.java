@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.dto.CommentDto;
 import com.alaska.socialis.model.dto.PostDto;
+import com.alaska.socialis.model.dto.SuccessMessage;
 
 @RestController
 @RequestMapping("/api")
@@ -80,5 +82,16 @@ public class CommentController {
         response.put("message", "Comment Updated");
 
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/comment/{id}/delete")
+    public ResponseEntity<SuccessMessage> deleteComment(@PathVariable Long id)
+            throws EntityNotFoundException {
+        this.commentService.deleteComment(id);
+
+        SuccessMessage response = SuccessMessage.builder().message("Comment Successfully deleted").status(HttpStatus.OK)
+                .build();
+
+        return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
     }
 }

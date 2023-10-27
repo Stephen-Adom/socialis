@@ -18,4 +18,6 @@ public interface CommentServiceInterface {
 
     public Comment editComment(Long id, String content, MultipartFile[] multipartFiles)
             throws EntityNotFoundException;
+
+    public void deleteComment(Long id) throws EntityNotFoundException;
 }

@@ -180,8 +180,6 @@ public class PostService implements PostServiceInterface {
 
         if (images.size() > 0) {
             images.stream().forEach((imageUrl) -> {
-                System.out.println("============================ all images ==================================");
-                System.out.println(imageUrl);
                 this.imageUploadService.deleteUploadedImage("socialis/post/images/",
                         imageUrl);
             });
