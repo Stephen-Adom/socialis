@@ -69,7 +69,7 @@ public class ReplyService implements ReplyServiceInterface {
             Arrays.asList(multipartFiles).forEach((file) -> {
                 Map<String, Object> result;
                 try {
-                    result = this.imageUploadService.uploadImageToCloud("socialis/replies/images", file);
+                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
 
                     ReplyImage uploadedImage = ReplyImage.builder().reply(replyObj)
                             .mediaType((String) result.get("resource_type"))

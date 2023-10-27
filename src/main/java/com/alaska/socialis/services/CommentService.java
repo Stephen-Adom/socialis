@@ -78,7 +78,7 @@ public class CommentService implements CommentServiceInterface {
             Arrays.asList(multipartFiles).forEach((file) -> {
                 Map<String, Object> result;
                 try {
-                    result = this.imageUploadService.uploadImageToCloud("socialis/comments/images", file);
+                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
 
                     CommentImages uploadedImage = CommentImages.builder().comment(commentObj)
                             .mediaType((String) result.get("resource_type"))

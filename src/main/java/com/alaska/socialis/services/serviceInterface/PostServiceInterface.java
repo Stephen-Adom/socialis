@@ -19,5 +19,5 @@ public interface PostServiceInterface {
         public Post editPost(Long id, String content, MultipartFile[] multipartFiles)
                         throws EntityNotFoundException;
 
-        public void deletePost(Long userId, Long id) throws EntityNotFoundException;
+        public void deletePost(Long id) throws EntityNotFoundException;
 }

@@ -105,10 +105,10 @@ public class PostController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{userId}/post/{id}/delete")
-    public ResponseEntity<SuccessMessage> deletePost(@PathVariable Long userId, @PathVariable Long id)
+    @DeleteMapping("/post/{id}/delete")
+    public ResponseEntity<SuccessMessage> deletePost(@PathVariable Long id)
             throws EntityNotFoundException {
-        this.postService.deletePost(userId, id);
+        this.postService.deletePost(id);
 
         SuccessMessage response = SuccessMessage.builder().message("Post Successfully deleted").status(HttpStatus.OK)
                 .build();

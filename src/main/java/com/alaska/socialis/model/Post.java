@@ -61,10 +61,9 @@ public class Post {
     List<PostImage> postImages = new ArrayList<PostImage>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    @Getter(AccessLevel.NONE)
     List<Comment> comments = new ArrayList<Comment>();
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     List<PostLike> likes = new ArrayList<PostLike>();
 
     @Override

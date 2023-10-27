@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
+import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
+import com.alaska.socialis.model.ReplyImage;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
@@ -25,8 +27,6 @@ import com.alaska.socialis.repository.PostImageRepository;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.PostServiceInterface;
-
-import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -149,15 +149,41 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    public void deletePost(Long userId, Long id) throws EntityNotFoundException {
-        Optional<Post> existPost = this.postRepository.findByIdAndUserId(id, userId);
+    public void deletePost(Long id) throws EntityNotFoundException {
+        Optional<Post> existPost = this.postRepository.findById(id);
 
         if (existPost.isEmpty()) {
-            throw new EntityNotFoundException("Post with user id " + userId + " and post id " + id + " does not exist",
+            throw new EntityNotFoundException("Post with id " + id + " does not exist",
                     HttpStatus.NOT_FOUND);
         }
 
+        this.deleteAllPostImages(existPost.get());
+
         this.postRepository.deleteById(id);
+    }
+
+    private void deleteAllPostImages(Post post) {
+        List<String> images = new ArrayList<>();
+
+        images.addAll(
+                post.getPostImages().stream().map(PostImage::getMediaType).collect(Collectors.toList()));
+
+        post.getComments().forEach((comment) -> {
+            images.addAll(
+                    comment.getCommentImages().stream().map(CommentImages::getMediaUrl).collect(Collectors.toList()));
+
+            comment.getReplies().stream().forEach((reply) -> {
+                images.addAll(
+                        reply.getReplyImages().stream().map(ReplyImage::getMediaUrl).collect(Collectors.toList()));
+            });
+        });
+
+        if (images.size() > 0) {
+            images.stream().forEach((imageUrl) -> {
+                this.imageUploadService.deleteUploadedImage("socialis/post/images/", imageUrl);
+            });
+        }
+
     }
 
     public PostDto buildPostDto(Post post) {
