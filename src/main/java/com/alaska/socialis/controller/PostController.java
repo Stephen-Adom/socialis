@@ -100,8 +100,6 @@ public class PostController {
         response.put("status", HttpStatus.OK);
         response.put("message", "Post Updated");
 
-        // ! dispatch an event to notify followers
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 

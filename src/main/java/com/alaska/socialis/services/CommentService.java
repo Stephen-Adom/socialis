@@ -19,11 +19,13 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
+import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.CommentDto;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
+import com.alaska.socialis.repository.CommentImageRepository;
 import com.alaska.socialis.repository.CommentRepository;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
@@ -45,6 +47,9 @@ public class CommentService implements CommentServiceInterface {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private CommentImageRepository commentImageRepository;
 
     @Override
     public List<CommentDto> getAllComments(Long postId) {
@@ -113,6 +118,52 @@ public class CommentService implements CommentServiceInterface {
         response.put("postDto", postDto);
 
         return response;
+    }
+
+    @Override
+    public Comment editComment(Long id, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
+        List<CommentImages> allMedia = new ArrayList<CommentImages>();
+        Optional<Comment> commentExist = this.commentRepository.findById(id);
+
+        if (commentExist.isEmpty()) {
+            throw new EntityNotFoundException("Comment with id " + commentExist.get().getId() + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        Comment existingComment = commentExist.get();
+
+        if (Objects.nonNull(multipartFiles) && Arrays.asList(multipartFiles).size() > 0) {
+            Arrays.asList(multipartFiles).forEach((file) -> {
+                Map<String, Object> result;
+                try {
+                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
+
+                    CommentImages uploadedImage = CommentImages.builder().comment(existingComment)
+                            .mediaType((String) result.get("resource_type"))
+                            .mediaUrl((String) result.get("secure_url"))
+                            .build();
+
+                    allMedia.add(uploadedImage);
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                }
+            });
+
+            existingComment.setCommentImages(allMedia);
+        }
+
+        if (content != null) {
+            existingComment.setContent(content);
+        }
+
+        this.commentRepository.save(existingComment);
+
+        Optional<Comment> updatedComment = this.commentRepository.findById(id);
+
+        List<CommentImages> updatedImages = this.commentImageRepository.findAllByCommentId(id);
+        updatedComment.get().setCommentImages(updatedImages);
+
+        return updatedComment.get();
     }
 
     public CommentDto buildCommentDto(Comment comment) {

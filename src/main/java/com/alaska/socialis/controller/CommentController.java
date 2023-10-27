@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
+import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.services.CommentService;
+import com.alaska.socialis.model.Comment;
+import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.dto.CommentDto;
+import com.alaska.socialis.model.dto.PostDto;
 
 @RestController
 @RequestMapping("/api")
@@ -57,5 +62,23 @@ public class CommentController {
         response.put("message", "New Comment Created");
 
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+    }
+
+    @PatchMapping(value = "/comment/{id}/edit", headers = "Content-Type=multipart/form-data")
+    public ResponseEntity<Map<String, Object>> editComment(@PathVariable Long id,
+            @RequestParam(required = false, value = "content") String content,
+            @RequestParam(required = false, value = "images") MultipartFile[] multipartFile)
+            throws ValidationErrorsException, EntityNotFoundException {
+        Comment updatedComment = this.commentService.editComment(id, content, multipartFile);
+
+        CommentDto formattedComment = this.commentService.buildCommentDto(updatedComment);
+
+        messagingTemplate.convertAndSend("/feed/comment/update", formattedComment);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("message", "Comment Updated");
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 }
