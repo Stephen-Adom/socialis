@@ -163,10 +163,10 @@ public class PostService implements PostServiceInterface {
     }
 
     private void deleteAllPostImages(Post post) {
-        List<String> images = new ArrayList<>();
+        List<String> images = new ArrayList<String>();
 
         images.addAll(
-                post.getPostImages().stream().map(PostImage::getMediaType).collect(Collectors.toList()));
+                post.getPostImages().stream().map(PostImage::getMediaUrl).collect(Collectors.toList()));
 
         post.getComments().forEach((comment) -> {
             images.addAll(
@@ -180,7 +180,10 @@ public class PostService implements PostServiceInterface {
 
         if (images.size() > 0) {
             images.stream().forEach((imageUrl) -> {
-                this.imageUploadService.deleteUploadedImage("socialis/post/images/", imageUrl);
+                System.out.println("============================ all images ==================================");
+                System.out.println(imageUrl);
+                this.imageUploadService.deleteUploadedImage("socialis/post/images/",
+                        imageUrl);
             });
         }
 
