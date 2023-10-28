@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
@@ -54,7 +55,7 @@ public class PostService implements PostServiceInterface {
 
     @Override
     public Post createPost(Long userId, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
-        List<PostImage> allMedia = new ArrayList<PostImage>();
+
         Optional<User> author = this.userRepository.findById(userId);
         Post postObj = new Post();
 
@@ -62,30 +63,29 @@ public class PostService implements PostServiceInterface {
             throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
-        if (Objects.nonNull(multipartFiles) && Arrays.asList(multipartFiles).size() > 0) {
-            Arrays.asList(multipartFiles).forEach((file) -> {
-                Map<String, Object> result;
-                try {
-                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
+        if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
 
-                    PostImage uploadedImage = PostImage.builder().post(postObj)
+            List<PostImage> allMedia = Arrays.stream(multipartFiles).map((file) -> {
+                try {
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images",
+                            file);
+
+                    return PostImage.builder().post(postObj)
                             .mediaType((String) result.get("resource_type"))
                             .mediaUrl((String) result.get("secure_url"))
                             .build();
 
-                    allMedia.add(uploadedImage);
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
+                    return null;
                 }
-            });
+            }).filter(Objects::nonNull).collect(Collectors.toList());
 
             postObj.setPostImages(allMedia);
         }
 
         postObj.setUser(author.get());
         postObj.setContent(Objects.nonNull(content) ? content : "");
-        postObj.setNumberOfComments(0);
-        postObj.setNumberOfLikes(0);
 
         return this.postRepository.save(postObj);
 
@@ -104,7 +104,6 @@ public class PostService implements PostServiceInterface {
 
     @Override
     public Post editPost(Long id, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
-        List<PostImage> allMedia = new ArrayList<PostImage>();
         Optional<Post> postExist = this.postRepository.findById(id);
 
         if (postExist.isEmpty()) {
@@ -114,22 +113,22 @@ public class PostService implements PostServiceInterface {
 
         Post existingPost = postExist.get();
 
-        if (Objects.nonNull(multipartFiles) && Arrays.asList(multipartFiles).size() > 0) {
-            Arrays.asList(multipartFiles).forEach((file) -> {
-                Map<String, Object> result;
+        if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
+            List<PostImage> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images",
+                            file);
 
-                    PostImage uploadedImage = PostImage.builder().post(existingPost)
+                    return PostImage.builder().post(existingPost)
                             .mediaType((String) result.get("resource_type"))
                             .mediaUrl((String) result.get("secure_url"))
                             .build();
 
-                    allMedia.add(uploadedImage);
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
+                    return null;
                 }
-            });
+            }).filter(Objects::nonNull).collect(Collectors.toList());
 
             existingPost.setPostImages(allMedia);
         }
@@ -149,6 +148,7 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
+    @Transactional
     public void deletePost(Long id) throws EntityNotFoundException {
         Optional<Post> existPost = this.postRepository.findById(id);
 

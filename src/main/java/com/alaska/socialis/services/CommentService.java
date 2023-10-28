@@ -65,7 +65,6 @@ public class CommentService implements CommentServiceInterface {
     @Override
     public Map<String, Object> createComment(Long userId, Long postId, String content, MultipartFile[] multipartFiles)
             throws EntityNotFoundException {
-        List<CommentImages> allMedia = new ArrayList<CommentImages>();
         Optional<Post> existpost = this.postRepository.findById(postId);
         Optional<User> existuser = this.userRepository.findById(userId);
         Comment commentObj = new Comment();
@@ -80,28 +79,30 @@ public class CommentService implements CommentServiceInterface {
                     HttpStatus.NOT_FOUND);
         }
 
-        if (Objects.nonNull(multipartFiles) && Arrays.asList(multipartFiles).size() > 0) {
-            Arrays.asList(multipartFiles).forEach((file) -> {
-                Map<String, Object> result;
+        if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
+            List<CommentImages> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images",
+                            file);
 
-                    CommentImages uploadedImage = CommentImages.builder().comment(commentObj)
+                    return CommentImages.builder().comment(commentObj)
                             .mediaType((String) result.get("resource_type"))
                             .mediaUrl((String) result.get("secure_url"))
                             .build();
-
-                    allMedia.add(uploadedImage);
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
+                    return null;
                 }
-            });
+            }).filter(Objects::nonNull).collect(Collectors.toList());
+
+            commentObj.setCommentImages(allMedia);
         }
 
-        commentObj.setContent(Objects.nonNull(content) ? content : "");
+        if (content != null) {
+            commentObj.setContent(content);
+        }
         commentObj.setUser(existuser.get());
         commentObj.setPost(existpost.get());
-        commentObj.setCommentImages(allMedia);
 
         Comment savedComment = this.commentRepository.save(commentObj);
 
@@ -123,7 +124,6 @@ public class CommentService implements CommentServiceInterface {
 
     @Override
     public Comment editComment(Long id, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
-        List<CommentImages> allMedia = new ArrayList<CommentImages>();
         Optional<Comment> commentExist = this.commentRepository.findById(id);
 
         if (commentExist.isEmpty()) {
@@ -133,22 +133,21 @@ public class CommentService implements CommentServiceInterface {
 
         Comment existingComment = commentExist.get();
 
-        if (Objects.nonNull(multipartFiles) && Arrays.asList(multipartFiles).size() > 0) {
-            Arrays.asList(multipartFiles).forEach((file) -> {
-                Map<String, Object> result;
+        if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
+            List<CommentImages> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
 
-                    CommentImages uploadedImage = CommentImages.builder().comment(existingComment)
+                    return CommentImages.builder().comment(existingComment)
                             .mediaType((String) result.get("resource_type"))
                             .mediaUrl((String) result.get("secure_url"))
                             .build();
 
-                    allMedia.add(uploadedImage);
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
+                    return null;
                 }
-            });
+            }).filter(Objects::nonNull).collect(Collectors.toList());
 
             existingComment.setCommentImages(allMedia);
         }

@@ -9,14 +9,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
+import com.alaska.socialis.exceptions.ValidationErrorsException;
+import com.alaska.socialis.model.Post;
+import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.ReplyDto;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.services.ReplyService;
@@ -59,5 +64,21 @@ public class ReplyController {
         SuccessResponse response = SuccessResponse.builder().data(allReplyDto).status(HttpStatus.OK).build();
 
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/reply/{id}/edit", headers = "Content-Type=multipart/form-data")
+    public ResponseEntity<Map<String, Object>> editPost(@PathVariable Long id,
+            @RequestParam(required = false, value = "content") String content,
+            @RequestParam(required = false, value = "images") MultipartFile[] multipartFile)
+            throws ValidationErrorsException, EntityNotFoundException {
+        ReplyDto updatedReply = this.replyService.editReply(id, content, multipartFile);
+
+        messagingTemplate.convertAndSend("/feed/reply/update", updatedReply);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("message", "Reply Updated");
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 }

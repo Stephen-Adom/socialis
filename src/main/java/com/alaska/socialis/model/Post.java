@@ -57,7 +57,7 @@ public class Post {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<PostImage> postImages = new ArrayList<PostImage>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)

@@ -27,6 +27,7 @@ import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.ReplyDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.repository.CommentRepository;
+import com.alaska.socialis.repository.ReplyImageRepository;
 import com.alaska.socialis.repository.ReplyRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.ReplyServiceInterface;
@@ -44,6 +45,9 @@ public class ReplyService implements ReplyServiceInterface {
 
     @Autowired
     private ImageUploadService imageUploadService;
+
+    @Autowired
+    private ReplyImageRepository replyImageRepository;
 
     @Autowired
     private CommentService commentService;
@@ -109,6 +113,50 @@ public class ReplyService implements ReplyServiceInterface {
     public List<ReplyDto> fetchAllReplies(Long commentId) {
         List<Reply> allReplies = this.replyRepository.findByCommentIdOrderByCreatedAtDesc(commentId);
         return allReplies.stream().map((reply) -> this.buildReplyDto(reply)).collect(Collectors.toList());
+    }
+
+    @Override
+    public ReplyDto editReply(Long id, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
+        Optional<Reply> replyExist = this.replyRepository.findById(id);
+
+        if (replyExist.isEmpty()) {
+            throw new EntityNotFoundException("Reply with id " + replyExist.get().getId() + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        Reply existingReply = replyExist.get();
+
+        if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
+            List<ReplyImage> allMedia = Arrays.stream(multipartFiles).map((file) -> {
+                try {
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images",
+                            file);
+
+                    return ReplyImage.builder().reply(existingReply)
+                            .mediaType((String) result.get("resource_type"))
+                            .mediaUrl((String) result.get("secure_url"))
+                            .build();
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                    return null;
+                }
+            }).filter(Objects::nonNull).collect(Collectors.toList());
+
+            existingReply.setReplyImages(allMedia);
+        }
+
+        if (content != null) {
+            existingReply.setContent(content);
+        }
+
+        this.replyRepository.save(existingReply);
+
+        Optional<Reply> updatedReply = this.replyRepository.findById(id);
+
+        List<ReplyImage> updatedImages = this.replyImageRepository.findAllByReplyId(id);
+        updatedReply.get().setReplyImages(updatedImages);
+
+        return this.buildReplyDto(updatedReply.get());
     }
 
     public ReplyDto buildReplyDto(Reply reply) {
