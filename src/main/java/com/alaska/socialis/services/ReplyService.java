@@ -12,11 +12,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Comment;
+import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.Reply;
@@ -51,6 +54,9 @@ public class ReplyService implements ReplyServiceInterface {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
     public Map<String, Object> createReply(Long userId, Long commentId, String content, MultipartFile[] multipartFiles)
@@ -157,6 +163,45 @@ public class ReplyService implements ReplyServiceInterface {
         updatedReply.get().setReplyImages(updatedImages);
 
         return this.buildReplyDto(updatedReply.get());
+    }
+
+    @Override
+    @Transactional
+    public void deleteReply(Long id) throws EntityNotFoundException {
+        Optional<Reply> existReply = this.replyRepository.findById(id);
+
+        if (existReply.isEmpty()) {
+            throw new EntityNotFoundException("Reply with id " + id + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        this.deleteAllReplyImages(existReply.get());
+
+        Comment comment = existReply.get().getComment();
+
+        comment.setNumberOfReplies(comment.getNumberOfReplies() - 1);
+
+        Comment updatedComment = this.commentRepository.save(comment);
+
+        this.replyRepository.deleteById(id);
+
+        this.messagingTemplate.convertAndSend("/feed/comment/update",
+                this.commentService.buildCommentDto(updatedComment));
+    }
+
+    private void deleteAllReplyImages(Reply reply) {
+        List<String> images = new ArrayList<String>();
+
+        images.addAll(
+                reply.getReplyImages().stream().map(ReplyImage::getMediaUrl).collect(Collectors.toList()));
+
+        if (images.size() > 0) {
+            images.stream().forEach((imageUrl) -> {
+                this.imageUploadService.deleteUploadedImage("socialis/post/images/",
+                        imageUrl);
+            });
+        }
+
     }
 
     public ReplyDto buildReplyDto(Reply reply) {

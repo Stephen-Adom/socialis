@@ -136,7 +136,8 @@ public class CommentService implements CommentServiceInterface {
         if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
             List<CommentImages> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images",
+                            file);
 
                     return CommentImages.builder().comment(existingComment)
                             .mediaType((String) result.get("resource_type"))
@@ -193,8 +194,6 @@ public class CommentService implements CommentServiceInterface {
 
         if (images.size() > 0) {
             images.stream().forEach((imageUrl) -> {
-                System.out.println("============================ all images ==================================");
-                System.out.println(imageUrl);
                 this.imageUploadService.deleteUploadedImage("socialis/post/images/",
                         imageUrl);
             });

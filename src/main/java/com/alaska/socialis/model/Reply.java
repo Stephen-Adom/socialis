@@ -51,7 +51,6 @@ public class Reply {
 
     @ManyToOne
     @JoinColumn(name = "comment_id", referencedColumnName = "id")
-    @Getter(AccessLevel.NONE)
     private Comment comment;
 
     @ManyToOne(fetch = FetchType.EAGER)
