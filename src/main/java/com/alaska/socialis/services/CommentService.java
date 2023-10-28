@@ -226,7 +226,8 @@ public class CommentService implements CommentServiceInterface {
 
         SimpleUserDto userInfo = SimpleUserDto.builder().id(comment.getUser().getId())
                 .firstname(comment.getUser().getFirstname()).lastname(comment.getUser().getLastname())
-                .username(comment.getUser().getUsername()).imageUrl(comment.getUser().getImageUrl()).build();
+                .username(comment.getUser().getUsername()).imageUrl(comment.getUser().getImageUrl())
+                .bio(comment.getUser().getBio()).build();
 
         return CommentDto.builder().id(comment.getId()).user(userInfo)
                 .content(comment.getContent()).commentImages(comment.getCommentImages())

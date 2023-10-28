@@ -201,7 +201,8 @@ public class PostService implements PostServiceInterface {
 
         SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
                 .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
-                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
+                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
+                .bio(post.getUser().getBio()).build();
 
         PostDto buildPost = PostDto.builder().id(post.getId()).content(post.getContent())
                 .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
@@ -226,7 +227,8 @@ public class PostService implements PostServiceInterface {
 
             SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
                     .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
-                    .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl()).build();
+                    .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
+                    .bio(post.getUser().getBio()).build();
 
             return PostDto.builder().id(post.getId()).content(post.getContent())
                     .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())

@@ -214,7 +214,8 @@ public class ReplyService implements ReplyServiceInterface {
 
         SimpleUserDto userInfo = SimpleUserDto.builder().id(reply.getUser().getId())
                 .firstname(reply.getUser().getFirstname()).lastname(reply.getUser().getLastname())
-                .username(reply.getUser().getUsername()).imageUrl(reply.getUser().getImageUrl()).build();
+                .username(reply.getUser().getUsername()).imageUrl(reply.getUser().getImageUrl())
+                .bio(reply.getUser().getBio()).build();
 
         return ReplyDto.builder().id(reply.getId()).user(userInfo)
                 .content(reply.getContent()).replyImages(reply.getReplyImages())
