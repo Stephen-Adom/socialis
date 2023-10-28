@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
-import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.ReplyImage;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.CommentDto;
@@ -168,6 +168,7 @@ public class CommentService implements CommentServiceInterface {
     }
 
     @Override
+    @Transactional
     public void deleteComment(Long id) throws EntityNotFoundException {
         Optional<Comment> existComment = this.commentRepository.findById(id);
 
@@ -178,7 +179,7 @@ public class CommentService implements CommentServiceInterface {
 
         this.deleteAllCommentImages(existComment.get());
 
-        this.postRepository.deleteById(id);
+        this.commentRepository.deleteById(id);
     }
 
     private void deleteAllCommentImages(Comment comment) {
