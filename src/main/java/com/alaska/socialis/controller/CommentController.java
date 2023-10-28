@@ -10,9 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,9 +23,7 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.services.CommentService;
 import com.alaska.socialis.model.Comment;
-import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.dto.CommentDto;
-import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 
 @RestController
@@ -66,7 +64,7 @@ public class CommentController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    @PatchMapping(value = "/comment/{id}/edit", headers = "Content-Type=multipart/form-data")
+    @PutMapping(value = "/comment/{id}/edit", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<Map<String, Object>> editComment(@PathVariable Long id,
             @RequestParam(required = false, value = "content") String content,
             @RequestParam(required = false, value = "images") MultipartFile[] multipartFile)
