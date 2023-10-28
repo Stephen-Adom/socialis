@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +52,9 @@ public class CommentService implements CommentServiceInterface {
 
     @Autowired
     private CommentImageRepository commentImageRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Override
     public List<CommentDto> getAllComments(Long postId) {
@@ -179,7 +183,15 @@ public class CommentService implements CommentServiceInterface {
 
         this.deleteAllCommentImages(existComment.get());
 
+        Post post = existComment.get().getPost();
+
+        post.setNumberOfComments(post.getNumberOfComments() - 1);
+
+        Post updatedPost = this.postRepository.save(post);
+
         this.commentRepository.deleteById(id);
+
+        this.messagingTemplate.convertAndSend("/feed/post/update", this.postService.buildPostDto(updatedPost));
     }
 
     private void deleteAllCommentImages(Comment comment) {

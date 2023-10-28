@@ -19,9 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Comment;
-import com.alaska.socialis.model.CommentImages;
-import com.alaska.socialis.model.Post;
-import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.Reply;
 import com.alaska.socialis.model.ReplyImage;
 import com.alaska.socialis.model.User;

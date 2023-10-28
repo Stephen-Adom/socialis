@@ -45,7 +45,6 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "post_id", referencedColumnName = "id")
-    @Getter(AccessLevel.NONE)
     private Post post;
 
     @Column(columnDefinition = "VARCHAR(255)")
