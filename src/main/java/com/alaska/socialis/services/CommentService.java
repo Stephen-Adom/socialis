@@ -213,6 +213,17 @@ public class CommentService implements CommentServiceInterface {
 
     }
 
+    @Override
+    public CommentDto fetchCommentById(Long postId) throws EntityNotFoundException {
+        Optional<Comment> comment = this.commentRepository.findById(postId);
+
+        if (comment.isEmpty()) {
+            throw new EntityNotFoundException("Comment with id " + comment + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        return this.buildCommentDto(comment.get());
+    }
+
     public CommentDto buildCommentDto(Comment comment) {
         List<LikeDto> likes = comment.getLikes().stream().map((like) -> {
             LikeDto currentLike = new LikeDto();

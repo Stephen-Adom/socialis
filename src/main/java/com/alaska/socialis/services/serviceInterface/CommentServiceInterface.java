@@ -11,13 +11,16 @@ import com.alaska.socialis.model.dto.CommentDto;
 
 public interface CommentServiceInterface {
 
-    public Map<String, Object> createComment(Long userId, Long postId, String content, MultipartFile[] multipartFiles)
-            throws EntityNotFoundException;
+        public Map<String, Object> createComment(Long userId, Long postId, String content,
+                        MultipartFile[] multipartFiles)
+                        throws EntityNotFoundException;
 
-    public List<CommentDto> getAllComments(Long postId);
+        public List<CommentDto> getAllComments(Long postId);
 
-    public Comment editComment(Long id, String content, MultipartFile[] multipartFiles)
-            throws EntityNotFoundException;
+        public Comment editComment(Long id, String content, MultipartFile[] multipartFiles)
+                        throws EntityNotFoundException;
 
-    public void deleteComment(Long id) throws EntityNotFoundException;
+        public void deleteComment(Long id) throws EntityNotFoundException;
+
+        public CommentDto fetchCommentById(Long postId) throws EntityNotFoundException;
 }

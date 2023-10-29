@@ -24,6 +24,7 @@ import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.services.CommentService;
 import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.dto.CommentDto;
+import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 
 @RestController
@@ -34,6 +35,19 @@ public class CommentController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @GetMapping("/{id}/comment")
+    public ResponseEntity<Map<String, Object>> fetchCommentDetail(@PathVariable("id") Long postId)
+            throws EntityNotFoundException {
+
+        CommentDto commentDto = this.commentService.fetchCommentById(postId);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("data", commentDto);
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
 
     @GetMapping("/{postId}/comments")
     public ResponseEntity<SuccessResponse> getAllComments(@PathVariable Long postId) {
