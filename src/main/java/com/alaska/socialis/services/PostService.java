@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
+import com.alaska.socialis.model.Bookmark;
 import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
@@ -25,6 +26,7 @@ import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
+import com.alaska.socialis.repository.BookmarkRepository;
 import com.alaska.socialis.repository.PostImageRepository;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
@@ -46,6 +48,9 @@ public class PostService implements PostServiceInterface {
 
     @Autowired
     private ImageUploadService imageUploadService;
+
+    @Autowired
+    private BookmarkRepository bookmarkRepository;
 
     @Override
     public List<PostDto> fetchAllPost() {
@@ -193,6 +198,9 @@ public class PostService implements PostServiceInterface {
 
     public PostDto buildPostDto(Post post) {
 
+        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(post.getId(), "post").stream()
+                .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
+
         List<LikeDto> likes = post.getLikes().stream().map((like) -> {
             LikeDto currentLike = new LikeDto();
             currentLike.setImageUrl(like.getUser().getImageUrl());
@@ -211,7 +219,7 @@ public class PostService implements PostServiceInterface {
         PostDto buildPost = PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                 .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                 .numberOfBookmarks(post.getNumberOfBookmarks())
-                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
+                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)
                 .postImages(post.getPostImages()).likes(likes).build();
 
         return buildPost;
@@ -220,6 +228,10 @@ public class PostService implements PostServiceInterface {
     public List<PostDto> buildPostDto(List<Post> allPost) {
 
         List<PostDto> allBuildPosts = allPost.stream().map((post) -> {
+            List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(post.getId(), "post").stream()
+                    .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
             List<LikeDto> likes = post.getLikes().stream().map((like) -> {
                 LikeDto currentLike = new LikeDto();
                 currentLike.setImageUrl(like.getUser().getImageUrl());
@@ -238,7 +250,7 @@ public class PostService implements PostServiceInterface {
             return PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                     .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                     .numberOfBookmarks(post.getNumberOfBookmarks())
-                    .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
+                    .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)
                     .postImages(post.getPostImages()).likes(likes).build();
         }).collect(Collectors.toList());
 

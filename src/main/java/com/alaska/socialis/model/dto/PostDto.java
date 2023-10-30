@@ -28,4 +28,5 @@ public class PostDto {
     private SimpleUserDto user;
     List<PostImage> postImages = new ArrayList<PostImage>();
     List<LikeDto> likes = new ArrayList<LikeDto>();
+    List<Long> bookmarkedUsers = new ArrayList<Long>();
 }

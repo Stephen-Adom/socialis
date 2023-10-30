@@ -61,7 +61,7 @@ public class BookmarkService implements BookmarkServiceInterface {
     private SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public void saveBookmark(BookmarkRequest bookmarkRequest, BindingResult validationResult)
+    public void toggleBookmark(BookmarkRequest bookmarkRequest, BindingResult validationResult)
             throws ValidationErrorsException, EntityNotFoundException {
         if (validationResult.hasErrors()) {
             throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
@@ -74,14 +74,22 @@ public class BookmarkService implements BookmarkServiceInterface {
                     HttpStatus.NOT_FOUND);
         }
 
-        Bookmark bookmark = new Bookmark();
-        bookmark.setContentId(bookmarkRequest.getContentId());
-        bookmark.setContentType(bookmarkRequest.getContentType());
-        bookmark.setUser(user.get());
+        Optional<Bookmark> bookmarkExist = this.bookmarkRepository
+                .findByContentIdAndContentType(bookmarkRequest.getContentId(), bookmarkRequest.getContentType());
 
-        bookmarkRepository.save(bookmark);
+        if (bookmarkExist.isEmpty()) {
+            Bookmark bookmark = new Bookmark();
+            bookmark.setContentId(bookmarkRequest.getContentId());
+            bookmark.setContentType(bookmarkRequest.getContentType());
+            bookmark.setUser(user.get());
 
-        this.setNumberOfBookmarksOnEntity(bookmarkRequest);
+            bookmarkRepository.save(bookmark);
+            this.setNumberOfBookmarksOnEntity(bookmarkRequest, bookmarkExist);
+        } else {
+            this.setNumberOfBookmarksOnEntity(bookmarkRequest, bookmarkExist);
+            bookmarkRepository.delete(bookmarkExist.get());
+        }
+
     }
 
     @Override
@@ -106,11 +114,17 @@ public class BookmarkService implements BookmarkServiceInterface {
         return formattedBookmark;
     }
 
-    private void setNumberOfBookmarksOnEntity(BookmarkRequest bookmarkRequest) {
+    private void setNumberOfBookmarksOnEntity(BookmarkRequest bookmarkRequest, Optional<Bookmark> bookmarkExist) {
 
         if (bookmarkRequest.getContentType().equals("post")) {
             Optional<Post> post = this.postRepository.findById(bookmarkRequest.getContentId());
-            post.get().setNumberOfBookmarks(post.get().getNumberOfBookmarks() + 1);
+
+            if (bookmarkExist.isEmpty()) {
+                post.get().setNumberOfBookmarks(post.get().getNumberOfBookmarks() + 1);
+            } else {
+                post.get().setNumberOfBookmarks(post.get().getNumberOfBookmarks() - 1);
+            }
+
             Post updatedPost = this.postRepository.save(post.get());
 
             PostDto postDto = this.postService.buildPostDto(updatedPost);
@@ -119,7 +133,12 @@ public class BookmarkService implements BookmarkServiceInterface {
 
         } else if (bookmarkRequest.getContentType().equals("comment")) {
             Optional<Comment> comment = this.commentRepository.findById(bookmarkRequest.getContentId());
-            comment.get().setNumberOfBookmarks(comment.get().getNumberOfBookmarks() + 1);
+            if (bookmarkExist.isEmpty()) {
+                comment.get().setNumberOfBookmarks(comment.get().getNumberOfBookmarks() + 1);
+            } else {
+                comment.get().setNumberOfBookmarks(comment.get().getNumberOfBookmarks() - 1);
+            }
+
             Comment updatedComment = this.commentRepository.save(comment.get());
 
             CommentDto commentDto = this.commentService.buildCommentDto(updatedComment);
@@ -128,7 +147,13 @@ public class BookmarkService implements BookmarkServiceInterface {
 
         } else if (bookmarkRequest.getContentType().equals("reply")) {
             Optional<Reply> reply = this.replyRepository.findById(bookmarkRequest.getContentId());
-            reply.get().setNumberOfBookmarks(reply.get().getNumberOfBookmarks() + 1);
+
+            if (bookmarkExist.isEmpty()) {
+                reply.get().setNumberOfBookmarks(reply.get().getNumberOfBookmarks() + 1);
+            } else {
+                reply.get().setNumberOfBookmarks(reply.get().getNumberOfBookmarks() - 1);
+            }
+
             Reply updatedReply = this.replyRepository.save(reply.get());
 
             ReplyDto replyDto = this.replyService.buildReplyDto(updatedReply);

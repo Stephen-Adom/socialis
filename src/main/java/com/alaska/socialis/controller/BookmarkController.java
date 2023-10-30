@@ -29,10 +29,10 @@ public class BookmarkController {
     @Autowired
     private BookmarkService bookmarkService;
 
-    @PostMapping("/bookmark/save")
+    @PostMapping("/bookmark/toggle")
     private void bookmarkPost(@RequestBody @Valid BookmarkRequest bookmarkRequest, BindingResult validationResult)
             throws ValidationErrorsException, EntityNotFoundException {
-        this.bookmarkService.saveBookmark(bookmarkRequest, validationResult);
+        this.bookmarkService.toggleBookmark(bookmarkRequest, validationResult);
     }
 
     @GetMapping("/bookmarks/{userId}/all")
