@@ -75,7 +75,8 @@ public class BookmarkService implements BookmarkServiceInterface {
         }
 
         Optional<Bookmark> bookmarkExist = this.bookmarkRepository
-                .findByContentIdAndContentType(bookmarkRequest.getContentId(), bookmarkRequest.getContentType());
+                .findByUserIdAndContentIdAndContentType(bookmarkRequest.getUserId(), bookmarkRequest.getContentId(),
+                        bookmarkRequest.getContentType());
 
         if (bookmarkExist.isEmpty()) {
             Bookmark bookmark = new Bookmark();
@@ -86,8 +87,8 @@ public class BookmarkService implements BookmarkServiceInterface {
             bookmarkRepository.save(bookmark);
             this.setNumberOfBookmarksOnEntity(bookmarkRequest, bookmarkExist);
         } else {
-            this.setNumberOfBookmarksOnEntity(bookmarkRequest, bookmarkExist);
             bookmarkRepository.delete(bookmarkExist.get());
+            this.setNumberOfBookmarksOnEntity(bookmarkRequest, bookmarkExist);
         }
 
     }

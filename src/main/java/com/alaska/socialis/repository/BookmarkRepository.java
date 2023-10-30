@@ -14,5 +14,5 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     List<Bookmark> findAllByContentIdAndContentType(Long contentId, String contentType);
 
-    Optional<Bookmark> findByContentIdAndContentType(Long contentId, String contentType);
+    Optional<Bookmark> findByUserIdAndContentIdAndContentType(Long userId, Long contentId, String contentType);
 }
