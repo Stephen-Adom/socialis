@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class ReplyDto {
 
     private Long id;
+    private String uid;
     private String content;
     private List<ReplyImage> replyImages = new ArrayList<ReplyImage>();
     private Date createdAt;

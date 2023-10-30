@@ -40,13 +40,17 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(name = "user_email_unique", columnNames = "email"),
-        @UniqueConstraint(name = "user_username_unique", columnNames = "username")
+        @UniqueConstraint(name = "user_username_unique", columnNames = "username"),
+        @UniqueConstraint(name = "user_uid_unique", columnNames = "uid")
 })
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(name = "uid", nullable = false, unique = true)
+    private String uid;
 
     @NotBlank(message = "Firstname is required", groups = RegisterValidationGroup.class)
     private String firstname;

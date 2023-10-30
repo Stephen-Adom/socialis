@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -84,8 +85,10 @@ public class AuthenticationService implements AuthenticationServiceInterface {
             throw new UserAlreadyExistException("User with username already exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
+        String uid = "usr-" + UUID.randomUUID().toString();
+
         User newUser = User.builder().firstname(user.getFirstname()).lastname(user.getLastname())
-                .email(user.getEmail()).username(user.getUsername())
+                .email(user.getEmail()).username(user.getUsername()).uid(uid)
                 .password(this.passwordEncoder.encode(user.getPassword())).build();
 
         return this.userRepository.save(newUser);

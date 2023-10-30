@@ -132,7 +132,8 @@ public class UserService implements UserServiceInterface {
     }
 
     public UserDto buildDto(User newUser) {
-        return UserDto.builder().id(newUser.getId()).firstname(newUser.getFirstname()).lastname(newUser.getLastname())
+        return UserDto.builder().id(newUser.getId()).uid(newUser.getUid()).firstname(newUser.getFirstname())
+                .lastname(newUser.getLastname())
                 .email(newUser.getEmail()).username(newUser.getUsername()).createdAt(newUser.getCreatedAt())
                 .updatedAt(newUser.getUpdatedAt()).enabled(newUser.isEnabled()).loginCount(newUser.getLoginCount())
                 .imageUrl(newUser.getImageUrl()).bio(newUser.getBio()).coverImageUrl(newUser.getCoverImageUrl())

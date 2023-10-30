@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,9 +103,12 @@ public class CommentService implements CommentServiceInterface {
             commentObj.setCommentImages(allMedia);
         }
 
+        String uid = "cmt-" + UUID.randomUUID().toString();
+
         if (content != null) {
             commentObj.setContent(content);
         }
+        commentObj.setUid(uid);
         commentObj.setUser(existuser.get());
         commentObj.setPost(existpost.get());
 
@@ -240,7 +244,7 @@ public class CommentService implements CommentServiceInterface {
                 .username(comment.getUser().getUsername()).imageUrl(comment.getUser().getImageUrl())
                 .bio(comment.getUser().getBio()).build();
 
-        return CommentDto.builder().id(comment.getId()).user(userInfo)
+        return CommentDto.builder().id(comment.getId()).uid(comment.getUid()).user(userInfo)
                 .content(comment.getContent()).commentImages(comment.getCommentImages())
                 .numberOfLikes(comment.getNumberOfLikes()).numberOfReplies(comment.getNumberOfReplies()).likes(likes)
                 .createdAt(comment.getCreatedAt()).updatedAt(comment.getUpdatedAt())

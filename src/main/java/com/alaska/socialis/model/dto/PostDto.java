@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class PostDto {
 
     private Long id;
+    private String uid;
     private String content;
     private int numberOfLikes = 0;
     private int numberOfComments = 0;

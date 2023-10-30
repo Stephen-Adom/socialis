@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class CommentDto {
 
     private Long id;
+    private String uid;
     private String content;
     private List<CommentImages> commentImages = new ArrayList<CommentImages>();
     private Date createdAt;

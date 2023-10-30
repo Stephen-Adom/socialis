@@ -23,7 +23,6 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
-import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.services.PostService;
 
 import lombok.extern.slf4j.Slf4j;

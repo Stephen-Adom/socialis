@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,9 @@ public class PostService implements PostServiceInterface {
             postObj.setPostImages(allMedia);
         }
 
+        String uid = "post-" + UUID.randomUUID().toString();
+
+        postObj.setUid(uid);
         postObj.setUser(author.get());
         postObj.setContent(Objects.nonNull(content) ? content : "");
 
@@ -204,7 +208,7 @@ public class PostService implements PostServiceInterface {
                 .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
                 .bio(post.getUser().getBio()).build();
 
-        PostDto buildPost = PostDto.builder().id(post.getId()).content(post.getContent())
+        PostDto buildPost = PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                 .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                 .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
                 .postImages(post.getPostImages()).likes(likes).build();
@@ -230,7 +234,7 @@ public class PostService implements PostServiceInterface {
                     .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
                     .bio(post.getUser().getBio()).build();
 
-            return PostDto.builder().id(post.getId()).content(post.getContent())
+            return PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                     .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                     .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
                     .postImages(post.getPostImages()).likes(likes).build();

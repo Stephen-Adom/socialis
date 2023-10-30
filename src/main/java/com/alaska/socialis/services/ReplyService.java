@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +91,9 @@ public class ReplyService implements ReplyServiceInterface {
             });
         }
 
+        String uid = "rpl-" + UUID.randomUUID().toString();
+
+        replyObj.setUid(uid);
         replyObj.setUser(author.get());
         replyObj.setContent(Objects.nonNull(content) ? content : "");
         replyObj.setReplyImages(allMedia);
@@ -217,7 +221,7 @@ public class ReplyService implements ReplyServiceInterface {
                 .username(reply.getUser().getUsername()).imageUrl(reply.getUser().getImageUrl())
                 .bio(reply.getUser().getBio()).build();
 
-        return ReplyDto.builder().id(reply.getId()).user(userInfo)
+        return ReplyDto.builder().id(reply.getId()).uid(reply.getUid()).user(userInfo)
                 .content(reply.getContent()).replyImages(reply.getReplyImages())
                 .numberOfLikes(reply.getNumberOfLikes()).likes(likes)
                 .createdAt(reply.getCreatedAt()).updatedAt(reply.getUpdatedAt())
