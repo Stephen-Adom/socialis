@@ -22,6 +22,7 @@ public class PostDto {
     private String content;
     private int numberOfLikes = 0;
     private int numberOfComments = 0;
+    private int numberOfBookmarks = 0;
     private Date createdAt;
     private Date updatedAt;
     private SimpleUserDto user;

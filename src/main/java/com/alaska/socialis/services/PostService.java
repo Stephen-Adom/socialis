@@ -210,6 +210,7 @@ public class PostService implements PostServiceInterface {
 
         PostDto buildPost = PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                 .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                .numberOfBookmarks(post.getNumberOfBookmarks())
                 .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
                 .postImages(post.getPostImages()).likes(likes).build();
 
@@ -236,6 +237,7 @@ public class PostService implements PostServiceInterface {
 
             return PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                     .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                    .numberOfBookmarks(post.getNumberOfBookmarks())
                     .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user)
                     .postImages(post.getPostImages()).likes(likes).build();
         }).collect(Collectors.toList());

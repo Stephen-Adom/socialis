@@ -24,6 +24,7 @@ public class ReplyDto {
     private Date createdAt;
     private Date updatedAt;
     private int numberOfLikes;
+    private int numberOfBookmarks;
     private SimpleUserDto user;
     List<LikeDto> likes = new ArrayList<LikeDto>();
 }

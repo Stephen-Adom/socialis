@@ -42,8 +42,15 @@ public class Post {
     private String uid;
 
     private String content;
+
+    @Builder.Default
     private int numberOfLikes = 0;
+
+    @Builder.Default
     private int numberOfComments = 0;
+
+    @Builder.Default
+    private int numberOfBookmarks = 0;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

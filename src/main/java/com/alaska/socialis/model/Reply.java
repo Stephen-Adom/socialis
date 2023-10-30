@@ -46,6 +46,9 @@ public class Reply {
     @Builder.Default
     private int numberOfLikes = 0;
 
+    @Builder.Default
+    private int numberOfBookmarks = 0;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;

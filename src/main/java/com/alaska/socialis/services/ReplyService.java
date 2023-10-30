@@ -223,7 +223,7 @@ public class ReplyService implements ReplyServiceInterface {
 
         return ReplyDto.builder().id(reply.getId()).uid(reply.getUid()).user(userInfo)
                 .content(reply.getContent()).replyImages(reply.getReplyImages())
-                .numberOfLikes(reply.getNumberOfLikes()).likes(likes)
+                .numberOfLikes(reply.getNumberOfLikes()).numberOfBookmarks(reply.getNumberOfBookmarks()).likes(likes)
                 .createdAt(reply.getCreatedAt()).updatedAt(reply.getUpdatedAt())
                 .build();
     }

@@ -60,6 +60,9 @@ public class Comment {
     @Builder.Default
     private int numberOfReplies = 0;
 
+    @Builder.Default
+    private int numberOfBookmarks = 0;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)

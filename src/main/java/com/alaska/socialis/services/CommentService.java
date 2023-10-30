@@ -246,7 +246,8 @@ public class CommentService implements CommentServiceInterface {
 
         return CommentDto.builder().id(comment.getId()).uid(comment.getUid()).user(userInfo)
                 .content(comment.getContent()).commentImages(comment.getCommentImages())
-                .numberOfLikes(comment.getNumberOfLikes()).numberOfReplies(comment.getNumberOfReplies()).likes(likes)
+                .numberOfLikes(comment.getNumberOfLikes()).numberOfReplies(comment.getNumberOfReplies())
+                .numberOfBookmarks(comment.getNumberOfBookmarks()).likes(likes)
                 .createdAt(comment.getCreatedAt()).updatedAt(comment.getUpdatedAt())
                 .build();
     }

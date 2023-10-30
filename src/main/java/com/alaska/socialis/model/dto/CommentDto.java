@@ -25,6 +25,7 @@ public class CommentDto {
     private Date updatedAt;
     private int numberOfLikes;
     private int numberOfReplies;
+    private int numberOfBookmarks;
     private SimpleUserDto user;
     private List<LikeDto> likes = new ArrayList<LikeDto>();
 
