@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
+import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.requestModel.BookmarkRequest;
 import com.alaska.socialis.services.BookmarkService;
 
@@ -30,9 +31,15 @@ public class BookmarkController {
     private BookmarkService bookmarkService;
 
     @PostMapping("/bookmark/toggle")
-    private void bookmarkPost(@RequestBody @Valid BookmarkRequest bookmarkRequest, BindingResult validationResult)
+    private ResponseEntity<SuccessMessage> bookmarkPost(@RequestBody @Valid BookmarkRequest bookmarkRequest,
+            BindingResult validationResult)
             throws ValidationErrorsException, EntityNotFoundException {
         this.bookmarkService.toggleBookmark(bookmarkRequest, validationResult);
+
+        SuccessMessage message = SuccessMessage.builder().message("User Bookmark Updated").status(HttpStatus.OK)
+                .build();
+
+        return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
     }
 
     @GetMapping("/bookmarks/{userId}/all")
