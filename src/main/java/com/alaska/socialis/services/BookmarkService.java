@@ -8,13 +8,20 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Bookmark;
+import com.alaska.socialis.model.Comment;
+import com.alaska.socialis.model.Post;
+import com.alaska.socialis.model.Reply;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.dto.CommentDto;
+import com.alaska.socialis.model.dto.PostDto;
+import com.alaska.socialis.model.dto.ReplyDto;
 import com.alaska.socialis.model.requestModel.BookmarkRequest;
 import com.alaska.socialis.repository.BookmarkRepository;
 import com.alaska.socialis.repository.CommentRepository;
@@ -50,6 +57,9 @@ public class BookmarkService implements BookmarkServiceInterface {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     @Override
     public void saveBookmark(BookmarkRequest bookmarkRequest, BindingResult validationResult)
             throws ValidationErrorsException, EntityNotFoundException {
@@ -70,6 +80,8 @@ public class BookmarkService implements BookmarkServiceInterface {
         bookmark.setUser(user.get());
 
         bookmarkRepository.save(bookmark);
+
+        this.setNumberOfBookmarksOnEntity(bookmarkRequest);
     }
 
     @Override
@@ -92,6 +104,38 @@ public class BookmarkService implements BookmarkServiceInterface {
         }
 
         return formattedBookmark;
+    }
+
+    private void setNumberOfBookmarksOnEntity(BookmarkRequest bookmarkRequest) {
+
+        if (bookmarkRequest.getContentType().equals("post")) {
+            Optional<Post> post = this.postRepository.findById(bookmarkRequest.getContentId());
+            post.get().setNumberOfBookmarks(post.get().getNumberOfBookmarks() + 1);
+            Post updatedPost = this.postRepository.save(post.get());
+
+            PostDto postDto = this.postService.buildPostDto(updatedPost);
+
+            messagingTemplate.convertAndSend("/feed/post/update", postDto);
+
+        } else if (bookmarkRequest.getContentType().equals("comment")) {
+            Optional<Comment> comment = this.commentRepository.findById(bookmarkRequest.getContentId());
+            comment.get().setNumberOfBookmarks(comment.get().getNumberOfBookmarks() + 1);
+            Comment updatedComment = this.commentRepository.save(comment.get());
+
+            CommentDto commentDto = this.commentService.buildCommentDto(updatedComment);
+
+            messagingTemplate.convertAndSend("/feed/comment/update", commentDto);
+
+        } else if (bookmarkRequest.getContentType().equals("reply")) {
+            Optional<Reply> reply = this.replyRepository.findById(bookmarkRequest.getContentId());
+            reply.get().setNumberOfBookmarks(reply.get().getNumberOfBookmarks() + 1);
+            Reply updatedReply = this.replyRepository.save(reply.get());
+
+            ReplyDto replyDto = this.replyService.buildReplyDto(updatedReply);
+
+            messagingTemplate.convertAndSend("/feed/reply/update", replyDto);
+        }
+
     }
 
     public Object getContentByBookmark(Bookmark bookmark) {
