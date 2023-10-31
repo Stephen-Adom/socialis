@@ -60,24 +60,20 @@ public class Post {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<PostImage> postImages = new ArrayList<PostImage>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     List<Comment> comments = new ArrayList<Comment>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     List<PostLike> likes = new ArrayList<PostLike>();
-
-    @Override
-    public String toString() {
-        return "Post: [id: " + this.id + " content: " + this.content + " createdAt: " + this.createdAt
-                + " updatedAt: " + this.updatedAt
-                + " User: " + user.getId() + " postImages: " + postImages.size();
-    }
 
 }

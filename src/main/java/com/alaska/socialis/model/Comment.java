@@ -10,7 +10,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,11 +20,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -43,7 +40,7 @@ public class Comment {
     @Column(name = "uid", unique = true, nullable = false)
     private String uid;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
@@ -65,20 +62,23 @@ public class Comment {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private Date createdAt;
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at", nullable = false, updatable = false)
+    @Column(name = "updated_at", nullable = false)
     private Date updatedAt;
 
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Builder.Default
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     List<CommentImages> commentImages = new ArrayList<CommentImages>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     List<Reply> replies = new ArrayList<Reply>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     List<CommentLike> likes = new ArrayList<CommentLike>();
 }

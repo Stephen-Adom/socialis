@@ -96,23 +96,18 @@ public class ReplyService implements ReplyServiceInterface {
         }
 
         String uid = "rpl-" + UUID.randomUUID().toString();
+        comment.get().setNumberOfReplies(comment.get().getNumberOfReplies() + 1);
 
         replyObj.setUid(uid);
         replyObj.setUser(author.get());
         replyObj.setContent(Objects.nonNull(content) ? content : "");
         replyObj.setReplyImages(allMedia);
         replyObj.setComment(comment.get());
-        ;
 
         Reply result = this.replyRepository.save(replyObj);
 
-        // update number of replies
-        comment.get().setNumberOfReplies(comment.get().getNumberOfReplies() + 1);
-
-        Comment updatedComment = this.commentRepository.save(comment.get());
-
         ReplyDto replyDto = this.buildReplyDto(result);
-        CommentDto commentDto = this.commentService.buildCommentDto(updatedComment);
+        CommentDto commentDto = this.commentService.buildCommentDto(replyObj.getComment());
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("commentDto", commentDto);
@@ -211,7 +206,7 @@ public class ReplyService implements ReplyServiceInterface {
 
     public ReplyDto buildReplyDto(Reply reply) {
 
-        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(reply.getId(), "post").stream()
+        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(reply.getId(), "reply").stream()
                 .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<LikeDto> likes = reply.getLikes().stream().map((like) -> {
@@ -229,7 +224,7 @@ public class ReplyService implements ReplyServiceInterface {
                 .username(reply.getUser().getUsername()).imageUrl(reply.getUser().getImageUrl())
                 .bio(reply.getUser().getBio()).build();
 
-        return ReplyDto.builder().id(reply.getId()).uid(reply.getUid()).user(userInfo)
+        return ReplyDto.builder().id(reply.getId()).user(userInfo)
                 .content(reply.getContent()).replyImages(reply.getReplyImages())
                 .numberOfLikes(reply.getNumberOfLikes()).numberOfBookmarks(reply.getNumberOfBookmarks()).likes(likes)
                 .bookmarkedUsers(userIds)

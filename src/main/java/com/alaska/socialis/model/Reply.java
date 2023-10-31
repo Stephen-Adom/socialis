@@ -38,7 +38,7 @@ public class Reply {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "uid", nullable = false, unique = true)
+    @Column(name = "uid", unique = true, nullable = false)
     private String uid;
 
     private String content;
@@ -65,9 +65,11 @@ public class Reply {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Builder.Default
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "reply")
     List<ReplyImage> replyImages = new ArrayList<ReplyImage>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "reply", cascade = CascadeType.ALL)
     List<ReplyLike> likes = new ArrayList<ReplyLike>();
 }

@@ -63,7 +63,6 @@ public class CommentService implements CommentServiceInterface {
 
     @Override
     public List<CommentDto> getAllComments(Long postId) {
-        // Optional<Post> post = this.postRepository.findById(postId);
         List<Comment> allComments = this.commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         List<CommentDto> parsedComments = allComments.stream()
@@ -79,7 +78,8 @@ public class CommentService implements CommentServiceInterface {
         Comment commentObj = new Comment();
 
         if (existuser.isEmpty()) {
-            throw new EntityNotFoundException("User id " + userId + "not found", HttpStatus.NOT_FOUND);
+            throw new EntityNotFoundException("User id " + userId + "not found",
+                    HttpStatus.NOT_FOUND);
         }
 
         if (existpost.isEmpty()) {
@@ -112,20 +112,17 @@ public class CommentService implements CommentServiceInterface {
         if (content != null) {
             commentObj.setContent(content);
         }
+
         commentObj.setUid(uid);
         commentObj.setUser(existuser.get());
+        existpost.get().setNumberOfComments(existpost.get().getNumberOfComments() + 1);
         commentObj.setPost(existpost.get());
 
         Comment savedComment = this.commentRepository.save(commentObj);
 
-        existpost.get().setNumberOfComments(existpost.get().getNumberOfComments() +
-                1);
-
-        Post updatedPost = this.postRepository.save(existpost.get());
-
         CommentDto commentDto = this.buildCommentDto(savedComment);
 
-        PostDto postDto = this.postService.buildPostDto(updatedPost);
+        PostDto postDto = this.postService.buildPostDto(savedComment.getPost());
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("commentDto", commentDto);
@@ -233,7 +230,7 @@ public class CommentService implements CommentServiceInterface {
     }
 
     public CommentDto buildCommentDto(Comment comment) {
-        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(comment.getId(), "post").stream()
+        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(comment.getId(), "comment").stream()
                 .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<LikeDto> likes = comment.getLikes().stream().map((like) -> {
@@ -251,7 +248,7 @@ public class CommentService implements CommentServiceInterface {
                 .username(comment.getUser().getUsername()).imageUrl(comment.getUser().getImageUrl())
                 .bio(comment.getUser().getBio()).build();
 
-        return CommentDto.builder().id(comment.getId()).uid(comment.getUid()).user(userInfo)
+        return CommentDto.builder().id(comment.getId()).user(userInfo)
                 .content(comment.getContent()).commentImages(comment.getCommentImages())
                 .numberOfLikes(comment.getNumberOfLikes()).numberOfReplies(comment.getNumberOfReplies())
                 .numberOfBookmarks(comment.getNumberOfBookmarks()).likes(likes).bookmarkedUsers(userIds)

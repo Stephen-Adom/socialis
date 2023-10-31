@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
-import com.alaska.socialis.model.Bookmark;
 import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
@@ -97,7 +96,6 @@ public class PostService implements PostServiceInterface {
         postObj.setContent(Objects.nonNull(content) ? content : "");
 
         return this.postRepository.save(postObj);
-
     }
 
     @Override
@@ -216,7 +214,7 @@ public class PostService implements PostServiceInterface {
                 .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
                 .bio(post.getUser().getBio()).build();
 
-        PostDto buildPost = PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
+        PostDto buildPost = PostDto.builder().id(post.getId()).content(post.getContent())
                 .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                 .numberOfBookmarks(post.getNumberOfBookmarks())
                 .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)
@@ -247,7 +245,7 @@ public class PostService implements PostServiceInterface {
                     .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
                     .bio(post.getUser().getBio()).build();
 
-            return PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
+            return PostDto.builder().id(post.getId()).content(post.getContent())
                     .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                     .numberOfBookmarks(post.getNumberOfBookmarks())
                     .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)

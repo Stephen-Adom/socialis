@@ -5,6 +5,8 @@ import java.util.Date;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -37,10 +40,12 @@ public class CommentImages {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
+    @Getter(AccessLevel.NONE)
     private Date createdAt;
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
+    @Getter(AccessLevel.NONE)
     private Date updatedAt;
 
     @ManyToOne

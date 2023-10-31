@@ -87,8 +87,8 @@ public class AuthenticationService implements AuthenticationServiceInterface {
 
         String uid = "usr-" + UUID.randomUUID().toString();
 
-        User newUser = User.builder().firstname(user.getFirstname()).lastname(user.getLastname())
-                .email(user.getEmail()).username(user.getUsername()).uid(uid)
+        User newUser = User.builder().uid(uid).firstname(user.getFirstname()).lastname(user.getLastname())
+                .email(user.getEmail()).username(user.getUsername())
                 .password(this.passwordEncoder.encode(user.getPassword())).build();
 
         return this.userRepository.save(newUser);

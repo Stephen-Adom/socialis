@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.alaska.socialis.model.validationGroups.LoginValidationGroup;
 import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -28,10 +29,13 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -97,24 +101,31 @@ public class User implements UserDetails {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<Post> posts = new ArrayList<Post>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<Comment>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @Getter(AccessLevel.NONE)
     private EmailVerificationToken verificationToken;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<PostLike> postLikes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<CommentLike> commentLikes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<ReplyLike> replyLikes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<Bookmark> bookmarks = new ArrayList<>();
 

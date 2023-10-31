@@ -24,7 +24,6 @@ import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.services.CommentService;
 import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.dto.CommentDto;
-import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 
 @RestController
@@ -68,8 +67,10 @@ public class CommentController {
         Map<String, Object> commentResponse = this.commentService.createComment(userId, postId, content,
                 multipartFile);
 
-        this.messagingTemplate.convertAndSend("/feed/comment/new", commentResponse.get("commentDto"));
-        this.messagingTemplate.convertAndSend("/feed/post/update", commentResponse.get("postDto"));
+        this.messagingTemplate.convertAndSend("/feed/comment/new",
+                commentResponse.get("commentDto"));
+        this.messagingTemplate.convertAndSend("/feed/post/update",
+                commentResponse.get("postDto"));
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("status", HttpStatus.CREATED);
