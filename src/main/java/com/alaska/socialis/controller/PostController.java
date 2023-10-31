@@ -72,7 +72,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}/post")
-    public ResponseEntity<Map<String, Object>> fetchPostDetail(@PathVariable("id") Long postId)
+    public ResponseEntity<Map<String, Object>> fetchPostDetail(@PathVariable("id") String postId)
             throws EntityNotFoundException {
 
         PostDto postDto = this.postService.fetchPostById(postId);

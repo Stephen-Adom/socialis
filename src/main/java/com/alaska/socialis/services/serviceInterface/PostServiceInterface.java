@@ -12,7 +12,7 @@ public interface PostServiceInterface {
         public Post createPost(Long userId, String content, MultipartFile[] multipartFiles)
                         throws EntityNotFoundException;
 
-        public PostDto fetchPostById(Long postId) throws EntityNotFoundException;
+        public PostDto fetchPostById(String postId) throws EntityNotFoundException;
 
         public List<PostDto> fetchAllPost();
 

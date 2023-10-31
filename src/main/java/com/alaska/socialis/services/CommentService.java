@@ -219,8 +219,8 @@ public class CommentService implements CommentServiceInterface {
     }
 
     @Override
-    public CommentDto fetchCommentById(Long postId) throws EntityNotFoundException {
-        Optional<Comment> comment = this.commentRepository.findById(postId);
+    public CommentDto fetchCommentById(String commentId) throws EntityNotFoundException {
+        Optional<Comment> comment = this.commentRepository.findByUid(commentId);
 
         if (comment.isEmpty()) {
             throw new EntityNotFoundException("Comment with id " + comment + " does not exist", HttpStatus.NOT_FOUND);
@@ -248,7 +248,7 @@ public class CommentService implements CommentServiceInterface {
                 .username(comment.getUser().getUsername()).imageUrl(comment.getUser().getImageUrl())
                 .bio(comment.getUser().getBio()).build();
 
-        return CommentDto.builder().id(comment.getId()).user(userInfo)
+        return CommentDto.builder().id(comment.getId()).uid(comment.getUid()).user(userInfo)
                 .content(comment.getContent()).commentImages(comment.getCommentImages())
                 .numberOfLikes(comment.getNumberOfLikes()).numberOfReplies(comment.getNumberOfReplies())
                 .numberOfBookmarks(comment.getNumberOfBookmarks()).likes(likes).bookmarkedUsers(userIds)

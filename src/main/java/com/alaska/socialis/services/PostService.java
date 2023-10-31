@@ -99,8 +99,8 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    public PostDto fetchPostById(Long postId) throws EntityNotFoundException {
-        Optional<Post> post = this.postRepository.findById(postId);
+    public PostDto fetchPostById(String postId) throws EntityNotFoundException {
+        Optional<Post> post = this.postRepository.findByUid(postId);
 
         if (post.isEmpty()) {
             throw new EntityNotFoundException("Post with id " + postId + " does not exist", HttpStatus.NOT_FOUND);
@@ -214,7 +214,7 @@ public class PostService implements PostServiceInterface {
                 .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
                 .bio(post.getUser().getBio()).build();
 
-        PostDto buildPost = PostDto.builder().id(post.getId()).content(post.getContent())
+        PostDto buildPost = PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                 .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                 .numberOfBookmarks(post.getNumberOfBookmarks())
                 .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)
@@ -245,7 +245,7 @@ public class PostService implements PostServiceInterface {
                     .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
                     .bio(post.getUser().getBio()).build();
 
-            return PostDto.builder().id(post.getId()).content(post.getContent())
+            return PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                     .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
                     .numberOfBookmarks(post.getNumberOfBookmarks())
                     .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)

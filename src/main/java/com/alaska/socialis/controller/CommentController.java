@@ -36,10 +36,10 @@ public class CommentController {
     private SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/{id}/comment")
-    public ResponseEntity<Map<String, Object>> fetchCommentDetail(@PathVariable("id") Long postId)
+    public ResponseEntity<Map<String, Object>> fetchCommentDetail(@PathVariable("id") String commentId)
             throws EntityNotFoundException {
 
-        CommentDto commentDto = this.commentService.fetchCommentById(postId);
+        CommentDto commentDto = this.commentService.fetchCommentById(commentId);
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("status", HttpStatus.OK);
