@@ -28,5 +28,6 @@ public class CommentDto {
     private int numberOfBookmarks;
     private SimpleUserDto user;
     private List<LikeDto> likes = new ArrayList<LikeDto>();
+    private List<Long> bookmarkedUsers = new ArrayList<Long>();
 
 }

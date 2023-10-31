@@ -27,4 +27,5 @@ public class ReplyDto {
     private int numberOfBookmarks;
     private SimpleUserDto user;
     List<LikeDto> likes = new ArrayList<LikeDto>();
+    private List<Long> bookmarkedUsers = new ArrayList<Long>();
 }

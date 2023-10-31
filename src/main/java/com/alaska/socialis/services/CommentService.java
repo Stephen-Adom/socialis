@@ -28,6 +28,7 @@ import com.alaska.socialis.model.dto.CommentDto;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
+import com.alaska.socialis.repository.BookmarkRepository;
 import com.alaska.socialis.repository.CommentImageRepository;
 import com.alaska.socialis.repository.CommentRepository;
 import com.alaska.socialis.repository.PostRepository;
@@ -50,6 +51,9 @@ public class CommentService implements CommentServiceInterface {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private BookmarkRepository bookmarkRepository;
 
     @Autowired
     private CommentImageRepository commentImageRepository;
@@ -229,6 +233,9 @@ public class CommentService implements CommentServiceInterface {
     }
 
     public CommentDto buildCommentDto(Comment comment) {
+        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(comment.getId(), "post").stream()
+                .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
+
         List<LikeDto> likes = comment.getLikes().stream().map((like) -> {
             LikeDto currentLike = new LikeDto();
             currentLike.setImageUrl(like.getUser().getImageUrl());
@@ -247,7 +254,7 @@ public class CommentService implements CommentServiceInterface {
         return CommentDto.builder().id(comment.getId()).uid(comment.getUid()).user(userInfo)
                 .content(comment.getContent()).commentImages(comment.getCommentImages())
                 .numberOfLikes(comment.getNumberOfLikes()).numberOfReplies(comment.getNumberOfReplies())
-                .numberOfBookmarks(comment.getNumberOfBookmarks()).likes(likes)
+                .numberOfBookmarks(comment.getNumberOfBookmarks()).likes(likes).bookmarkedUsers(userIds)
                 .createdAt(comment.getCreatedAt()).updatedAt(comment.getUpdatedAt())
                 .build();
     }

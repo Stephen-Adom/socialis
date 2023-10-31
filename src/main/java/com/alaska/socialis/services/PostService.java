@@ -201,9 +201,6 @@ public class PostService implements PostServiceInterface {
         List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(post.getId(), "post").stream()
                 .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
 
-        System.out.println("================================ updating bookmarks from build ========================");
-        System.out.println(userIds.size());
-
         List<LikeDto> likes = post.getLikes().stream().map((like) -> {
             LikeDto currentLike = new LikeDto();
             currentLike.setImageUrl(like.getUser().getImageUrl());

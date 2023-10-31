@@ -27,6 +27,7 @@ import com.alaska.socialis.model.dto.CommentDto;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.ReplyDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
+import com.alaska.socialis.repository.BookmarkRepository;
 import com.alaska.socialis.repository.CommentRepository;
 import com.alaska.socialis.repository.ReplyImageRepository;
 import com.alaska.socialis.repository.ReplyRepository;
@@ -55,6 +56,9 @@ public class ReplyService implements ReplyServiceInterface {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private BookmarkRepository bookmarkRepository;
 
     @Override
     public Map<String, Object> createReply(Long userId, Long commentId, String content, MultipartFile[] multipartFiles)
@@ -206,6 +210,10 @@ public class ReplyService implements ReplyServiceInterface {
     }
 
     public ReplyDto buildReplyDto(Reply reply) {
+
+        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(reply.getId(), "post").stream()
+                .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
+
         List<LikeDto> likes = reply.getLikes().stream().map((like) -> {
             LikeDto currentLike = new LikeDto();
             currentLike.setImageUrl(like.getUser().getImageUrl());
@@ -224,6 +232,7 @@ public class ReplyService implements ReplyServiceInterface {
         return ReplyDto.builder().id(reply.getId()).uid(reply.getUid()).user(userInfo)
                 .content(reply.getContent()).replyImages(reply.getReplyImages())
                 .numberOfLikes(reply.getNumberOfLikes()).numberOfBookmarks(reply.getNumberOfBookmarks()).likes(likes)
+                .bookmarkedUsers(userIds)
                 .createdAt(reply.getCreatedAt()).updatedAt(reply.getUpdatedAt())
                 .build();
     }
