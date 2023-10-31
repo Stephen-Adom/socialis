@@ -91,6 +91,9 @@ public class BookmarkService implements BookmarkServiceInterface {
             this.setNumberOfBookmarksOnEntity(bookmarkRequest, bookmarkExist);
         }
 
+        List<Object> allBookmarks = this.fetchUserBookmarks(bookmarkRequest.getUserId());
+        this.messagingTemplate.convertAndSend("/feed/bookmarks/update", allBookmarks);
+
     }
 
     @Override
