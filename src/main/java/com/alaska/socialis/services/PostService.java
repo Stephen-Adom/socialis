@@ -59,6 +59,19 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
+    public List<PostDto> fetchAllPostsByUser(Long userId) throws EntityNotFoundException {
+        Optional<User> user = this.userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        List<Post> allPosts = this.postRepository.findAllByUserId(userId);
+
+        return this.buildPostDto(allPosts);
+    }
+
+    @Override
     public Post createPost(Long userId, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
 
         Optional<User> author = this.userRepository.findById(userId);

@@ -20,4 +20,6 @@ public interface PostServiceInterface {
                         throws EntityNotFoundException;
 
         public void deletePost(Long id) throws EntityNotFoundException;
+
+        public List<PostDto> fetchAllPostsByUser(Long userId) throws EntityNotFoundException;
 }

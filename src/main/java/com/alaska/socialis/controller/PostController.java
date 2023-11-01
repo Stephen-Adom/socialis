@@ -49,6 +49,18 @@ public class PostController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
+    @GetMapping("user/{userId}/posts")
+    public ResponseEntity<Map<String, Object>> fetchAllPostsByUser(@PathVariable("userId") Long userId)
+            throws EntityNotFoundException {
+        List<PostDto> allPosts = this.postService.fetchAllPostsByUser(userId);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("data", allPosts);
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
     @PostMapping(value = "/post", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<Map<String, Object>> createPost(@RequestParam(required = true, value = "user_id") Long userId,
             @RequestParam(required = false, value = "content") String postContent,
