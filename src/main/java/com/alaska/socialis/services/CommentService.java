@@ -71,6 +71,22 @@ public class CommentService implements CommentServiceInterface {
     }
 
     @Override
+    public List<CommentDto> fetchAllCommentByUser(Long userId) throws EntityNotFoundException {
+        Optional<User> user = this.userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        List<Comment> allComments = this.commentRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+
+        List<CommentDto> allCommentDto = allComments.stream().map(comment -> this.buildCommentDto(comment))
+                .collect(Collectors.toList());
+
+        return allCommentDto;
+    }
+
+    @Override
     public Map<String, Object> createComment(Long userId, Long postId, String content, MultipartFile[] multipartFiles)
             throws EntityNotFoundException {
         Optional<Post> existpost = this.postRepository.findById(postId);

@@ -48,6 +48,18 @@ public class CommentController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/user/{userId}/comments")
+    public ResponseEntity<Map<String, Object>> fetchAllCommentByUser(@PathVariable("userId") Long userId)
+            throws EntityNotFoundException {
+        List<CommentDto> allComments = this.commentService.fetchAllCommentByUser(userId);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("data", allComments);
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/{postId}/comments")
     public ResponseEntity<SuccessResponse> getAllComments(@PathVariable Long postId) {
         List<CommentDto> comments = this.commentService.getAllComments(postId);

@@ -66,7 +66,7 @@ public class PostService implements PostServiceInterface {
             throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
-        List<Post> allPosts = this.postRepository.findAllByUserId(userId);
+        List<Post> allPosts = this.postRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
 
         return this.buildPostDto(allPosts);
     }

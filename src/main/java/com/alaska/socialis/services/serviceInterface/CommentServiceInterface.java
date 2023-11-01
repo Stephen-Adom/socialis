@@ -23,4 +23,6 @@ public interface CommentServiceInterface {
         public void deleteComment(Long id) throws EntityNotFoundException;
 
         public CommentDto fetchCommentById(String commentId) throws EntityNotFoundException;
+
+        public List<CommentDto> fetchAllCommentByUser(Long userId) throws EntityNotFoundException;
 }
