@@ -49,7 +49,7 @@ public class PostController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-    @GetMapping("user/{userId}/posts")
+    @GetMapping("/user/{userId}/posts")
     public ResponseEntity<Map<String, Object>> fetchAllPostsByUser(@PathVariable("userId") Long userId)
             throws EntityNotFoundException {
         List<PostDto> allPosts = this.postService.fetchAllPostsByUser(userId);

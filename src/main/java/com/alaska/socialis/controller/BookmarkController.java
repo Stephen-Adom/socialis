@@ -31,7 +31,7 @@ public class BookmarkController {
     private BookmarkService bookmarkService;
 
     @PostMapping("/bookmark/toggle")
-    private ResponseEntity<SuccessMessage> bookmarkPost(@RequestBody @Valid BookmarkRequest bookmarkRequest,
+    public ResponseEntity<SuccessMessage> bookmarkPost(@RequestBody @Valid BookmarkRequest bookmarkRequest,
             BindingResult validationResult)
             throws ValidationErrorsException, EntityNotFoundException {
         this.bookmarkService.toggleBookmark(bookmarkRequest, validationResult);
@@ -43,7 +43,7 @@ public class BookmarkController {
     }
 
     @GetMapping("/bookmarks/{userId}/all")
-    private ResponseEntity<Map<String, Object>> userBookmarks(@PathVariable("userId") Long userId)
+    public ResponseEntity<Map<String, Object>> userBookmarks(@PathVariable("userId") Long userId)
             throws EntityNotFoundException {
         List<Object> allBookmarks = this.bookmarkService.fetchUserBookmarks(userId);
 
