@@ -35,6 +35,18 @@ public class ReplyController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @GetMapping("/user/{userId}/replies")
+    public ResponseEntity<Map<String, Object>> fetchAllRepliesByUser(@PathVariable("userId") Long userId)
+            throws EntityNotFoundException {
+        List<ReplyDto> allReplies = this.replyService.fetchAllRepliesByUser(userId);
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("data", allReplies);
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
     @PostMapping(value = "/reply", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<Map<String, Object>> createCommentReply(
             @RequestParam(required = true, value = "user_id") Long userId,

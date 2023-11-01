@@ -17,4 +17,6 @@ public interface ReplyServiceInterface {
     public ReplyDto editReply(Long id, String content, MultipartFile[] multipartFile) throws EntityNotFoundException;
 
     public void deleteReply(Long id) throws EntityNotFoundException;
+
+    public List<ReplyDto> fetchAllRepliesByUser(Long userId) throws EntityNotFoundException;
 }

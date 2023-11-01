@@ -61,6 +61,22 @@ public class ReplyService implements ReplyServiceInterface {
     private BookmarkRepository bookmarkRepository;
 
     @Override
+    public List<ReplyDto> fetchAllRepliesByUser(Long userId) throws EntityNotFoundException {
+        Optional<User> user = this.userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        List<Reply> allReplies = this.replyRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+
+        List<ReplyDto> allReplyDto = allReplies.stream().map(reply -> buildReplyDto(reply))
+                .collect(Collectors.toList());
+
+        return allReplyDto;
+    }
+
+    @Override
     public Map<String, Object> createReply(Long userId, Long commentId, String content, MultipartFile[] multipartFiles)
             throws EntityNotFoundException {
 

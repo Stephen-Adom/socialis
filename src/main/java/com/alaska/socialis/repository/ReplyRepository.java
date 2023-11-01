@@ -10,4 +10,6 @@ import com.alaska.socialis.model.Reply;
 @Repository
 public interface ReplyRepository extends JpaRepository<Reply, Long> {
     public List<Reply> findByCommentIdOrderByCreatedAtDesc(Long commentId);
+
+    public List<Reply> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 }
