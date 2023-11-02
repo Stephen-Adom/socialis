@@ -25,4 +25,6 @@ public interface UserServiceInterface {
                         throws EntityNotFoundException, ValidationErrorsException;
 
         public UserSummaryDto fetchUserInformationByUsername(String username) throws EntityNotFoundException;
+
+        public UserDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;
 }

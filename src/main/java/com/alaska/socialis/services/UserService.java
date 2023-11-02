@@ -137,6 +137,17 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
+    public UserDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException {
+        User userInfo = (User) this.userRepository.findByUsername(username);
+        if (Objects.isNull(userInfo)) {
+            throw new EntityNotFoundException("User with username " + username + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        return this.buildDto(userInfo);
+    }
+
+    @Override
     public UserSummaryDto fetchUserInformationByUsername(String username) throws EntityNotFoundException {
         User userInfo = (User) this.userRepository.findByUsername(username);
         if (Objects.isNull(userInfo)) {

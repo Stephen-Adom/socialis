@@ -94,4 +94,14 @@ public class UserController {
 
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/user/{username}/full_information")
+    public ResponseEntity<SuccessResponse> fetchUserInfoFullInformation(@PathVariable("username") String username)
+            throws EntityNotFoundException {
+        UserDto userInfo = this.userService.fetchUserInfoFullInformation(username);
+
+        SuccessResponse response = SuccessResponse.builder().data(userInfo).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    }
 }
