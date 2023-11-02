@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.UserDto;
+import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 
 public interface UserServiceInterface {
@@ -22,4 +23,6 @@ public interface UserServiceInterface {
 
         public UserDto updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
                         throws EntityNotFoundException, ValidationErrorsException;
+
+        public UserSummaryDto fetchUserInformationByUsername(String username) throws EntityNotFoundException;
 }

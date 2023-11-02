@@ -18,7 +18,9 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
+import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
+import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.UserServiceInterface;
 
@@ -27,6 +29,9 @@ public class UserService implements UserServiceInterface {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PostRepository postRepository;
 
     @Autowired
     private ImageUploadService imageUploadService;
@@ -129,6 +134,31 @@ public class UserService implements UserServiceInterface {
         User updatedUser = this.userRepository.save(existingUser);
 
         return this.buildDto(updatedUser);
+    }
+
+    @Override
+    public UserSummaryDto fetchUserInformationByUsername(String username) throws EntityNotFoundException {
+        User userInfo = (User) this.userRepository.findByUsername(username);
+        if (Objects.isNull(userInfo)) {
+            throw new EntityNotFoundException("User with username " + username + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        return this.buildUserSummaryInfo(userInfo);
+    }
+
+    public UserSummaryDto buildUserSummaryInfo(User user) {
+        int totalPostCount = this.postRepository.countByUserId(user.getId());
+
+        UserSummaryDto userInfo = new UserSummaryDto();
+        userInfo.setFirstname(user.getFirstname());
+        userInfo.setLastname(user.getLastname());
+        userInfo.setImageUrl(user.getImageUrl());
+        userInfo.setBio(user.getBio());
+        userInfo.setUsername(user.getUsername());
+        userInfo.setTotalPost(totalPostCount);
+
+        return userInfo;
     }
 
     public UserDto buildDto(User newUser) {

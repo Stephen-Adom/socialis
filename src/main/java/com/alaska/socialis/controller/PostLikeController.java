@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.services.PostLikeService;
-import com.alaska.socialis.services.PostService;
 
 @RestController
 @RequestMapping("/api")
@@ -24,9 +23,6 @@ public class PostLikeController {
 
     @Autowired
     private PostLikeService postLikeService;
-
-    @Autowired
-    private PostService postService;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;

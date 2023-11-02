@@ -12,6 +12,8 @@ import com.alaska.socialis.model.Post;
 public interface PostRepository extends JpaRepository<Post, Long> {
     public Optional<List<Post>> findByUserId(Long userid);
 
+    public int countByUserId(Long userid);
+
     public Optional<Post> findByIdAndUserId(Long id, Long userId);
 
     public List<Post> findAllByOrderByCreatedAtDesc();

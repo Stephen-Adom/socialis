@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.UserDto;
+import com.alaska.socialis.model.dto.SuccessResponse;
+import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 import com.alaska.socialis.services.UserService;
 
@@ -80,5 +83,15 @@ public class UserController {
         response.put("message", "Profile image updated!");
 
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{username}/info")
+    public ResponseEntity<SuccessResponse> fetchUserInfoSummary(@PathVariable("username") String username)
+            throws EntityNotFoundException {
+        UserSummaryDto userInfo = this.userService.fetchUserInformationByUsername(username);
+
+        SuccessResponse response = SuccessResponse.builder().data(userInfo).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 }
