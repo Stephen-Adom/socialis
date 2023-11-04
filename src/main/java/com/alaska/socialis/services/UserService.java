@@ -18,9 +18,11 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
+import com.alaska.socialis.model.UserFollows;
 import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 import com.alaska.socialis.repository.PostRepository;
+import com.alaska.socialis.repository.UserFollowsRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.UserServiceInterface;
 
@@ -35,6 +37,9 @@ public class UserService implements UserServiceInterface {
 
     @Autowired
     private ImageUploadService imageUploadService;
+
+    @Autowired
+    private UserFollowsRepository userFollowsRepository;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -168,7 +173,8 @@ public class UserService implements UserServiceInterface {
         userInfo.setBio(user.getBio());
         userInfo.setUsername(user.getUsername());
         userInfo.setTotalPost(totalPostCount);
-
+        userInfo.setFollowers(user.getNoOfFollowers());
+        userInfo.setFollowing(user.getNoOfFollowing());
         return userInfo;
     }
 
@@ -179,6 +185,25 @@ public class UserService implements UserServiceInterface {
                 .updatedAt(newUser.getUpdatedAt()).enabled(newUser.isEnabled()).loginCount(newUser.getLoginCount())
                 .imageUrl(newUser.getImageUrl()).bio(newUser.getBio()).coverImageUrl(newUser.getCoverImageUrl())
                 .phonenumber(newUser.getPhonenumber()).address(newUser.getAddress())
-                .build();
+                .noOfFollowers(newUser.getNoOfFollowers())
+                .noOfFollowing(newUser.getNoOfFollowing()).build();
+    }
+
+    @Override
+    public UserDto followUser(Long followerId, Long followingId) {
+        Optional<User> follower = this.userRepository.findById(followerId);
+        Optional<User> following = this.userRepository.findById(followingId);
+
+        UserFollows userFollows = new UserFollows();
+        follower.get().setNoOfFollowing(follower.get().getNoOfFollowing() + 1);
+        following.get().setNoOfFollowers(following.get().getNoOfFollowers() + 1);
+        userFollows.setFollower(follower.get());
+        userFollows.setFollowing(following.get());
+
+        userFollowsRepository.save(userFollows);
+
+        Optional<User> followerUpdate = this.userRepository.findById(follower.get().getId());
+
+        return this.buildDto(followerUpdate.get());
     }
 }

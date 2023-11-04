@@ -27,4 +27,6 @@ public interface UserServiceInterface {
         public UserSummaryDto fetchUserInformationByUsername(String username) throws EntityNotFoundException;
 
         public UserDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;
+
+        public UserDto followUser(Long followerId, Long followingId);
 }

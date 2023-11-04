@@ -104,4 +104,12 @@ public class UserController {
 
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
+
+    @PostMapping("/user/{followerId}/follow/{followingId}")
+    public UserDto followUser(@PathVariable("followerId") Long followerId,
+            @PathVariable("followingId") Long followingId) {
+        UserDto follower = this.userService.followUser(followerId, followingId);
+
+        return follower;
+    }
 }

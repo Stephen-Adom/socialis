@@ -84,6 +84,12 @@ public class User implements UserDetails {
     @Column(name = "cover_image_url", nullable = true)
     private String coverImageUrl;
 
+    @Builder.Default
+    private int noOfFollowers = 0;
+
+    @Builder.Default
+    private int noOfFollowing = 0;
+
     @Column(name = "bio", columnDefinition = "VARCHAR(255)", nullable = true)
     private String bio;
 

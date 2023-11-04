@@ -27,5 +27,6 @@ public class UserDto {
     private String coverImageUrl;
     private String phonenumber;
     private String address;
-
+    private int noOfFollowers;
+    private int noOfFollowing;
 }
