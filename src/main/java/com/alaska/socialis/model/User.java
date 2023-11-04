@@ -3,7 +3,9 @@ package com.alaska.socialis.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.alaska.socialis.model.validationGroups.LoginValidationGroup;
 import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,6 +22,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -35,7 +39,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
 @Data
@@ -128,6 +131,12 @@ public class User implements UserDetails {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<Bookmark> bookmarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "follower")
+    private Set<UserFollows> following = new HashSet<>();
+
+    @OneToMany(mappedBy = "following")
+    private Set<UserFollows> followers = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
