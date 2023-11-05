@@ -90,6 +90,9 @@ public class User implements UserDetails {
     @Builder.Default
     private int noOfFollowing = 0;
 
+    @Builder.Default
+    private int noOfPosts = 0;
+
     @Column(name = "bio", columnDefinition = "VARCHAR(255)", nullable = true)
     private String bio;
 
@@ -138,9 +141,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<Bookmark> bookmarks = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "follower")
     private Set<UserFollows> following = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "following")
     private Set<UserFollows> followers = new HashSet<>();
 
