@@ -34,9 +34,6 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
     @GetMapping("/all_posts")
     public ResponseEntity<Map<String, Object>> fetchAllPost() {
 
@@ -67,12 +64,7 @@ public class PostController {
             @RequestParam(required = false, value = "images") MultipartFile[] multipartFile)
             throws EntityNotFoundException {
 
-        Post newPost = this.postService.createPost(userId, postContent,
-                multipartFile);
-
-        PostDto formattedPost = this.postService.buildPostDto(newPost);
-
-        messagingTemplate.convertAndSend("/feed/post/new", formattedPost);
+        this.postService.createPost(userId, postContent, multipartFile);
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("status", HttpStatus.CREATED);
@@ -101,11 +93,7 @@ public class PostController {
             @RequestParam(required = false, value = "content") String postContent,
             @RequestParam(required = false, value = "images") MultipartFile[] multipartFile)
             throws ValidationErrorsException, EntityNotFoundException {
-        Post updatedPost = this.postService.editPost(id, postContent, multipartFile);
-
-        PostDto formattedPost = this.postService.buildPostDto(updatedPost);
-
-        messagingTemplate.convertAndSend("/feed/post/update", formattedPost);
+        this.postService.editPost(id, postContent, multipartFile);
 
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("status", HttpStatus.OK);

@@ -35,17 +35,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
     @PostMapping(value = "/user/update_cover_background", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<Map<String, Object>> updateUserCoverBackground(
             @RequestParam(required = true, value = "user_id") Long userId,
             @RequestParam(required = true, value = "image") MultipartFile multipartFile)
             throws EntityNotFoundException, IOException {
-        UserDto updatedUser = this.userService.updateUserCoverImage(userId, multipartFile);
-
-        this.messagingTemplate.convertAndSend("/feed/user/update", updatedUser);
+        this.userService.updateUserCoverImage(userId, multipartFile);
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", HttpStatus.OK);
@@ -59,9 +54,8 @@ public class UserController {
             @RequestParam(required = true, value = "user_id") Long userId,
             @RequestParam(required = true, value = "image") MultipartFile multipartFile)
             throws EntityNotFoundException, IOException {
-        UserDto updatedUser = this.userService.updateUserProfileImage(userId, multipartFile);
 
-        this.messagingTemplate.convertAndSend("/feed/user/update", updatedUser);
+        this.userService.updateUserProfileImage(userId, multipartFile);
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", HttpStatus.OK);
@@ -74,9 +68,7 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> updateUserInfo(@PathVariable("id") Long userId,
             @RequestBody @Valid UserInfoRequeset requestBody, BindingResult bindingResult)
             throws EntityNotFoundException, ValidationErrorsException {
-        UserDto updatedUser = this.userService.updateUserInfo(userId, requestBody, bindingResult);
-
-        this.messagingTemplate.convertAndSend("/feed/user/update", updatedUser);
+        this.userService.updateUserInfo(userId, requestBody, bindingResult);
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", HttpStatus.OK);
@@ -106,10 +98,9 @@ public class UserController {
     }
 
     @PostMapping("/user/{followerId}/follow/{followingId}")
-    public UserDto followUser(@PathVariable("followerId") Long followerId,
+    public void followUser(@PathVariable("followerId") Long followerId,
             @PathVariable("followingId") Long followingId) {
-        UserDto follower = this.userService.followUser(followerId, followingId);
 
-        return follower;
+        this.userService.followUser(followerId, followingId);
     }
 }

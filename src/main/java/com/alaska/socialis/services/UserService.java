@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -41,6 +42,9 @@ public class UserService implements UserServiceInterface {
     @Autowired
     private UserFollowsRepository userFollowsRepository;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     @Override
@@ -50,7 +54,7 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public UserDto updateUserCoverImage(Long userId, MultipartFile multipartFile)
+    public void updateUserCoverImage(Long userId, MultipartFile multipartFile)
             throws EntityNotFoundException, IOException {
         Optional<User> user = this.userRepository.findById(userId);
         String currentImage = user.get().getCoverImageUrl();
@@ -72,12 +76,12 @@ public class UserService implements UserServiceInterface {
 
         User updatedUser = this.userRepository.save(user.get());
 
-        return this.buildDto(updatedUser);
+        this.messagingTemplate.convertAndSend("/feed/user/update", this.buildDto(updatedUser));
 
     }
 
     @Override
-    public UserDto updateUserProfileImage(Long userId, MultipartFile multipartFile)
+    public void updateUserProfileImage(Long userId, MultipartFile multipartFile)
             throws EntityNotFoundException, IOException {
         Optional<User> user = this.userRepository.findById(userId);
         String currentImage = user.get().getImageUrl();
@@ -99,12 +103,12 @@ public class UserService implements UserServiceInterface {
 
         User updatedUser = this.userRepository.save(user.get());
 
-        return this.buildDto(updatedUser);
+        this.messagingTemplate.convertAndSend("/feed/user/update", this.buildDto(updatedUser));
 
     }
 
     @Override
-    public UserDto updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
+    public void updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
             throws EntityNotFoundException, ValidationErrorsException {
         Optional<User> user = this.userRepository.findById(userId);
 
@@ -138,7 +142,7 @@ public class UserService implements UserServiceInterface {
 
         User updatedUser = this.userRepository.save(existingUser);
 
-        return this.buildDto(updatedUser);
+        this.messagingTemplate.convertAndSend("/feed/user/update", this.buildDto(updatedUser));
     }
 
     @Override
@@ -190,7 +194,7 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public UserDto followUser(Long followerId, Long followingId) {
+    public void followUser(Long followerId, Long followingId) {
         Optional<User> follower = this.userRepository.findById(followerId);
         Optional<User> following = this.userRepository.findById(followingId);
 
@@ -204,6 +208,6 @@ public class UserService implements UserServiceInterface {
 
         Optional<User> followerUpdate = this.userRepository.findById(follower.get().getId());
 
-        return this.buildDto(followerUpdate.get());
+        this.messagingTemplate.convertAndSend("/feed/user/update", this.buildDto(followerUpdate.get()));
     }
 }

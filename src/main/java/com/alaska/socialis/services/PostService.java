@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +52,9 @@ public class PostService implements PostServiceInterface {
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     @Override
     public List<PostDto> fetchAllPost() {
         List<Post> allPost = this.postRepository.findAllByOrderByCreatedAtDesc();
@@ -72,7 +76,7 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    public Post createPost(Long userId, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
+    public void createPost(Long userId, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
 
         Optional<User> author = this.userRepository.findById(userId);
         Post postObj = new Post();
@@ -103,12 +107,14 @@ public class PostService implements PostServiceInterface {
         }
 
         String uid = "post-" + UUID.randomUUID().toString();
-
+        author.get().setNoOfPosts(author.get().getNoOfPosts() + 1);
         postObj.setUid(uid);
         postObj.setUser(author.get());
         postObj.setContent(Objects.nonNull(content) ? content : "");
 
-        return this.postRepository.save(postObj);
+        Post updatedPost = this.postRepository.save(postObj);
+
+        messagingTemplate.convertAndSend("/feed/post/new", this.buildPostDto(updatedPost));
     }
 
     @Override
@@ -123,7 +129,7 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    public Post editPost(Long id, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
+    public void editPost(Long id, String content, MultipartFile[] multipartFiles) throws EntityNotFoundException {
         Optional<Post> postExist = this.postRepository.findById(id);
 
         if (postExist.isEmpty()) {
@@ -162,9 +168,10 @@ public class PostService implements PostServiceInterface {
         Optional<Post> updatedPost = this.postRepository.findById(id);
 
         List<PostImage> updatedImages = this.postImageRepository.findAllByPostId(id);
+
         updatedPost.get().setPostImages(updatedImages);
 
-        return updatedPost.get();
+        messagingTemplate.convertAndSend("/feed/post/update", this.buildPostDto(updatedPost.get()));
     }
 
     @Override
@@ -179,7 +186,14 @@ public class PostService implements PostServiceInterface {
 
         this.deleteAllPostImages(existPost.get());
 
+        User user = existPost.get().getUser();
+        user.setNoOfPosts(user.getNoOfPosts() - 1);
+
+        User updatedUser = this.userRepository.save(user);
+
         this.postRepository.deleteById(id);
+
+        messagingTemplate.convertAndSend("/feed/user/update", updatedUser);
     }
 
     private void deleteAllPostImages(Post post) {

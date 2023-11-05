@@ -15,18 +15,18 @@ import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 public interface UserServiceInterface {
         public UserDetails fetchUserDetailsByUsername(String username) throws EntityNotFoundException;
 
-        public UserDto updateUserCoverImage(Long userId, MultipartFile multipartFile)
+        public void updateUserCoverImage(Long userId, MultipartFile multipartFile)
                         throws EntityNotFoundException, IOException;
 
-        public UserDto updateUserProfileImage(Long userId, MultipartFile multipartFile)
+        public void updateUserProfileImage(Long userId, MultipartFile multipartFile)
                         throws EntityNotFoundException, IOException;
 
-        public UserDto updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
+        public void updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
                         throws EntityNotFoundException, ValidationErrorsException;
 
         public UserSummaryDto fetchUserInformationByUsername(String username) throws EntityNotFoundException;
 
         public UserDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;
 
-        public UserDto followUser(Long followerId, Long followingId);
+        public void followUser(Long followerId, Long followingId);
 }
