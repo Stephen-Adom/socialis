@@ -29,4 +29,5 @@ public class UserDto {
     private String address;
     private int noOfFollowers;
     private int noOfFollowing;
+    private int noOfPosts;
 }

@@ -37,6 +37,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PostService implements PostServiceInterface {
 
+    private static final String NEW_LIVE_POST_FEED_URL = "/feed/post/new";
+
+    private static final String UPDATE_LIVE_POST_FEED_URL = "/feed/post/update";
+
+    private static final String UPDATE_LIVE_USER_URL = "/feed/user/update";
+
     @Autowired
     private UserRepository userRepository;
 
@@ -54,6 +60,9 @@ public class PostService implements PostServiceInterface {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public List<PostDto> fetchAllPost() {
@@ -114,7 +123,8 @@ public class PostService implements PostServiceInterface {
 
         Post updatedPost = this.postRepository.save(postObj);
 
-        messagingTemplate.convertAndSend("/feed/post/new", this.buildPostDto(updatedPost));
+        messagingTemplate.convertAndSend(NEW_LIVE_POST_FEED_URL, this.buildPostDto(updatedPost));
+        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.userService.buildDto(author.get()));
     }
 
     @Override
@@ -171,7 +181,7 @@ public class PostService implements PostServiceInterface {
 
         updatedPost.get().setPostImages(updatedImages);
 
-        messagingTemplate.convertAndSend("/feed/post/update", this.buildPostDto(updatedPost.get()));
+        messagingTemplate.convertAndSend(UPDATE_LIVE_POST_FEED_URL, this.buildPostDto(updatedPost.get()));
     }
 
     @Override
@@ -193,7 +203,7 @@ public class PostService implements PostServiceInterface {
 
         this.postRepository.deleteById(id);
 
-        messagingTemplate.convertAndSend("/feed/user/update", updatedUser);
+        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.userService.buildDto(updatedUser));
     }
 
     private void deleteAllPostImages(Post post) {

@@ -22,7 +22,6 @@ import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.UserFollows;
 import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
-import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserFollowsRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.UserServiceInterface;
@@ -30,11 +29,12 @@ import com.alaska.socialis.services.serviceInterface.UserServiceInterface;
 @Service
 public class UserService implements UserServiceInterface {
 
-    @Autowired
-    private UserRepository userRepository;
+    private static final String COVER_IMAGE_CLOUD_PATH = "socialis/user/cover_images";
+    private static final String PROFILE_IMAGE_CLOUD_PATH = "socialis/user/profile_images";
+    private static final String UPDATE_LIVE_USER_URL = "/feed/user/update";
 
     @Autowired
-    private PostRepository postRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private ImageUploadService imageUploadService;
@@ -63,20 +63,20 @@ public class UserService implements UserServiceInterface {
             throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
-        Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/user/cover_images",
+        Map<String, Object> result = this.imageUploadService.uploadImageToCloud(COVER_IMAGE_CLOUD_PATH,
                 multipartFile);
 
         if (Objects.nonNull(currentImage)) {
 
             this.executorService.execute(() -> this.imageUploadService
-                    .deleteUploadedImage("socialis/user/cover_images/", currentImage));
+                    .deleteUploadedImage(COVER_IMAGE_CLOUD_PATH + "/", currentImage));
         }
 
         user.get().setCoverImageUrl((String) result.get("secure_url"));
 
         User updatedUser = this.userRepository.save(user.get());
 
-        this.messagingTemplate.convertAndSend("/feed/user/update", this.buildDto(updatedUser));
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.buildDto(updatedUser));
 
     }
 
@@ -90,20 +90,20 @@ public class UserService implements UserServiceInterface {
             throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
-        Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/user/profile_images",
+        Map<String, Object> result = this.imageUploadService.uploadImageToCloud(PROFILE_IMAGE_CLOUD_PATH,
                 multipartFile);
 
         if (Objects.nonNull(currentImage)) {
 
             this.executorService.execute(() -> this.imageUploadService
-                    .deleteUploadedImage("socialis/user/profile_images/", currentImage));
+                    .deleteUploadedImage(PROFILE_IMAGE_CLOUD_PATH + "/", currentImage));
         }
 
         user.get().setImageUrl((String) result.get("secure_url"));
 
         User updatedUser = this.userRepository.save(user.get());
 
-        this.messagingTemplate.convertAndSend("/feed/user/update", this.buildDto(updatedUser));
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.buildDto(updatedUser));
 
     }
 
@@ -142,7 +142,7 @@ public class UserService implements UserServiceInterface {
 
         User updatedUser = this.userRepository.save(existingUser);
 
-        this.messagingTemplate.convertAndSend("/feed/user/update", this.buildDto(updatedUser));
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.buildDto(updatedUser));
     }
 
     @Override
@@ -168,7 +168,7 @@ public class UserService implements UserServiceInterface {
     }
 
     public UserSummaryDto buildUserSummaryInfo(User user) {
-        int totalPostCount = this.postRepository.countByUserId(user.getId());
+        // int totalPostCount = this.postRepository.countByUserId(user.getId());
 
         UserSummaryDto userInfo = new UserSummaryDto();
         userInfo.setFirstname(user.getFirstname());
@@ -176,7 +176,7 @@ public class UserService implements UserServiceInterface {
         userInfo.setImageUrl(user.getImageUrl());
         userInfo.setBio(user.getBio());
         userInfo.setUsername(user.getUsername());
-        userInfo.setTotalPost(totalPostCount);
+        userInfo.setTotalPost(user.getNoOfPosts());
         userInfo.setFollowers(user.getNoOfFollowers());
         userInfo.setFollowing(user.getNoOfFollowing());
         return userInfo;
@@ -189,7 +189,7 @@ public class UserService implements UserServiceInterface {
                 .updatedAt(newUser.getUpdatedAt()).enabled(newUser.isEnabled()).loginCount(newUser.getLoginCount())
                 .imageUrl(newUser.getImageUrl()).bio(newUser.getBio()).coverImageUrl(newUser.getCoverImageUrl())
                 .phonenumber(newUser.getPhonenumber()).address(newUser.getAddress())
-                .noOfFollowers(newUser.getNoOfFollowers())
+                .noOfFollowers(newUser.getNoOfFollowers()).noOfPosts(newUser.getNoOfPosts())
                 .noOfFollowing(newUser.getNoOfFollowing()).build();
     }
 
@@ -208,6 +208,6 @@ public class UserService implements UserServiceInterface {
 
         Optional<User> followerUpdate = this.userRepository.findById(follower.get().getId());
 
-        this.messagingTemplate.convertAndSend("/feed/user/update", this.buildDto(followerUpdate.get()));
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.buildDto(followerUpdate.get()));
     }
 }
