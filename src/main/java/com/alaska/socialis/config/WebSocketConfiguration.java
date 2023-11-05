@@ -24,6 +24,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/feed");
         registry.enableSimpleBroker("/feed");
+        registry.setUserDestinationPrefix("/feed/user");
     }
 
     @Override

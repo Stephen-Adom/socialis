@@ -32,6 +32,8 @@ public class UserService implements UserServiceInterface {
     private static final String COVER_IMAGE_CLOUD_PATH = "socialis/user/cover_images";
     private static final String PROFILE_IMAGE_CLOUD_PATH = "socialis/user/profile_images";
     private static final String UPDATE_LIVE_USER_URL = "/feed/user/update";
+    private static final String UPDATE_FOLLOWER_USER_PATH = "/feed/user/follower/update";
+    private static final String UPDATE_FOLLOWING_USER_PATH = "/feed/user/following/update";
 
     @Autowired
     private UserRepository userRepository;
@@ -171,6 +173,7 @@ public class UserService implements UserServiceInterface {
         // int totalPostCount = this.postRepository.countByUserId(user.getId());
 
         UserSummaryDto userInfo = new UserSummaryDto();
+        userInfo.setId(user.getId());
         userInfo.setFirstname(user.getFirstname());
         userInfo.setLastname(user.getLastname());
         userInfo.setImageUrl(user.getImageUrl());
@@ -207,7 +210,13 @@ public class UserService implements UserServiceInterface {
         userFollowsRepository.save(userFollows);
 
         Optional<User> followerUpdate = this.userRepository.findById(follower.get().getId());
+        Optional<User> followingUpdate = this.userRepository.findById(following.get().getId());
 
-        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.buildDto(followerUpdate.get()));
+        // this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL,
+        // this.buildDto(followerUpdate.get()));
+        this.messagingTemplate.convertAndSend(UPDATE_FOLLOWER_USER_PATH + "-" + follower.get().getUsername(),
+                this.buildDto(followerUpdate.get()));
+        this.messagingTemplate.convertAndSend(UPDATE_FOLLOWING_USER_PATH + "-" + following.get().getUsername(),
+                this.buildDto(followingUpdate.get()));
     }
 }

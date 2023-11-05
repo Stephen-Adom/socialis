@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -97,7 +96,7 @@ public class UserController {
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/user/{followerId}/follow/{followingId}")
+    @GetMapping("/user/{followerId}/follow/{followingId}")
     public void followUser(@PathVariable("followerId") Long followerId,
             @PathVariable("followingId") Long followingId) {
 
