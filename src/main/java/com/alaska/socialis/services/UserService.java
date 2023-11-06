@@ -161,16 +161,18 @@ public class UserService implements UserServiceInterface {
         return this.buildUserSummaryFollowingInfo(userInfo);
     }
 
-    @Override
-    public UserSummaryFollowingDto fetchUserInformationByUsername(String username) throws EntityNotFoundException {
-        User userInfo = (User) this.userRepository.findByUsername(username);
-        if (Objects.isNull(userInfo)) {
-            throw new EntityNotFoundException("User with username " + username + " does not exist",
-                    HttpStatus.NOT_FOUND);
-        }
+    // @Override
+    // public UserSummaryFollowingDto fetchUserInformationByUsername(String
+    // username) throws EntityNotFoundException {
+    // User userInfo = (User) this.userRepository.findByUsername(username);
+    // if (Objects.isNull(userInfo)) {
+    // throw new EntityNotFoundException("User with username " + username + " does
+    // not exist",
+    // HttpStatus.NOT_FOUND);
+    // }
 
-        return this.buildUserSummaryFollowingInfo(userInfo);
-    }
+    // return this.buildUserSummaryFollowingInfo(userInfo);
+    // }
 
     public UserSummaryFollowingDto buildUserSummaryFollowingInfo(User user) {
         UserSummaryFollowingDto userInfo = new UserSummaryFollowingDto();

@@ -26,7 +26,8 @@ public interface UserServiceInterface {
         public void updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
                         throws EntityNotFoundException, ValidationErrorsException;
 
-        public UserSummaryFollowingDto fetchUserInformationByUsername(String username) throws EntityNotFoundException;
+        // public UserSummaryFollowingDto fetchUserInformationByUsername(String
+        // username) throws EntityNotFoundException;
 
         public UserSummaryFollowingDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;
 

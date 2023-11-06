@@ -79,15 +79,18 @@ public class UserController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{username}/info")
-    public ResponseEntity<SuccessResponse> fetchUserInfoSummary(@PathVariable("username") String username)
-            throws EntityNotFoundException {
-        UserSummaryFollowingDto userInfo = this.userService.fetchUserInformationByUsername(username);
+    // @GetMapping("/user/{username}/info")
+    // public ResponseEntity<SuccessResponse>
+    // fetchUserInfoSummary(@PathVariable("username") String username)
+    // throws EntityNotFoundException {
+    // UserSummaryFollowingDto userInfo =
+    // this.userService.fetchUserInformationByUsername(username);
 
-        SuccessResponse response = SuccessResponse.builder().data(userInfo).status(HttpStatus.OK).build();
+    // SuccessResponse response =
+    // SuccessResponse.builder().data(userInfo).status(HttpStatus.OK).build();
 
-        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
-    }
+    // return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    // }
 
     @GetMapping("/user/{username}/full_information")
     public ResponseEntity<SuccessResponse> fetchUserInfoFullInformation(@PathVariable("username") String username)
