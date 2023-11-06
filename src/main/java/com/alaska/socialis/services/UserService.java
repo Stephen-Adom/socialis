@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -218,5 +220,37 @@ public class UserService implements UserServiceInterface {
                 this.buildDto(followerUpdate.get()));
         this.messagingTemplate.convertAndSend(UPDATE_FOLLOWING_USER_PATH + "-" + following.get().getUsername(),
                 this.buildDto(followingUpdate.get()));
+    }
+
+    @Override
+    public Set<UserSummaryDto> fetchAllUserFollowers(String username) throws EntityNotFoundException {
+        User userExist = (User) this.userRepository.findByUsername(username);
+
+        if (Objects.isNull(userExist)) {
+            throw new EntityNotFoundException("User with username " + username + " not found", HttpStatus.NOT_FOUND);
+        }
+
+        Set<UserFollows> allFollowers = this.userFollowsRepository.findAllByFollowingId(userExist.getId());
+
+        Set<UserSummaryDto> allUserSummaryInfo = allFollowers.stream()
+                .map(follower -> this.buildUserSummaryInfo(follower.getFollower())).collect(Collectors.toSet());
+
+        return allUserSummaryInfo;
+    }
+
+    @Override
+    public Set<UserSummaryDto> fetchAllUserFollowing(String username) throws EntityNotFoundException {
+        User userExist = (User) this.userRepository.findByUsername(username);
+
+        if (Objects.isNull(userExist)) {
+            throw new EntityNotFoundException("User with username " + username + " not found", HttpStatus.NOT_FOUND);
+        }
+
+        Set<UserFollows> allFollowings = this.userFollowsRepository.findAllByFollowerId(userExist.getId());
+
+        Set<UserSummaryDto> allUserSummaryInfo = allFollowings.stream()
+                .map(follower -> this.buildUserSummaryInfo(follower.getFollower())).collect(Collectors.toSet());
+
+        return allUserSummaryInfo;
     }
 }

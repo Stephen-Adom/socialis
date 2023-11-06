@@ -1,6 +1,7 @@
 package com.alaska.socialis.services.serviceInterface;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
@@ -29,4 +30,8 @@ public interface UserServiceInterface {
         public UserDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;
 
         public void followUser(Long followerId, Long followingId);
+
+        public Set<UserSummaryDto> fetchAllUserFollowers(String username) throws EntityNotFoundException;
+
+        public Set<UserSummaryDto> fetchAllUserFollowing(String username) throws EntityNotFoundException;
 }

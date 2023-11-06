@@ -3,6 +3,7 @@ package com.alaska.socialis.controller;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.UserDto;
+import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
@@ -101,5 +103,29 @@ public class UserController {
             @PathVariable("followingId") Long followingId) {
 
         this.userService.followUser(followerId, followingId);
+    }
+
+    @GetMapping("/user/{username}/all_followers")
+    public ResponseEntity<SuccessResponse> fetchAllUserFollowers(
+            @PathVariable(name = "username", required = true) String username)
+            throws EntityNotFoundException {
+
+        Set<UserSummaryDto> allFollowers = this.userService.fetchAllUserFollowers(username);
+
+        SuccessResponse response = SuccessResponse.builder().data(allFollowers).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{username}/all_following")
+    public ResponseEntity<SuccessResponse> fetchAllUserFollowing(
+            @PathVariable(name = "username", required = true) String username)
+            throws EntityNotFoundException {
+
+        Set<UserSummaryDto> allFollowing = this.userService.fetchAllUserFollowing(username);
+
+        SuccessResponse response = SuccessResponse.builder().data(allFollowing).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 }
