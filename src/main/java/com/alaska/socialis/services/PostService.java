@@ -41,7 +41,7 @@ public class PostService implements PostServiceInterface {
 
     private static final String UPDATE_LIVE_POST_FEED_URL = "/feed/post/update";
 
-    private static final String UPDATE_LIVE_USER_URL = "/feed/user/update";
+    private static final String UPDATE_LIVE_USER_PATH = "/feed/user/update";
 
     @Autowired
     private UserRepository userRepository;
@@ -122,9 +122,11 @@ public class PostService implements PostServiceInterface {
         postObj.setContent(Objects.nonNull(content) ? content : "");
 
         Post updatedPost = this.postRepository.save(postObj);
+        Optional<User> updatedUser = this.userRepository.findById(author.get().getId());
 
         messagingTemplate.convertAndSend(NEW_LIVE_POST_FEED_URL, this.buildPostDto(updatedPost));
-        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.userService.buildDto(author.get()));
+        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + updatedUser.get().getUsername(),
+                this.userService.buildDto(updatedUser.get()));
     }
 
     @Override
@@ -203,7 +205,8 @@ public class PostService implements PostServiceInterface {
 
         this.postRepository.deleteById(id);
 
-        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.userService.buildDto(updatedUser));
+        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + updatedUser.getUsername(),
+                this.userService.buildDto(updatedUser));
     }
 
     private void deleteAllPostImages(Post post) {

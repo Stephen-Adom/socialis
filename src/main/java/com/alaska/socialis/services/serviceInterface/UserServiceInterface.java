@@ -11,6 +11,7 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.UserSummaryDto;
+import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 
 public interface UserServiceInterface {
@@ -25,9 +26,9 @@ public interface UserServiceInterface {
         public void updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
                         throws EntityNotFoundException, ValidationErrorsException;
 
-        public UserSummaryDto fetchUserInformationByUsername(String username) throws EntityNotFoundException;
+        public UserSummaryFollowingDto fetchUserInformationByUsername(String username) throws EntityNotFoundException;
 
-        public UserDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;
+        public UserSummaryFollowingDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;
 
         public void followUser(Long followerId, Long followingId);
 

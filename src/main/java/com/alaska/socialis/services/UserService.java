@@ -23,6 +23,7 @@ import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.UserFollows;
 import com.alaska.socialis.model.dto.UserSummaryDto;
+import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 import com.alaska.socialis.repository.UserFollowsRepository;
 import com.alaska.socialis.repository.UserRepository;
@@ -33,9 +34,7 @@ public class UserService implements UserServiceInterface {
 
     private static final String COVER_IMAGE_CLOUD_PATH = "socialis/user/cover_images";
     private static final String PROFILE_IMAGE_CLOUD_PATH = "socialis/user/profile_images";
-    private static final String UPDATE_LIVE_USER_URL = "/feed/user/update";
-    private static final String UPDATE_FOLLOWER_USER_PATH = "/feed/user/follower/update";
-    private static final String UPDATE_FOLLOWING_USER_PATH = "/feed/user/following/update";
+    private static final String UPDATE_LIVE_USER_PATH = "/feed/user/update";
 
     @Autowired
     private UserRepository userRepository;
@@ -80,7 +79,8 @@ public class UserService implements UserServiceInterface {
 
         User updatedUser = this.userRepository.save(user.get());
 
-        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.buildDto(updatedUser));
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + updatedUser.getUsername(),
+                this.buildDto(updatedUser));
 
     }
 
@@ -107,7 +107,8 @@ public class UserService implements UserServiceInterface {
 
         User updatedUser = this.userRepository.save(user.get());
 
-        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.buildDto(updatedUser));
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + updatedUser.getUsername(),
+                this.buildDto(updatedUser));
 
     }
 
@@ -146,34 +147,54 @@ public class UserService implements UserServiceInterface {
 
         User updatedUser = this.userRepository.save(existingUser);
 
-        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL, this.buildDto(updatedUser));
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH, this.buildDto(updatedUser));
     }
 
     @Override
-    public UserDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException {
+    public UserSummaryFollowingDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException {
         User userInfo = (User) this.userRepository.findByUsername(username);
         if (Objects.isNull(userInfo)) {
             throw new EntityNotFoundException("User with username " + username + " does not exist",
                     HttpStatus.NOT_FOUND);
         }
 
-        return this.buildDto(userInfo);
+        return this.buildUserSummaryFollowingInfo(userInfo);
     }
 
     @Override
-    public UserSummaryDto fetchUserInformationByUsername(String username) throws EntityNotFoundException {
+    public UserSummaryFollowingDto fetchUserInformationByUsername(String username) throws EntityNotFoundException {
         User userInfo = (User) this.userRepository.findByUsername(username);
         if (Objects.isNull(userInfo)) {
             throw new EntityNotFoundException("User with username " + username + " does not exist",
                     HttpStatus.NOT_FOUND);
         }
 
-        return this.buildUserSummaryInfo(userInfo);
+        return this.buildUserSummaryFollowingInfo(userInfo);
+    }
+
+    public UserSummaryFollowingDto buildUserSummaryFollowingInfo(User user) {
+        UserSummaryFollowingDto userInfo = new UserSummaryFollowingDto();
+
+        Set<String> allFollowers = this.userFollowsRepository.findAllByFollowingId(user.getId()).stream()
+                .map(following -> following.getFollower().getUsername()).collect(Collectors.toSet());
+        Set<String> allFollowing = this.userFollowsRepository.findAllByFollowerId(user.getId()).stream()
+                .map(follower -> follower.getFollowing().getUsername()).collect(Collectors.toSet());
+
+        userInfo.setId(user.getId());
+        userInfo.setFirstname(user.getFirstname());
+        userInfo.setLastname(user.getLastname());
+        userInfo.setImageUrl(user.getImageUrl());
+        userInfo.setBio(user.getBio());
+        userInfo.setUsername(user.getUsername());
+        userInfo.setTotalPost(user.getNoOfPosts());
+        userInfo.setFollowers(user.getNoOfFollowers());
+        userInfo.setFollowing(user.getNoOfFollowing());
+        userInfo.setFollowersList(allFollowers);
+        userInfo.setFollowingList(allFollowing);
+        return userInfo;
     }
 
     public UserSummaryDto buildUserSummaryInfo(User user) {
-        // int totalPostCount = this.postRepository.countByUserId(user.getId());
-
         UserSummaryDto userInfo = new UserSummaryDto();
         userInfo.setId(user.getId());
         userInfo.setFirstname(user.getFirstname());
@@ -214,11 +235,9 @@ public class UserService implements UserServiceInterface {
         Optional<User> followerUpdate = this.userRepository.findById(follower.get().getId());
         Optional<User> followingUpdate = this.userRepository.findById(following.get().getId());
 
-        // this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_URL,
-        // this.buildDto(followerUpdate.get()));
-        this.messagingTemplate.convertAndSend(UPDATE_FOLLOWER_USER_PATH + "-" + follower.get().getUsername(),
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + follower.get().getUsername(),
                 this.buildDto(followerUpdate.get()));
-        this.messagingTemplate.convertAndSend(UPDATE_FOLLOWING_USER_PATH + "-" + following.get().getUsername(),
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + following.get().getUsername(),
                 this.buildDto(followingUpdate.get()));
     }
 
@@ -249,7 +268,7 @@ public class UserService implements UserServiceInterface {
         Set<UserFollows> allFollowings = this.userFollowsRepository.findAllByFollowerId(userExist.getId());
 
         Set<UserSummaryDto> allUserSummaryInfo = allFollowings.stream()
-                .map(follower -> this.buildUserSummaryInfo(follower.getFollower())).collect(Collectors.toSet());
+                .map(following -> this.buildUserSummaryInfo(following.getFollowing())).collect(Collectors.toSet());
 
         return allUserSummaryInfo;
     }

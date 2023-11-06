@@ -24,6 +24,7 @@ import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.model.dto.UserSummaryDto;
+import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 import com.alaska.socialis.services.UserService;
 
@@ -81,7 +82,7 @@ public class UserController {
     @GetMapping("/user/{username}/info")
     public ResponseEntity<SuccessResponse> fetchUserInfoSummary(@PathVariable("username") String username)
             throws EntityNotFoundException {
-        UserSummaryDto userInfo = this.userService.fetchUserInformationByUsername(username);
+        UserSummaryFollowingDto userInfo = this.userService.fetchUserInformationByUsername(username);
 
         SuccessResponse response = SuccessResponse.builder().data(userInfo).status(HttpStatus.OK).build();
 
@@ -91,7 +92,7 @@ public class UserController {
     @GetMapping("/user/{username}/full_information")
     public ResponseEntity<SuccessResponse> fetchUserInfoFullInformation(@PathVariable("username") String username)
             throws EntityNotFoundException {
-        UserDto userInfo = this.userService.fetchUserInfoFullInformation(username);
+        UserSummaryFollowingDto userInfo = this.userService.fetchUserInfoFullInformation(username);
 
         SuccessResponse response = SuccessResponse.builder().data(userInfo).status(HttpStatus.OK).build();
 
