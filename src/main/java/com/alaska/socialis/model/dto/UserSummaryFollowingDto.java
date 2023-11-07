@@ -1,5 +1,6 @@
 package com.alaska.socialis.model.dto;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ public class UserSummaryFollowingDto {
     private String coverImageUrl;
     private String phonenumber;
     private String address;
+    private Date createdAt;
     private int totalPost = 0;
     private int followers = 0;
     private int following = 0;
