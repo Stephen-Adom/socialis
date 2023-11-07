@@ -103,10 +103,25 @@ public class UserController {
     }
 
     @GetMapping("/user/{followerId}/follow/{followingId}")
-    public void followUser(@PathVariable("followerId") Long followerId,
+    public ResponseEntity<SuccessResponse> followUser(@PathVariable("followerId") Long followerId,
             @PathVariable("followingId") Long followingId) {
 
-        this.userService.followUser(followerId, followingId);
+        UserSummaryFollowingDto userFollowing = this.userService.followUser(followerId, followingId);
+
+        SuccessResponse message = SuccessResponse.builder().data(userFollowing).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(message, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{followerId}/unfollow/{followingId}")
+    public ResponseEntity<SuccessResponse> unfollowUser(@PathVariable("followerId") Long followerId,
+            @PathVariable("followingId") Long followingId) throws EntityNotFoundException {
+
+        UserSummaryFollowingDto userFollowing = this.userService.unfollowUser(followerId, followingId);
+
+        SuccessResponse message = SuccessResponse.builder().data(userFollowing).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(message, HttpStatus.OK);
     }
 
     @GetMapping("/user/{username}/all_followers")

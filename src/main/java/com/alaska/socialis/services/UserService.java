@@ -35,6 +35,8 @@ public class UserService implements UserServiceInterface {
     private static final String COVER_IMAGE_CLOUD_PATH = "socialis/user/cover_images";
     private static final String PROFILE_IMAGE_CLOUD_PATH = "socialis/user/profile_images";
     private static final String UPDATE_LIVE_USER_PATH = "/feed/user/update";
+    private static final String UPDATE_FOLLOWERS_COUNT_PATH = "/feed/followers/count";
+    private static final String UPDATE_FOLLOWING_COUNT_PATH = "/feed/following/count";
 
     @Autowired
     private UserRepository userRepository;
@@ -222,7 +224,7 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public void followUser(Long followerId, Long followingId) {
+    public UserSummaryFollowingDto followUser(Long followerId, Long followingId) {
         Optional<User> follower = this.userRepository.findById(followerId);
         Optional<User> following = this.userRepository.findById(followingId);
 
@@ -241,6 +243,41 @@ public class UserService implements UserServiceInterface {
                 this.buildDto(followerUpdate.get()));
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + following.get().getUsername(),
                 this.buildDto(followingUpdate.get()));
+
+        this.messagingTemplate.convertAndSend(UPDATE_FOLLOWING_COUNT_PATH + "-" + follower.get().getUsername(),
+                this.buildUserSummaryInfo(followingUpdate.get()));
+
+        this.messagingTemplate.convertAndSend(UPDATE_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
+                this.buildUserSummaryInfo(followerUpdate.get()));
+
+        return this.buildUserSummaryFollowingInfo(followingUpdate.get());
+    }
+
+    @Override
+    public UserSummaryFollowingDto unfollowUser(Long followerId, Long followingId) throws EntityNotFoundException {
+        Optional<UserFollows> followExist = this.userFollowsRepository.findByFollowerIdAndFollowingId(followerId,
+                followingId);
+
+        if (followExist.isEmpty()) {
+            throw new EntityNotFoundException("User Follow does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        Optional<User> follower = this.userRepository.findById(followerId);
+        Optional<User> following = this.userRepository.findById(followingId);
+
+        follower.get().setNoOfFollowing(follower.get().getNoOfFollowing() - 1);
+        following.get().setNoOfFollowers(following.get().getNoOfFollowers() - 1);
+        userFollowsRepository.delete(followExist.get());
+
+        User followerUpdate = this.userRepository.save(follower.get());
+        User followingUpdate = this.userRepository.save(following.get());
+
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + follower.get().getUsername(),
+                this.buildDto(followerUpdate));
+        this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + following.get().getUsername(),
+                this.buildDto(followingUpdate));
+
+        return this.buildUserSummaryFollowingInfo(followingUpdate);
     }
 
     @Override
