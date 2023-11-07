@@ -189,6 +189,9 @@ public class UserService implements UserServiceInterface {
         userInfo.setLastname(user.getLastname());
         userInfo.setImageUrl(user.getImageUrl());
         userInfo.setBio(user.getBio());
+        userInfo.setCoverImageUrl(user.getCoverImageUrl());
+        userInfo.setAddress(user.getAddress());
+        userInfo.setPhonenumber(user.getPhonenumber());
         userInfo.setUsername(user.getUsername());
         userInfo.setTotalPost(user.getNoOfPosts());
         userInfo.setFollowers(user.getNoOfFollowers());
