@@ -192,6 +192,7 @@ public class UserService implements UserServiceInterface {
         userInfo.setCoverImageUrl(user.getCoverImageUrl());
         userInfo.setAddress(user.getAddress());
         userInfo.setPhonenumber(user.getPhonenumber());
+        userInfo.setCreatedAt(user.getCreatedAt());
         userInfo.setUsername(user.getUsername());
         userInfo.setTotalPost(user.getNoOfPosts());
         userInfo.setFollowers(user.getNoOfFollowers());
@@ -248,10 +249,10 @@ public class UserService implements UserServiceInterface {
                 this.buildDto(followingUpdate.get()));
 
         this.messagingTemplate.convertAndSend(UPDATE_FOLLOWING_COUNT_PATH + "-" + follower.get().getUsername(),
-                this.buildUserSummaryInfo(followingUpdate.get()));
+                this.buildUserSummaryFollowingInfo(followingUpdate.get()));
 
         this.messagingTemplate.convertAndSend(UPDATE_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
-                this.buildUserSummaryInfo(followerUpdate.get()));
+                this.buildUserSummaryFollowingInfo(followerUpdate.get()));
 
         return this.buildUserSummaryFollowingInfo(followingUpdate.get());
     }
@@ -284,7 +285,7 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public Set<UserSummaryDto> fetchAllUserFollowers(String username) throws EntityNotFoundException {
+    public Set<UserSummaryFollowingDto> fetchAllUserFollowers(String username) throws EntityNotFoundException {
         User userExist = (User) this.userRepository.findByUsername(username);
 
         if (Objects.isNull(userExist)) {
@@ -293,14 +294,15 @@ public class UserService implements UserServiceInterface {
 
         Set<UserFollows> allFollowers = this.userFollowsRepository.findAllByFollowingId(userExist.getId());
 
-        Set<UserSummaryDto> allUserSummaryInfo = allFollowers.stream()
-                .map(follower -> this.buildUserSummaryInfo(follower.getFollower())).collect(Collectors.toSet());
+        Set<UserSummaryFollowingDto> allUserSummaryInfo = allFollowers.stream()
+                .map(follower -> this.buildUserSummaryFollowingInfo(follower.getFollower()))
+                .collect(Collectors.toSet());
 
         return allUserSummaryInfo;
     }
 
     @Override
-    public Set<UserSummaryDto> fetchAllUserFollowing(String username) throws EntityNotFoundException {
+    public Set<UserSummaryFollowingDto> fetchAllUserFollowing(String username) throws EntityNotFoundException {
         User userExist = (User) this.userRepository.findByUsername(username);
 
         if (Objects.isNull(userExist)) {
@@ -309,8 +311,9 @@ public class UserService implements UserServiceInterface {
 
         Set<UserFollows> allFollowings = this.userFollowsRepository.findAllByFollowerId(userExist.getId());
 
-        Set<UserSummaryDto> allUserSummaryInfo = allFollowings.stream()
-                .map(following -> this.buildUserSummaryInfo(following.getFollowing())).collect(Collectors.toSet());
+        Set<UserSummaryFollowingDto> allUserSummaryInfo = allFollowings.stream()
+                .map(following -> this.buildUserSummaryFollowingInfo(following.getFollowing()))
+                .collect(Collectors.toSet());
 
         return allUserSummaryInfo;
     }

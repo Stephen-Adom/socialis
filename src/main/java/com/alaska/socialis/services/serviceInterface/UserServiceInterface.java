@@ -9,8 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
-import com.alaska.socialis.model.UserDto;
-import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 
@@ -26,16 +24,13 @@ public interface UserServiceInterface {
         public void updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
                         throws EntityNotFoundException, ValidationErrorsException;
 
-        // public UserSummaryFollowingDto fetchUserInformationByUsername(String
-        // username) throws EntityNotFoundException;
-
         public UserSummaryFollowingDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;
 
         public UserSummaryFollowingDto followUser(Long followerId, Long followingId);
 
         public UserSummaryFollowingDto unfollowUser(Long followerId, Long followingId) throws EntityNotFoundException;
 
-        public Set<UserSummaryDto> fetchAllUserFollowers(String username) throws EntityNotFoundException;
+        public Set<UserSummaryFollowingDto> fetchAllUserFollowers(String username) throws EntityNotFoundException;
 
-        public Set<UserSummaryDto> fetchAllUserFollowing(String username) throws EntityNotFoundException;
+        public Set<UserSummaryFollowingDto> fetchAllUserFollowing(String username) throws EntityNotFoundException;
 }

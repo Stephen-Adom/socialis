@@ -20,10 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
-import com.alaska.socialis.model.UserDto;
-import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
-import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
 import com.alaska.socialis.services.UserService;
@@ -129,7 +126,7 @@ public class UserController {
             @PathVariable(name = "username", required = true) String username)
             throws EntityNotFoundException {
 
-        Set<UserSummaryDto> allFollowers = this.userService.fetchAllUserFollowers(username);
+        Set<UserSummaryFollowingDto> allFollowers = this.userService.fetchAllUserFollowers(username);
 
         SuccessResponse response = SuccessResponse.builder().data(allFollowers).status(HttpStatus.OK).build();
 
@@ -141,7 +138,7 @@ public class UserController {
             @PathVariable(name = "username", required = true) String username)
             throws EntityNotFoundException {
 
-        Set<UserSummaryDto> allFollowing = this.userService.fetchAllUserFollowing(username);
+        Set<UserSummaryFollowingDto> allFollowing = this.userService.fetchAllUserFollowing(username);
 
         SuccessResponse response = SuccessResponse.builder().data(allFollowing).status(HttpStatus.OK).build();
 
