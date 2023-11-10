@@ -1,6 +1,7 @@
 package com.alaska.socialis.services;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.UserFollows;
+import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
@@ -35,8 +37,10 @@ public class UserService implements UserServiceInterface {
     private static final String COVER_IMAGE_CLOUD_PATH = "socialis/user/cover_images";
     private static final String PROFILE_IMAGE_CLOUD_PATH = "socialis/user/profile_images";
     private static final String UPDATE_LIVE_USER_PATH = "/feed/user/update";
-    private static final String UPDATE_FOLLOWERS_COUNT_PATH = "/feed/followers/count";
-    private static final String UPDATE_FOLLOWING_COUNT_PATH = "/feed/following/count";
+    private static final String ADD_FOLLOWERS_COUNT_PATH = "/feed/followers/count";
+    private static final String ADD_FOLLOWING_COUNT_PATH = "/feed/following/count";
+    private static final String REMOVE_FOLLOWERS_COUNT_PATH = "/feed/followers/count/remove";
+    private static final String REMOVE_FOLLOWING_COUNT_PATH = "/feed/following/count/remove";
 
     @Autowired
     private UserRepository userRepository;
@@ -179,10 +183,7 @@ public class UserService implements UserServiceInterface {
     public UserSummaryFollowingDto buildUserSummaryFollowingInfo(User user) {
         UserSummaryFollowingDto userInfo = new UserSummaryFollowingDto();
 
-        Set<String> allFollowers = this.userFollowsRepository.findAllByFollowingId(user.getId()).stream()
-                .map(following -> following.getFollower().getUsername()).collect(Collectors.toSet());
-        Set<String> allFollowing = this.userFollowsRepository.findAllByFollowerId(user.getId()).stream()
-                .map(follower -> follower.getFollowing().getUsername()).collect(Collectors.toSet());
+        user = userRepository.findById(user.getId()).get();
 
         userInfo.setId(user.getId());
         userInfo.setFirstname(user.getFirstname());
@@ -197,8 +198,10 @@ public class UserService implements UserServiceInterface {
         userInfo.setTotalPost(user.getNoOfPosts());
         userInfo.setFollowers(user.getNoOfFollowers());
         userInfo.setFollowing(user.getNoOfFollowing());
-        userInfo.setFollowersList(allFollowers);
-        userInfo.setFollowingList(allFollowing);
+        userInfo.setFollowersList(user.getFollowers().stream().map(follower -> follower.getFollower().getUsername())
+                .collect(Collectors.toSet()));
+        userInfo.setFollowingList(user.getFollowing().stream().map(following -> following.getFollowing().getUsername())
+                .collect(Collectors.toSet()));
         return userInfo;
     }
 
@@ -247,11 +250,9 @@ public class UserService implements UserServiceInterface {
                 this.buildDto(followerUpdate.get()));
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + following.get().getUsername(),
                 this.buildDto(followingUpdate.get()));
-
-        this.messagingTemplate.convertAndSend(UPDATE_FOLLOWING_COUNT_PATH + "-" + follower.get().getUsername(),
+        this.messagingTemplate.convertAndSend(ADD_FOLLOWING_COUNT_PATH + "-" + follower.get().getUsername(),
                 this.buildUserSummaryFollowingInfo(followingUpdate.get()));
-
-        this.messagingTemplate.convertAndSend(UPDATE_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
+        this.messagingTemplate.convertAndSend(ADD_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
                 this.buildUserSummaryFollowingInfo(followerUpdate.get()));
 
         return this.buildUserSummaryFollowingInfo(followingUpdate.get());
@@ -280,6 +281,13 @@ public class UserService implements UserServiceInterface {
                 this.buildDto(followerUpdate));
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + following.get().getUsername(),
                 this.buildDto(followingUpdate));
+
+        this.messagingTemplate.convertAndSend(REMOVE_FOLLOWING_COUNT_PATH + "-" +
+                follower.get().getUsername(),
+                this.buildUserSummaryFollowingInfo(followingUpdate));
+
+        this.messagingTemplate.convertAndSend(REMOVE_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
+                this.buildUserSummaryFollowingInfo(followerUpdate));
 
         return this.buildUserSummaryFollowingInfo(followingUpdate);
     }
