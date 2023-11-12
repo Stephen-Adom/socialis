@@ -1,7 +1,6 @@
 package com.alaska.socialis.services;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,7 +22,6 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.UserFollows;
-import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
 import com.alaska.socialis.model.requestModel.UserInfoRequeset;
@@ -167,19 +165,6 @@ public class UserService implements UserServiceInterface {
         return this.buildUserSummaryFollowingInfo(userInfo);
     }
 
-    // @Override
-    // public UserSummaryFollowingDto fetchUserInformationByUsername(String
-    // username) throws EntityNotFoundException {
-    // User userInfo = (User) this.userRepository.findByUsername(username);
-    // if (Objects.isNull(userInfo)) {
-    // throw new EntityNotFoundException("User with username " + username + " does
-    // not exist",
-    // HttpStatus.NOT_FOUND);
-    // }
-
-    // return this.buildUserSummaryFollowingInfo(userInfo);
-    // }
-
     public UserSummaryFollowingDto buildUserSummaryFollowingInfo(User user) {
         UserSummaryFollowingDto userInfo = new UserSummaryFollowingDto();
 
@@ -246,14 +231,18 @@ public class UserService implements UserServiceInterface {
         Optional<User> followerUpdate = this.userRepository.findById(follower.get().getId());
         Optional<User> followingUpdate = this.userRepository.findById(following.get().getId());
 
+        UserSummaryFollowingDto followingUpdateDto = this.buildUserSummaryFollowingInfo(followingUpdate.get());
+        UserSummaryFollowingDto followerUpdateDto = this.buildUserSummaryFollowingInfo(followerUpdate.get());
+
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + follower.get().getUsername(),
                 this.buildDto(followerUpdate.get()));
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + following.get().getUsername(),
                 this.buildDto(followingUpdate.get()));
+
         this.messagingTemplate.convertAndSend(ADD_FOLLOWING_COUNT_PATH + "-" + follower.get().getUsername(),
-                this.buildUserSummaryFollowingInfo(followingUpdate.get()));
+                followingUpdateDto);
         this.messagingTemplate.convertAndSend(ADD_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
-                this.buildUserSummaryFollowingInfo(followerUpdate.get()));
+                followerUpdateDto);
 
         return this.buildUserSummaryFollowingInfo(followingUpdate.get());
     }
@@ -277,17 +266,19 @@ public class UserService implements UserServiceInterface {
         User followerUpdate = this.userRepository.save(follower.get());
         User followingUpdate = this.userRepository.save(following.get());
 
+        UserSummaryFollowingDto followingUpdateDto = this.buildUserSummaryFollowingInfo(followingUpdate);
+        UserSummaryFollowingDto followerUpdateDto = this.buildUserSummaryFollowingInfo(followerUpdate);
+
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + follower.get().getUsername(),
                 this.buildDto(followerUpdate));
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + following.get().getUsername(),
                 this.buildDto(followingUpdate));
 
         this.messagingTemplate.convertAndSend(REMOVE_FOLLOWING_COUNT_PATH + "-" +
-                follower.get().getUsername(),
-                this.buildUserSummaryFollowingInfo(followingUpdate));
+                follower.get().getUsername(), followingUpdateDto);
 
         this.messagingTemplate.convertAndSend(REMOVE_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
-                this.buildUserSummaryFollowingInfo(followerUpdate));
+                followerUpdateDto);
 
         return this.buildUserSummaryFollowingInfo(followingUpdate);
     }
