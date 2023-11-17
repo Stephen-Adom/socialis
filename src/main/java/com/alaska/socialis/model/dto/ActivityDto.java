@@ -11,13 +11,13 @@ import lombok.Setter;
 public class ActivityDto {
     private Long id;
 
-    private String actionType;
+    private Object actionType;
 
-    private String groupType;
+    private Object groupType;
 
     private Date createdAt;
 
-    private String activityLink;
+    private Object activityLink;
 
-    private Map<String, Object> targetData;
+    private Object targetData;
 }

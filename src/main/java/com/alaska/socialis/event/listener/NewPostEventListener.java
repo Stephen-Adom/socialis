@@ -32,8 +32,6 @@ public class NewPostEventListener implements ApplicationListener<NewPostEvent> {
     @Override
     public void onApplicationEvent(NewPostEvent event) {
 
-        System.out.println("============================== activity ===========================");
-
         this.savePostActivity(event.getPost(), event.getUser());
     }
 
@@ -64,9 +62,6 @@ public class NewPostEventListener implements ApplicationListener<NewPostEvent> {
             targetData.put("image", null);
         }
         activityDto.setTargetData(targetData);
-
-        System.out.println("============================== activity ===========================");
-        System.out.println(activityDto.getGroupType());
 
         messagingTemplate.convertAndSend(NEW_ACTIVITY_FEED + "-" + user.getUsername(), activityDto);
     }
