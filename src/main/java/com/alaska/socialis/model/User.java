@@ -149,6 +149,10 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "following")
     private Set<UserFollows> followers = new HashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    @Builder.Default
+    private List<Activity> activities = new ArrayList<Activity>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("USER"));

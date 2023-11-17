@@ -11,12 +11,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alaska.socialis.event.NewPostEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
@@ -63,6 +65,9 @@ public class PostService implements PostServiceInterface {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<PostDto> fetchAllPost() {
@@ -124,8 +129,12 @@ public class PostService implements PostServiceInterface {
         Post updatedPost = this.postRepository.save(postObj);
         Optional<User> updatedUser = this.userRepository.findById(author.get().getId());
 
-        messagingTemplate.convertAndSend(NEW_LIVE_POST_FEED_URL, this.buildPostDto(updatedPost));
-        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + updatedUser.get().getUsername(),
+        this.eventPublisher.publishEvent(new NewPostEvent(updatedPost));
+
+        messagingTemplate.convertAndSend(NEW_LIVE_POST_FEED_URL,
+                this.buildPostDto(updatedPost));
+        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" +
+                updatedUser.get().getUsername(),
                 this.userService.buildDto(updatedUser.get()));
     }
 
