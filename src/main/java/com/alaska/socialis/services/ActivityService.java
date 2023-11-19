@@ -57,7 +57,7 @@ public class ActivityService implements ActivityServiceInterface {
         return allActivitiesDto;
     }
 
-    private List<String> extractUsernameFromPost(String content) {
+    public List<String> extractUsernameFromPost(String content) {
         List<String> mentions = new ArrayList<>();
 
         // Define the regular expression pattern for mentions
