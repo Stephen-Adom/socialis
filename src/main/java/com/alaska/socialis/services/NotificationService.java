@@ -65,7 +65,7 @@ public class NotificationService implements NotificationServiceInterface {
     public NotificationDto buildNotificationDto(Notification notification) {
         NotificationDto newNotificationDto = new NotificationDto();
         newNotificationDto.setId(notification.getId());
-        newNotificationDto.setUser(buildUserInfo(notification.getUser()));
+        // newNotificationDto.setUser(buildUserInfo(notification.getUser()));
         newNotificationDto.setSource(buildUserInfo(notification.getSource()));
         newNotificationDto.setRead(notification.getRead());
         newNotificationDto.setReadAt(notification.getReadAt());
@@ -139,7 +139,7 @@ public class NotificationService implements NotificationServiceInterface {
                 targetObj.put("targetFirstname", user.getFirstname());
                 targetObj.put("targetLastname", user.getLastname());
                 targetObj.put("targetUsername", user.getUsername());
-                targetObj.put("targetUsername", user.getImageUrl());
+                targetObj.put("targetImage", user.getImageUrl());
 
                 break;
 

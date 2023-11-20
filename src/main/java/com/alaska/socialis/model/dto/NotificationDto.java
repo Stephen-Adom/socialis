@@ -11,7 +11,7 @@ import lombok.Setter;
 public class NotificationDto {
     private Long id;
 
-    private UserSummary2Dto user;
+    // private UserSummary2Dto user;
 
     private String activityType;
 
