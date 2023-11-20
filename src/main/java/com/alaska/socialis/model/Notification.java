@@ -49,4 +49,8 @@ public class Notification {
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+
+    public boolean getRead() {
+        return this.isRead;
+    }
 }
