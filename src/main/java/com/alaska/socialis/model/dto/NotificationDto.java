@@ -19,6 +19,8 @@ public class NotificationDto {
 
     private Map<String, Object> target;
 
+    private String targetType;
+
     private boolean isRead = false;
 
     private Date readAt;

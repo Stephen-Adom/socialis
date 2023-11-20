@@ -26,6 +26,7 @@ import com.alaska.socialis.repository.ReplyRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.NotificationServiceInterface;
 import com.alaska.socialis.utils.NotificationActivityType;
+import com.alaska.socialis.utils.NotificationTargetType;
 
 @Service
 public class NotificationService implements NotificationServiceInterface {
@@ -71,6 +72,7 @@ public class NotificationService implements NotificationServiceInterface {
         newNotificationDto.setCreatedAt(notification.getCreatedAt());
         newNotificationDto.setActivityType(getActivityType(notification));
         newNotificationDto.setTarget(getTargetObject(notification));
+        newNotificationDto.setTargetType(getTargetType(notification));
 
         return newNotificationDto;
 
@@ -146,6 +148,21 @@ public class NotificationService implements NotificationServiceInterface {
         }
 
         return targetObj;
+    }
+
+    private String getTargetType(Notification notification) {
+        switch (notification.getTargetType()) {
+            case POST:
+                return NotificationTargetType.POST.getValue();
+            case COMMENT:
+                return NotificationTargetType.COMMENT.getValue();
+            case REPLY:
+                return NotificationTargetType.REPLY.getValue();
+            case USER:
+                return NotificationTargetType.USER.getValue();
+            default:
+                return "";
+        }
     }
 
     private UserSummary2Dto buildUserInfo(User user) {
