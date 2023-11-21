@@ -12,12 +12,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alaska.socialis.event.NewReplyEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.Reply;
@@ -59,6 +61,9 @@ public class ReplyService implements ReplyServiceInterface {
 
     @Autowired
     private BookmarkRepository bookmarkRepository;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<ReplyDto> fetchAllRepliesByUser(Long userId) throws EntityNotFoundException {
@@ -128,6 +133,8 @@ public class ReplyService implements ReplyServiceInterface {
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("commentDto", commentDto);
         response.put("replyDto", replyDto);
+
+        this.eventPublisher.publishEvent(new NewReplyEvent(result));
 
         return response;
     }
