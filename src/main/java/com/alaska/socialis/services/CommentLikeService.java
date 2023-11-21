@@ -3,8 +3,10 @@ package com.alaska.socialis.services;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import com.alaska.socialis.event.CommentLikeEvent;
 import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.CommentLike;
 import com.alaska.socialis.model.User;
@@ -28,6 +30,9 @@ public class CommentLikeService implements CommentLikeServiceInterface {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     public CommentDto toggleCommentLike(Long userId, Long commentId) {
 
@@ -41,12 +46,13 @@ public class CommentLikeService implements CommentLikeServiceInterface {
     private CommentDto checkLikeEntity(Optional<CommentLike> commentLike, Optional<User> user,
             Optional<Comment> comment) {
         if (commentLike.isEmpty()) {
+            comment.get().setNumberOfLikes(comment.get().getNumberOfLikes() + 1);
             CommentLike newLike = CommentLike.builder().user(user.get()).comment(comment.get()).build();
             this.commentLikeRepository.save(newLike);
-            comment.get().setNumberOfLikes(comment.get().getNumberOfLikes() + 1);
-            Comment updatedComment = this.commentRepository.save(comment.get());
 
-            return this.commentService.buildCommentDto(updatedComment);
+            this.eventPublisher.publishEvent(new CommentLikeEvent(newLike));
+
+            return this.commentService.buildCommentDto(comment.get());
         } else {
             comment.get().setNumberOfLikes(comment.get().getNumberOfLikes() - 1);
             Comment updatedcomment = this.commentRepository.save(comment.get());
