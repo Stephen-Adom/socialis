@@ -54,7 +54,7 @@ public class NotificationService implements NotificationServiceInterface {
             throw new EntityNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
 
-        List<Notification> notifications = this.notificationRepository.findAllByUserId(userId);
+        List<Notification> notifications = this.notificationRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
 
         List<NotificationDto> notificationDtos = notifications.stream()
                 .map(notification -> buildNotificationDto(notification)).collect(Collectors.toList());

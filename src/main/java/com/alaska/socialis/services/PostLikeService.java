@@ -8,9 +8,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.alaska.socialis.event.PostLikeEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.CommentLike;
 import com.alaska.socialis.model.Like;
@@ -56,6 +58,9 @@ public class PostLikeService implements PostLikeServiceInterface {
     @Autowired
     private ReplyService replyService;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     public PostDto togglePostLike(Long userId, Long postId) {
 
@@ -68,15 +73,13 @@ public class PostLikeService implements PostLikeServiceInterface {
 
     private PostDto checkLikeEntity(Optional<PostLike> postLike, Optional<User> user, Optional<Post> post) {
         if (postLike.isEmpty()) {
+            post.get().setNumberOfLikes(post.get().getNumberOfLikes() + 1);
             PostLike newLike = PostLike.builder().user(user.get()).post(post.get()).build();
             this.postLikeRepository.save(newLike);
-            post.get().setNumberOfLikes(post.get().getNumberOfLikes() + 1);
-            Post updatedPost = this.postRepository.save(post.get());
 
-            System.out.println("=======================saving post like======================");
-            System.out.println(updatedPost.getLikes().size());
+            this.eventPublisher.publishEvent(new PostLikeEvent(newLike));
 
-            return this.postService.buildPostDto(updatedPost);
+            return this.postService.buildPostDto(post.get());
         } else {
             post.get().setNumberOfLikes(post.get().getNumberOfLikes() - 1);
             Post updatedPost = this.postRepository.save(post.get());

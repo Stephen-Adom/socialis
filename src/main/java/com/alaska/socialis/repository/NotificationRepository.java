@@ -10,5 +10,5 @@ import com.alaska.socialis.model.Notification;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
     @EntityGraph(attributePaths = { "user", "source" })
-    public List<Notification> findAllByUserId(Long userId);
+    public List<Notification> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 }

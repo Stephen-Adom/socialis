@@ -12,12 +12,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alaska.socialis.event.NewCommentEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.CommentImages;
@@ -60,6 +62,9 @@ public class CommentService implements CommentServiceInterface {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<CommentDto> getAllComments(Long postId) {
@@ -143,6 +148,8 @@ public class CommentService implements CommentServiceInterface {
         Map<String, Object> response = new HashMap<String, Object>();
         response.put("commentDto", commentDto);
         response.put("postDto", postDto);
+
+        this.eventPublisher.publishEvent(new NewCommentEvent(savedComment));
 
         return response;
     }
