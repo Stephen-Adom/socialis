@@ -3,8 +3,10 @@ package com.alaska.socialis.services;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import com.alaska.socialis.event.ReplyLikeEvent;
 import com.alaska.socialis.model.Comment;
 import com.alaska.socialis.model.CommentLike;
 import com.alaska.socialis.model.Reply;
@@ -31,6 +33,9 @@ public class ReplyLikeService implements ReplyLikeServiceInterface {
     @Autowired
     private ReplyService replyService;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     public ReplyDto toggleReplyLike(Long userId, Long replyId) {
         Optional<ReplyLike> replyLike = this.replyLikeRepository.findByUserIdAndReplyId(userId, replyId);
@@ -43,14 +48,12 @@ public class ReplyLikeService implements ReplyLikeServiceInterface {
     private ReplyDto checkReplyLikeEntity(Optional<ReplyLike> replyLike, Optional<User> user, Optional<Reply> reply) {
 
         if (replyLike.isEmpty()) {
-            System.out.println(reply.get().getNumberOfLikes());
-
-            ReplyLike newLike = ReplyLike.builder().user(user.get()).reply(reply.get()).build();
-            this.replyLikeRepository.save(newLike);
             reply.get().setNumberOfLikes(reply.get().getNumberOfLikes() + 1);
-            Reply updatedReply = this.replyRepository.save(reply.get());
+            ReplyLike newLike = ReplyLike.builder().user(user.get()).reply(reply.get()).build();
+            ReplyLike updatedNewLike = this.replyLikeRepository.save(newLike);
 
-            return this.replyService.buildReplyDto(updatedReply);
+            this.eventPublisher.publishEvent(new ReplyLikeEvent(updatedNewLike));
+            return this.replyService.buildReplyDto(reply.get());
         } else {
 
             reply.get().setNumberOfLikes(reply.get().getNumberOfLikes() - 1);

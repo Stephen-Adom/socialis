@@ -25,10 +25,12 @@ import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.ReplyImage;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.dto.CommentDto;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.repository.BookmarkRepository;
+import com.alaska.socialis.repository.CommentRepository;
 import com.alaska.socialis.repository.PostImageRepository;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
@@ -50,6 +52,9 @@ public class PostService implements PostServiceInterface {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private PostImageRepository postImageRepository;
