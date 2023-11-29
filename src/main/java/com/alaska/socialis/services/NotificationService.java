@@ -114,6 +114,7 @@ public class NotificationService implements NotificationServiceInterface {
                 targetObj.put("targetUid", post.getUid());
                 targetObj.put("targetContent", post.getContent());
                 targetObj.put("targetImage", post.getPostImages().size() > 0 ? post.getPostImages().get(0) : "");
+                targetObj.put("targetUrl", post.getUser().getUsername() + "/details/" + post.getUid());
 
                 break;
             case COMMENT:
@@ -122,6 +123,9 @@ public class NotificationService implements NotificationServiceInterface {
                 targetObj.put("targetContent", comment.getContent());
                 targetObj.put("targetImage",
                         comment.getCommentImages().size() > 0 ? comment.getCommentImages().get(0) : "");
+                targetObj.put("targetUrl",
+                        comment.getPost().getUser().getUsername() + "/details/" + comment.getPost().getUid() + "/"
+                                + comment.getUser().getUsername() + "/details/" + comment.getUid());
 
                 break;
             case REPLY:
@@ -130,6 +134,10 @@ public class NotificationService implements NotificationServiceInterface {
                 targetObj.put("targetUid", reply.getUid());
                 targetObj.put("targetContent", reply.getContent());
                 targetObj.put("targetImage", reply.getReplyImages().size() > 0 ? reply.getReplyImages().get(0) : "");
+
+                targetObj.put("targetUrl", reply.getComment().getPost().getUser().getUsername() + "/details/"
+                        + reply.getComment().getPost().getUid() + "/" + reply.getComment().getUser().getUsername()
+                        + "/details/" + reply.getComment().getUid());
 
                 break;
             case USER:
@@ -140,6 +148,7 @@ public class NotificationService implements NotificationServiceInterface {
                 targetObj.put("targetLastname", user.getLastname());
                 targetObj.put("targetUsername", user.getUsername());
                 targetObj.put("targetImage", user.getImageUrl());
+                targetObj.put("targetUrl", "user/" + user.getUsername() + "/profile");
 
                 break;
 
