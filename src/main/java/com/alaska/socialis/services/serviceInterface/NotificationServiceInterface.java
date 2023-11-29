@@ -7,4 +7,6 @@ import com.alaska.socialis.model.dto.NotificationDto;
 
 public interface NotificationServiceInterface {
     public List<NotificationDto> fetchAllUserNotification(Long userId) throws EntityNotFoundException;
+
+    public Long getUserUnreadNotificationCount(Long userId) throws EntityNotFoundException;
 }

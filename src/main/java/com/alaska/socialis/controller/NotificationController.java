@@ -30,4 +30,15 @@ public class NotificationController {
 
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/{userId}/count")
+    public ResponseEntity<SuccessResponse> getUserUnreadNotificationCount(@PathVariable("userId") Long userId)
+            throws EntityNotFoundException {
+        Long unreadNotificationsCount = this.notificationService.getUserUnreadNotificationCount(userId);
+
+        SuccessResponse response = SuccessResponse.builder().data(unreadNotificationsCount).status(HttpStatus.OK)
+                .build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    }
 }

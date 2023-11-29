@@ -47,6 +47,17 @@ public class NotificationService implements NotificationServiceInterface {
     private NotificationRepository notificationRepository;
 
     @Override
+    public Long getUserUnreadNotificationCount(Long userId) throws EntityNotFoundException {
+        Optional<User> user = this.userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
+        }
+
+        return this.notificationRepository.countAllByUserIdUnreadTrue(userId);
+    }
+
+    @Override
     public List<NotificationDto> fetchAllUserNotification(Long userId) throws EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
 
