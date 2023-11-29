@@ -91,7 +91,7 @@ public class NotificationService implements NotificationServiceInterface {
                 return NotificationActivityType.REPLY.getValue();
             case FOLLOWS:
 
-                return NotificationActivityType.FRIEND_REQUEST.getValue();
+                return NotificationActivityType.FOLLOWS.getValue();
 
             case MENTION:
 

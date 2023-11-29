@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alaska.socialis.event.UserFollowEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.User;
@@ -51,6 +53,9 @@ public class UserService implements UserServiceInterface {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -243,6 +248,8 @@ public class UserService implements UserServiceInterface {
                 followingUpdateDto);
         this.messagingTemplate.convertAndSend(ADD_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
                 followerUpdateDto);
+
+        eventPublisher.publishEvent(new UserFollowEvent(follower.get(), following.get()));
 
         return this.buildUserSummaryFollowingInfo(followingUpdate.get());
     }
