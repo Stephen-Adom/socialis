@@ -9,4 +9,6 @@ public interface NotificationServiceInterface {
     public List<NotificationDto> fetchAllUserNotification(Long userId) throws EntityNotFoundException;
 
     public Long getUserUnreadNotificationCount(Long userId) throws EntityNotFoundException;
+
+    public void markNotificationAsRead(Long notificationId) throws EntityNotFoundException;
 }

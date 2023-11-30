@@ -197,4 +197,18 @@ public class NotificationService implements NotificationServiceInterface {
         return userInfo;
     }
 
+    @Override
+    public void markNotificationAsRead(Long notificationId) throws EntityNotFoundException {
+        Optional<Notification> notificationExist = this.notificationRepository.findById(notificationId);
+
+        if (notificationExist.isEmpty()) {
+            throw new EntityNotFoundException("Notification with id " + notificationId + " not found",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        notificationExist.get().setRead(true);
+
+        this.notificationRepository.save(notificationExist.get());
+    }
+
 }

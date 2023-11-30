@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.alaska.socialis.model.dto.NotificationDto;
+import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.services.NotificationService;
@@ -40,5 +41,15 @@ public class NotificationController {
                 .build();
 
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{notificationId}/markAsRead")
+    public ResponseEntity<SuccessMessage> markNotificationAsRead(@PathVariable("notificationId") Long notificationId)
+            throws EntityNotFoundException {
+        this.notificationService.markNotificationAsRead(notificationId);
+
+        SuccessMessage message = SuccessMessage.builder().message("Notification Updated").status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
     }
 }
