@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
@@ -45,6 +46,13 @@ public class NotificationService implements NotificationServiceInterface {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    private static final String USER_NOTIFICATION_PATH = "/feed/notification/user";
+
+    private static final String USER_UNREAD_NOTIFICATION_COUNT_PATH = "/feed/notification/count/user";
 
     @Override
     public Long getUserUnreadNotificationCount(Long userId) throws EntityNotFoundException {
@@ -209,6 +217,18 @@ public class NotificationService implements NotificationServiceInterface {
         notificationExist.get().setRead(true);
 
         this.notificationRepository.save(notificationExist.get());
+    }
+
+    public void publishAlertToClient(Notification notification) {
+        Long unreadCount = this.notificationRepository.countAllByUserIdUnreadTrue(notification.getUser().getId());
+        NotificationDto notificationDto = this.buildNotificationDto(notification);
+
+        messagingTemplate.convertAndSend(USER_NOTIFICATION_PATH + "-" + notification.getUser().getUsername(),
+                notificationDto);
+
+        messagingTemplate.convertAndSend(
+                USER_UNREAD_NOTIFICATION_COUNT_PATH + "-" + notification.getUser().getUsername(),
+                unreadCount);
     }
 
 }

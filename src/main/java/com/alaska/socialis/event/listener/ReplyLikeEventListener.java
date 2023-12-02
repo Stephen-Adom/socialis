@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.alaska.socialis.event.ReplyLikeEvent;
 import com.alaska.socialis.model.Notification;
 import com.alaska.socialis.repository.NotificationRepository;
+import com.alaska.socialis.services.NotificationService;
 import com.alaska.socialis.utils.NotificationActivityType;
 import com.alaska.socialis.utils.NotificationTargetType;
 
@@ -14,6 +15,9 @@ import com.alaska.socialis.utils.NotificationTargetType;
 public class ReplyLikeEventListener implements ApplicationListener<ReplyLikeEvent> {
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public void onApplicationEvent(ReplyLikeEvent event) {
@@ -26,5 +30,11 @@ public class ReplyLikeEventListener implements ApplicationListener<ReplyLikeEven
         notificationObj.setRead(false);
 
         Notification newNotification = this.notificationRepository.save(notificationObj);
+
+        this.publishAlertToClient(newNotification);
+    }
+
+    public void publishAlertToClient(Notification notification) {
+        this.notificationService.publishAlertToClient(notification);
     }
 }
