@@ -14,6 +14,7 @@ import com.alaska.socialis.model.Notification;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.repository.NotificationRepository;
 import com.alaska.socialis.services.ActivityService;
+import com.alaska.socialis.services.NotificationService;
 import com.alaska.socialis.utils.NotificationActivityType;
 import com.alaska.socialis.utils.NotificationTargetType;
 
@@ -27,6 +28,9 @@ public class NewCommentEventListener implements ApplicationListener<NewCommentEv
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public void onApplicationEvent(NewCommentEvent event) {
@@ -57,5 +61,11 @@ public class NewCommentEventListener implements ApplicationListener<NewCommentEv
         notificationObj.setRead(false);
 
         Notification newNotification = this.notificationRepository.save(notificationObj);
+
+        this.publishAlertToClient(newNotification);
+    }
+
+    public void publishAlertToClient(Notification notification) {
+        this.notificationService.publishAlertToClient(notification);
     }
 }
