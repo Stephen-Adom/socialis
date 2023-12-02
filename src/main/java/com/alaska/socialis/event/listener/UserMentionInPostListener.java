@@ -13,6 +13,7 @@ import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.repository.NotificationRepository;
 import com.alaska.socialis.repository.UserRepository;
+import com.alaska.socialis.services.NotificationService;
 import com.alaska.socialis.utils.NotificationActivityType;
 import com.alaska.socialis.utils.NotificationTargetType;
 
@@ -24,6 +25,9 @@ public class UserMentionInPostListener implements ApplicationListener<UserMentio
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public void onApplicationEvent(UserMentionInPostEvent event) {
@@ -44,8 +48,14 @@ public class UserMentionInPostListener implements ApplicationListener<UserMentio
                 notificationObj.setRead(false);
 
                 Notification newNotification = this.notificationRepository.save(notificationObj);
+
+                this.publishAlertToClient(newNotification);
             }
         }
+    }
+
+    public void publishAlertToClient(Notification notification) {
+        this.notificationService.publishAlertToClient(notification);
     }
 
 }

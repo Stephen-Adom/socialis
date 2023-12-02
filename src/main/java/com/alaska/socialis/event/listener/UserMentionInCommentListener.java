@@ -13,6 +13,7 @@ import com.alaska.socialis.model.Notification;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.repository.NotificationRepository;
 import com.alaska.socialis.repository.UserRepository;
+import com.alaska.socialis.services.NotificationService;
 import com.alaska.socialis.utils.NotificationActivityType;
 import com.alaska.socialis.utils.NotificationTargetType;
 
@@ -23,6 +24,9 @@ public class UserMentionInCommentListener implements ApplicationListener<UserMen
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public void onApplicationEvent(UserMentionInCommentEvent event) {
@@ -43,7 +47,13 @@ public class UserMentionInCommentListener implements ApplicationListener<UserMen
                 notificationObj.setRead(false);
 
                 Notification newNotification = this.notificationRepository.save(notificationObj);
+
+                this.publishAlertToClient(newNotification);
             }
         }
+    }
+
+    public void publishAlertToClient(Notification notification) {
+        this.notificationService.publishAlertToClient(notification);
     }
 }
