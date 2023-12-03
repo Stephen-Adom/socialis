@@ -239,6 +239,8 @@ public class UserService implements UserServiceInterface {
         UserSummaryFollowingDto followingUpdateDto = this.buildUserSummaryFollowingInfo(followingUpdate.get());
         UserSummaryFollowingDto followerUpdateDto = this.buildUserSummaryFollowingInfo(followerUpdate.get());
 
+        this.eventPublisher.publishEvent(new UserFollowEvent(follower.get(), following.get()));
+
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + follower.get().getUsername(),
                 this.buildDto(followerUpdate.get()));
         this.messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + following.get().getUsername(),
@@ -248,8 +250,6 @@ public class UserService implements UserServiceInterface {
                 followingUpdateDto);
         this.messagingTemplate.convertAndSend(ADD_FOLLOWERS_COUNT_PATH + "-" + following.get().getUsername(),
                 followerUpdateDto);
-
-        eventPublisher.publishEvent(new UserFollowEvent(follower.get(), following.get()));
 
         return this.buildUserSummaryFollowingInfo(followingUpdate.get());
     }
