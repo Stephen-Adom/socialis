@@ -10,6 +10,7 @@ import com.alaska.socialis.model.Notification;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.repository.NotificationRepository;
+import com.alaska.socialis.services.NotificationService;
 import com.alaska.socialis.utils.NotificationActivityType;
 import com.alaska.socialis.utils.NotificationTargetType;
 
@@ -18,6 +19,9 @@ public class UserFollowEventListener implements ApplicationListener<UserFollowEv
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public void onApplicationEvent(UserFollowEvent event) {
@@ -33,7 +37,12 @@ public class UserFollowEventListener implements ApplicationListener<UserFollowEv
         notificationObj.setRead(false);
 
         Notification newNotification = this.notificationRepository.save(notificationObj);
+        this.publishAlertToClient(newNotification);
         // this.publishActivity(savedActivity, user, post);
+    }
+
+    public void publishAlertToClient(Notification notification) {
+        this.notificationService.publishAlertToClient(notification);
     }
 
     public void publishActivity(Activity activity, User user, Post post) {
