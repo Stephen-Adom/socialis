@@ -73,7 +73,7 @@ public class NotificationService implements NotificationServiceInterface {
             throw new EntityNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
 
-        List<Notification> notifications = this.notificationRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        List<Notification> notifications = this.notificationRepository.findFirst40ByUserIdOrderByCreatedAtDesc(userId);
 
         List<NotificationDto> notificationDtos = notifications.stream()
                 .map(notification -> buildNotificationDto(notification)).collect(Collectors.toList());
@@ -229,6 +229,25 @@ public class NotificationService implements NotificationServiceInterface {
         messagingTemplate.convertAndSend(
                 USER_UNREAD_NOTIFICATION_COUNT_PATH + "-" + notification.getUser().getUsername(),
                 unreadCount);
+    }
+
+    @Override
+    public void markAllNotificationAsRead(Long userId) throws EntityNotFoundException {
+        Optional<User> user = this.userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
+        }
+
+        List<Notification> allUnreadNotifications = this.notificationRepository.allUnreadNotifications(userId);
+
+        if (allUnreadNotifications.size() > 0) {
+            allUnreadNotifications.stream().forEach(notification -> {
+                notification.setRead(true);
+                this.notificationRepository.save(notification);
+            });
+        }
+
     }
 
 }
