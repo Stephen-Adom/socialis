@@ -12,5 +12,5 @@ public interface NotificationServiceInterface {
 
     public void markNotificationAsRead(Long notificationId) throws EntityNotFoundException;
 
-    public void markAllNotificationAsRead(Long userId) throws EntityNotFoundException;
+    public List<NotificationDto> markAllNotificationAsRead(Long userId) throws EntityNotFoundException;
 }

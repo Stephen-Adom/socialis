@@ -54,15 +54,13 @@ public class NotificationController {
     }
 
     @GetMapping("/{userId}/markAllAsRead")
-    public void markAllNotificationAsRead(@PathVariable("userId") Long userId)
+    public ResponseEntity<SuccessResponse> markAllNotificationAsRead(@PathVariable("userId") Long userId)
             throws EntityNotFoundException {
 
-        this.notificationService.markAllNotificationAsRead(userId);
+        List<NotificationDto> notifications = this.notificationService.markAllNotificationAsRead(userId);
 
-        // SuccessResponse response =
-        // SuccessResponse.builder().data(unreadNotificationsCount).status(HttpStatus.OK)
-        // .build();
+        SuccessResponse response = SuccessResponse.builder().data(notifications).status(HttpStatus.OK).build();
 
-        // return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 }

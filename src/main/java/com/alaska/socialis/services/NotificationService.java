@@ -1,5 +1,6 @@
 package com.alaska.socialis.services;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.OffsetScrollPosition;
+import org.springframework.data.domain.ScrollPosition;
+import org.springframework.data.support.WindowIterator;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -73,10 +77,16 @@ public class NotificationService implements NotificationServiceInterface {
             throw new EntityNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
 
-        List<Notification> notifications = this.notificationRepository.findFirst40ByUserIdOrderByCreatedAtDesc(userId);
+        WindowIterator<Notification> notifications = WindowIterator.of(position -> this.notificationRepository
+                .findFirst30ByUserIdOrderByCreatedAtDesc(userId, (OffsetScrollPosition) position))
+                .startingAt(ScrollPosition.offset());
 
-        List<NotificationDto> notificationDtos = notifications.stream()
-                .map(notification -> buildNotificationDto(notification)).collect(Collectors.toList());
+        List<NotificationDto> notificationDtos = new ArrayList<>();
+
+        notifications.forEachRemaining(notification -> {
+            NotificationDto notificationDto = buildNotificationDto(notification);
+            notificationDtos.add(notificationDto);
+        });
 
         return notificationDtos;
     }
@@ -232,7 +242,7 @@ public class NotificationService implements NotificationServiceInterface {
     }
 
     @Override
-    public void markAllNotificationAsRead(Long userId) throws EntityNotFoundException {
+    public List<NotificationDto> markAllNotificationAsRead(Long userId) throws EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
 
         if (user.isEmpty()) {
@@ -247,6 +257,8 @@ public class NotificationService implements NotificationServiceInterface {
                 this.notificationRepository.save(notification);
             });
         }
+
+        return this.fetchAllUserNotification(userId);
 
     }
 
