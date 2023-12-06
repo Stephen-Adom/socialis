@@ -12,6 +12,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.OffsetScrollPosition;
+import org.springframework.data.domain.ScrollPosition;
+import org.springframework.data.domain.Window;
+import org.springframework.data.support.WindowIterator;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -79,6 +83,19 @@ public class PostService implements PostServiceInterface {
         List<Post> allPost = this.postRepository.findAllByOrderByCreatedAtDesc();
 
         return this.buildPostDto(allPost);
+    }
+
+    public List<PostDto> fetchAllPostUsingOffsetFilteringAndWindowIterator() {
+        OffsetScrollPosition offset = ScrollPosition.offset(5);
+
+        System.out.println(
+                "====================================== scroll position offset ================================");
+        System.out.println(offset);
+        Window<Post> postWindowIterator = this.postRepository.findFirst5ByOrderByCreatedAtDesc(offset);
+
+        List<Post> posts = new ArrayList<>();
+        postWindowIterator.forEach(posts::add);
+        return this.buildPostDto(posts);
     }
 
     @Override

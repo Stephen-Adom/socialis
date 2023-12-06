@@ -34,6 +34,18 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @GetMapping("/all_posts_offset")
+    public ResponseEntity<Map<String, Object>> fetchAllPostUsingOffset() {
+
+        List<PostDto> postDto = this.postService.fetchAllPostUsingOffsetFilteringAndWindowIterator();
+
+        Map<String, Object> response = new HashMap<String, Object>();
+        response.put("status", HttpStatus.OK);
+        response.put("data", postDto);
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/all_posts")
     public ResponseEntity<Map<String, Object>> fetchAllPost() {
 
