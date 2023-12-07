@@ -85,8 +85,8 @@ public class PostService implements PostServiceInterface {
         return this.buildPostDto(allPost);
     }
 
-    public List<PostDto> fetchAllPostUsingOffsetFilteringAndWindowIterator() {
-        OffsetScrollPosition offset = ScrollPosition.offset(5);
+    public List<PostDto> fetchAllPostUsingOffsetFilteringAndWindowIterator(int offsetCount) {
+        OffsetScrollPosition offset = ScrollPosition.offset(offsetCount);
 
         System.out.println(
                 "====================================== scroll position offset ================================");
