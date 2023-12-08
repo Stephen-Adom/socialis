@@ -4,6 +4,7 @@ import java.util.Map;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -125,8 +126,13 @@ public class PostService implements PostServiceInterface {
 
             List<PostImage> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images",
-                            file);
+                    String filePath = file.getContentType().contains("image") ? "socialis/post/images"
+                            : "socialis/post/videos";
+
+                    String resourceType = file.getContentType().contains("image") ? "image" : "video";
+
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud(filePath,
+                            file, resourceType);
 
                     return PostImage.builder().post(postObj)
                             .mediaType((String) result.get("resource_type"))
@@ -151,13 +157,13 @@ public class PostService implements PostServiceInterface {
         Post updatedPost = this.postRepository.save(postObj);
         Optional<User> updatedUser = this.userRepository.findById(author.get().getId());
 
-        this.eventPublisher.publishEvent(new NewPostEvent(updatedPost));
-
         messagingTemplate.convertAndSend(NEW_LIVE_POST_FEED_URL,
                 this.buildPostDto(updatedPost));
         messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" +
                 updatedUser.get().getUsername(),
                 this.userService.buildDto(updatedUser.get()));
+
+        this.eventPublisher.publishEvent(new NewPostEvent(updatedPost));
     }
 
     @Override
@@ -185,8 +191,13 @@ public class PostService implements PostServiceInterface {
         if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
             List<PostImage> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images",
-                            file);
+                    String filePath = file.getContentType().contains("image") ? "socialis/post/images"
+                            : "socialis/post/videos";
+
+                    String resourceType = file.getContentType().contains("image") ? "image" : "video";
+
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud(filePath,
+                            file, resourceType);
 
                     return PostImage.builder().post(existingPost)
                             .mediaType((String) result.get("resource_type"))

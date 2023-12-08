@@ -76,7 +76,7 @@ public class UserService implements UserServiceInterface {
         }
 
         Map<String, Object> result = this.imageUploadService.uploadImageToCloud(COVER_IMAGE_CLOUD_PATH,
-                multipartFile);
+                multipartFile, "image");
 
         if (Objects.nonNull(currentImage)) {
 
@@ -104,7 +104,7 @@ public class UserService implements UserServiceInterface {
         }
 
         Map<String, Object> result = this.imageUploadService.uploadImageToCloud(PROFILE_IMAGE_CLOUD_PATH,
-                multipartFile);
+                multipartFile, "image");
 
         if (Objects.nonNull(currentImage)) {
 

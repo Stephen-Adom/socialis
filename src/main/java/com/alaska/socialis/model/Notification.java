@@ -3,6 +3,7 @@ package com.alaska.socialis.model;
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.AccessType;
 
 import com.alaska.socialis.utils.NotificationActivityType;
 import com.alaska.socialis.utils.NotificationTargetType;
@@ -17,6 +18,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,13 +31,13 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     private NotificationActivityType activityType;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
     @JoinColumn(name = "source_id", referencedColumnName = "id")
     private User source;
 
@@ -44,6 +47,7 @@ public class Notification {
 
     private boolean isRead = false;
 
+    @Column(name = "read_at", nullable = true)
     private Date readAt;
 
     @CreationTimestamp

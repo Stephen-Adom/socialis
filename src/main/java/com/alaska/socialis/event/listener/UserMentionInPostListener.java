@@ -37,7 +37,8 @@ public class UserMentionInPostListener implements ApplicationListener<UserMentio
 
         for (String mention : mentions) {
             User user = (User) userRepository.findByUsername(mention);
-
+            System.out.println(mention);
+            System.out.println(user.getId());
             if (Objects.nonNull(user)) {
                 Notification notificationObj = new Notification();
                 notificationObj.setUser(user);
@@ -46,6 +47,7 @@ public class UserMentionInPostListener implements ApplicationListener<UserMentio
                 notificationObj.setTargetId(post.getId());
                 notificationObj.setTargetType(NotificationTargetType.POST);
                 notificationObj.setRead(false);
+                notificationObj.setReadAt(null);
 
                 Notification newNotification = this.notificationRepository.save(notificationObj);
 

@@ -42,7 +42,6 @@ public class NewPostEventListener implements ApplicationListener<NewPostEvent> {
     @Override
     public void onApplicationEvent(NewPostEvent event) {
         this.checkMentionsInPost(event.getPost());
-        this.savePostActivity(event.getPost(), event.getUser());
     }
 
     public void checkMentionsInPost(Post post) {

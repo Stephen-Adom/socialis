@@ -102,7 +102,12 @@ public class ReplyService implements ReplyServiceInterface {
             Arrays.asList(multipartFiles).forEach((file) -> {
                 Map<String, Object> result;
                 try {
-                    result = this.imageUploadService.uploadImageToCloud("socialis/post/images", file);
+                    String filePath = file.getContentType().contains("image") ? "socialis/post/images"
+                            : "socialis/post/videos";
+
+                    String resourceType = file.getContentType().contains("image") ? "image" : "video";
+
+                    result = this.imageUploadService.uploadImageToCloud(filePath, file, resourceType);
 
                     ReplyImage uploadedImage = ReplyImage.builder().reply(replyObj)
                             .mediaType((String) result.get("resource_type"))
@@ -158,8 +163,13 @@ public class ReplyService implements ReplyServiceInterface {
         if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
             List<ReplyImage> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud("socialis/post/images",
-                            file);
+                    String filePath = file.getContentType().contains("image") ? "socialis/post/images"
+                            : "socialis/post/videos";
+
+                    String resourceType = file.getContentType().contains("image") ? "image" : "video";
+
+                    Map<String, Object> result = this.imageUploadService.uploadImageToCloud(filePath,
+                            file, resourceType);
 
                     return ReplyImage.builder().reply(existingReply)
                             .mediaType((String) result.get("resource_type"))
