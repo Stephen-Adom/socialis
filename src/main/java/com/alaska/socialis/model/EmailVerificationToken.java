@@ -38,7 +38,6 @@ public class EmailVerificationToken {
 
     @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "FK_USER_VERIFY_TOKEN"))
-    @Getter(AccessLevel.NONE)
     private User user;
 
     private Date expirationTime;
