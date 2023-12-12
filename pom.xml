@@ -107,6 +107,11 @@
 			<artifactId>spring-security-messaging</artifactId>
 			<version>6.1.4</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

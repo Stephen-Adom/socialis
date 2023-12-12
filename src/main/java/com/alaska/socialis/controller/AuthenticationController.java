@@ -223,4 +223,9 @@ public class AuthenticationController {
 
         return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
     }
+
+    @PostMapping("/login/google")
+    public void googleOAuthLogin(@RequestBody Map<String, String> googleToken) {
+        System.out.println(googleToken);
+    }
 }
