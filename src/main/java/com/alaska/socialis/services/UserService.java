@@ -57,6 +57,9 @@ public class UserService implements UserServiceInterface {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private JwtService jwtService;
+
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     @Override

@@ -3,6 +3,7 @@ package com.alaska.socialis.services;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ import com.alaska.socialis.model.RevokedTokens;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.GoogleUserRequest;
 import com.alaska.socialis.model.requestModel.PhoneValidationRequeset;
 import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
@@ -109,6 +111,33 @@ public class AuthenticationService implements AuthenticationServiceInterface {
         }
 
         return (User) this.userRepository.findByUsername(user.getUsername());
+    }
+
+    @Override
+    public User validateGoogleUserAndSignInUser(GoogleUserRequest googleUserRequest,
+            BindingResult validationResult) throws ValidationErrorsException {
+
+        if (validationResult.hasErrors()) {
+            throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        Optional<User> userExist = this.userRepository.findByEmail(googleUserRequest.getEmail());
+
+        if (userExist.isEmpty()) {
+            String uid = "usr-" + UUID.randomUUID().toString();
+            String username = googleUserRequest.getEmail().split("@")[0];
+
+            User newUser = User.builder().uid(uid).firstname(googleUserRequest.getFirstName())
+                    .lastname(googleUserRequest.getLastName())
+                    .email(googleUserRequest.getEmail()).username(username)
+                    .password(this.passwordEncoder.encode(googleUserRequest.getEmail()))
+                    .imageUrl(googleUserRequest.getPhotoUrl()).loginCount(1).enabled(true).build();
+
+            return this.userRepository.save(newUser);
+        } else {
+
+            return this.updateLoginCount(userExist.get());
+        }
     }
 
     @Override

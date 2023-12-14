@@ -30,6 +30,7 @@ import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.AuthResponse;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.GoogleUserRequest;
 import com.alaska.socialis.model.requestModel.PhoneValidationRequeset;
 import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
@@ -77,7 +78,6 @@ public class AuthenticationController {
         AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.CREATED)
                 .data(this.userService.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
 
-        // ! dispatch an event to send email for account created
         executorService.submit(() -> this.publisher
                 .publishEvent(new RegistrationCompleteEvent(newUser, this.authService.applicationUrl(request))));
 
@@ -98,6 +98,20 @@ public class AuthenticationController {
                 .data(this.userService.buildDto(updatedAuthUser)).accessToken(token).refreshToken(refreshToken).build();
 
         return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.OK);
+    }
+
+    @PostMapping("/google/login")
+    public ResponseEntity<AuthResponse> authenticateGoogleToken(@RequestBody @Valid GoogleUserRequest googleUserRequest,
+            BindingResult bindingResult, HttpServletRequest request) throws ValidationErrorsException {
+        User newUser = this.authService.validateGoogleUserAndSignInUser(googleUserRequest, bindingResult);
+
+        String token = this.authService.generateJwt(newUser, request);
+        String refreshToken = this.jwtService.generateRefreshToken(newUser);
+
+        AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.CREATED)
+                .data(this.userService.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
+
+        return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.CREATED);
     }
 
     @PostMapping("/refresh_token")
@@ -222,10 +236,5 @@ public class AuthenticationController {
         responseBody.put("status", HttpStatus.OK);
 
         return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
-    }
-
-    @PostMapping("/login/google")
-    public void googleOAuthLogin(@RequestBody Map<String, String> googleToken) {
-        System.out.println(googleToken);
     }
 }

@@ -13,6 +13,7 @@ import com.alaska.socialis.model.NewPasswordModel;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
+import com.alaska.socialis.model.requestModel.GoogleUserRequest;
 import com.alaska.socialis.model.requestModel.PhoneValidationRequeset;
 import com.alaska.socialis.model.requestModel.ResetPasswordRequest;
 import com.alaska.socialis.model.requestModel.UserEmailValidationRequest;
@@ -55,4 +56,7 @@ public interface AuthenticationServiceInterface {
 
         public void changePassword(String passwordToken, NewPasswordModel newPassword, BindingResult validationResult)
                         throws UnauthorizedRequestException, ValidationErrorsException;
+
+        public User validateGoogleUserAndSignInUser(GoogleUserRequest googleUserRequest,
+                        BindingResult bindingResult) throws ValidationErrorsException;
 }

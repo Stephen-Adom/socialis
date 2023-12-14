@@ -28,13 +28,13 @@ import com.alaska.socialis.services.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/user/update_cover_background", headers = "Content-Type=multipart/form-data")
+    @PostMapping(value = "/update_cover_background", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<Map<String, Object>> updateUserCoverBackground(
             @RequestParam(required = true, value = "user_id") Long userId,
             @RequestParam(required = true, value = "image") MultipartFile multipartFile)
@@ -48,7 +48,7 @@ public class UserController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/user/update_profile_image", headers = "Content-Type=multipart/form-data")
+    @PostMapping(value = "/update_profile_image", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<Map<String, Object>> updateUserProfileImage(
             @RequestParam(required = true, value = "user_id") Long userId,
             @RequestParam(required = true, value = "image") MultipartFile multipartFile)
@@ -63,7 +63,7 @@ public class UserController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/user/{id}/update_user_info")
+    @PostMapping("/{id}/update_user_info")
     public ResponseEntity<Map<String, Object>> updateUserInfo(@PathVariable("id") Long userId,
             @RequestBody @Valid UserInfoRequeset requestBody, BindingResult bindingResult)
             throws EntityNotFoundException, ValidationErrorsException {
@@ -76,7 +76,7 @@ public class UserController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{username}/full_information")
+    @GetMapping("/{username}/full_information")
     public ResponseEntity<SuccessResponse> fetchUserInfoFullInformation(@PathVariable("username") String username)
             throws EntityNotFoundException {
         UserSummaryFollowingDto userInfo = this.userService.fetchUserInfoFullInformation(username);
@@ -86,7 +86,7 @@ public class UserController {
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{followerId}/follow/{followingId}")
+    @GetMapping("/{followerId}/follow/{followingId}")
     public ResponseEntity<SuccessResponse> followUser(@PathVariable("followerId") Long followerId,
             @PathVariable("followingId") Long followingId) {
 
@@ -97,7 +97,7 @@ public class UserController {
         return new ResponseEntity<SuccessResponse>(message, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{followerId}/unfollow/{followingId}")
+    @GetMapping("/{followerId}/unfollow/{followingId}")
     public ResponseEntity<SuccessResponse> unfollowUser(@PathVariable("followerId") Long followerId,
             @PathVariable("followingId") Long followingId) throws EntityNotFoundException {
 
@@ -108,7 +108,7 @@ public class UserController {
         return new ResponseEntity<SuccessResponse>(message, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{username}/all_followers")
+    @GetMapping("/{username}/all_followers")
     public ResponseEntity<SuccessResponse> fetchAllUserFollowers(
             @PathVariable(name = "username", required = true) String username)
             throws EntityNotFoundException {
@@ -120,7 +120,7 @@ public class UserController {
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{username}/all_following")
+    @GetMapping("/{username}/all_following")
     public ResponseEntity<SuccessResponse> fetchAllUserFollowing(
             @PathVariable(name = "username", required = true) String username)
             throws EntityNotFoundException {
