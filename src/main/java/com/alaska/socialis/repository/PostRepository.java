@@ -24,5 +24,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     public List<Post> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 
-    Window<Post> findFirst5ByOrderByCreatedAtDesc(OffsetScrollPosition position);
+    Window<Post> findFirst5ByScheduledAtNullOrderByCreatedAtDesc(OffsetScrollPosition position);
 }

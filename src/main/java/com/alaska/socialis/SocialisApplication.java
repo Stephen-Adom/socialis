@@ -11,5 +11,4 @@ public class SocialisApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SocialisApplication.class, args);
 	}
-
 }

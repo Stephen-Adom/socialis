@@ -1,5 +1,6 @@
 package com.alaska.socialis.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -75,5 +76,8 @@ public class Post {
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     List<PostLike> likes = new ArrayList<PostLike>();
+
+    @Column(name = "scheduled_at", nullable = true)
+    private LocalDateTime scheduledAt;
 
 }
