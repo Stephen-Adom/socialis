@@ -23,6 +23,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query(value = "SELECT COUNT(*) from notification u WHERE u.user_id=?1 AND u.is_read=false", nativeQuery = true)
     public Long countAllByUserIdUnreadTrue(Long userId);
 
-    @Query(value = "SELECT * FROM notification u WHERE u.user_id=?1 AND u.is_read=false", nativeQuery = true)
+    @Query(value = "SELECT * FROM notification u WHERE u.user_id=?1 AND u.is_read=false ORDER BY u.created_at DESC", nativeQuery = true)
     public List<Notification> allUnreadNotifications(Long userId);
 }

@@ -92,7 +92,7 @@ public class PostService implements PostServiceInterface {
         System.out.println(
                 "====================================== scroll position offset ================================");
         System.out.println(offset);
-        Window<Post> postWindowIterator = this.postRepository.findFirst5ByOrderByCreatedAtDesc(offset);
+        Window<Post> postWindowIterator = this.postRepository.findFirst5ByScheduledAtIsNullOrderByCreatedAtDesc(offset);
 
         List<Post> posts = new ArrayList<>();
         postWindowIterator.forEach(posts::add);
