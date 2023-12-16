@@ -1,5 +1,9 @@
 package com.alaska.socialis.config;
 
+import java.util.List;
+
+import com.google.gson.annotations.SerializedName;
+
 public class MediaInfo {
     public static class Format {
         @SerializedName("bit_rate")

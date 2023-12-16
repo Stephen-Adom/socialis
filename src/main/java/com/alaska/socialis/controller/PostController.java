@@ -1,11 +1,17 @@
 package com.alaska.socialis.controller;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,7 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alaska.socialis.config.FFmpegWrapper;
+import com.alaska.socialis.config.FFmpegUtils;
+import com.alaska.socialis.config.TranscodeConfig;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.dto.PostDto;
@@ -27,12 +34,22 @@ import com.alaska.socialis.services.PostService;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/api")
 @Slf4j
 public class PostController {
     @Autowired
     private PostService postService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostController.class);
+
+    @Value("${app.video-folder}")
+    private String videoFolder;
+
+    private Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
 
     @GetMapping("/all_posts_offset")
     public ResponseEntity<Map<String, Object>> fetchAllPostUsingOffset(@RequestParam(required = true) int offset) {
@@ -126,9 +143,70 @@ public class PostController {
     }
 
     @PostMapping("/stories")
-    public void postStories(@RequestParam(required = false, value = "images") MultipartFile multipartFile)
+    public Object postStories(@RequestParam(required = false, value = "images") MultipartFile video)
             throws IOException {
-        byte[] videoData = multipartFile.getBytes();
-        byte[] trimmedVideo = FFmpegWrapper.trim(videoData, 0.0, 0.4);
+
+        TranscodeConfig transcodeConfig = new TranscodeConfig();
+        transcodeConfig.setCutEnd("");
+        transcodeConfig.setCutStart("");
+        transcodeConfig.setPoster("00:00:00.001");
+        transcodeConfig.setTsSeconds("15");
+
+        LOGGER.info("File Information：title={}, size={}", video.getOriginalFilename(),
+                video.getSize());
+        LOGGER.info("Transcoding configuration：{}", transcodeConfig);
+
+        // The name of the original file, which is the title of the video
+        String title = video.getOriginalFilename();
+
+        // io to temporary files
+        Path tempFile = tempDir.resolve(title);
+        LOGGER.info("io to temporary files：{}", tempFile.toString());
+
+        try {
+
+            video.transferTo(tempFile);
+
+            // Remove the suffix
+            title = title.substring(0, title.lastIndexOf("."));
+
+            // Generate subdirectories by date
+            String today = DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDate.now());
+
+            // Try creating a video catalog
+            Path targetFolder = Files.createDirectories(Paths.get(videoFolder, today, title));
+
+            LOGGER.info("target folder：{}", targetFolder);
+            Files.createDirectories(targetFolder);
+
+            // Start transcoding
+            LOGGER.info("Start transcoding");
+            try {
+                FFmpegUtils.transcodeToM3u8(tempFile.toString(), targetFolder.toString(), transcodeConfig);
+            } catch (Exception e) {
+                LOGGER.error("The transcoding is abnormal：{}", e.getMessage());
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", false);
+                result.put("message", e.getMessage());
+
+                System.out.println(result);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            }
+
+            // Encapsulation results
+            Map<String, Object> videoInfo = new HashMap<>();
+            videoInfo.put("title", title);
+            videoInfo.put("m3u8", String.join("/", "", today, title, "index.m3u8"));
+            videoInfo.put("poster", String.join("/", "", today, title, "poster.jpg"));
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("data", videoInfo);
+            System.out.println(result);
+            return result;
+        } finally {
+            // Always delete temporary files
+            Files.delete(tempFile);
+        }
     }
 }
