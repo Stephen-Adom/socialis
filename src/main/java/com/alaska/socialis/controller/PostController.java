@@ -1,5 +1,6 @@
 package com.alaska.socialis.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alaska.socialis.config.FFmpegWrapper;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.dto.PostDto;
@@ -121,5 +123,12 @@ public class PostController {
                 .build();
 
         return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/stories")
+    public void postStories(@RequestParam(required = false, value = "images") MultipartFile multipartFile)
+            throws IOException {
+        byte[] videoData = multipartFile.getBytes();
+        byte[] trimmedVideo = FFmpegWrapper.trim(videoData, 0.0, 0.4);
     }
 }
