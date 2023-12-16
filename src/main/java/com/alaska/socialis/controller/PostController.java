@@ -142,9 +142,13 @@ public class PostController {
         return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/stories")
-    public Object postStories(@RequestParam(required = false, value = "images") MultipartFile video)
+    @PostMapping(value = "/stories", headers = "Content-Type=multipart/form-data")
+    public Object postStories(@RequestParam(required = true, value = "video") MultipartFile video)
             throws IOException {
+
+        System.out.println(
+                "===================================== uploaded video =======================================");
+        System.out.println(video);
 
         TranscodeConfig transcodeConfig = new TranscodeConfig();
         transcodeConfig.setCutEnd("");
@@ -152,7 +156,8 @@ public class PostController {
         transcodeConfig.setPoster("00:00:00.001");
         transcodeConfig.setTsSeconds("15");
 
-        LOGGER.info("File Information：title={}, size={}", video.getOriginalFilename(),
+        LOGGER.info("File Information：title={}, size={}",
+                video.getOriginalFilename(),
                 video.getSize());
         LOGGER.info("Transcoding configuration：{}", transcodeConfig);
 
@@ -174,7 +179,8 @@ public class PostController {
             String today = DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDate.now());
 
             // Try creating a video catalog
-            Path targetFolder = Files.createDirectories(Paths.get(videoFolder, today, title));
+            Path targetFolder = Files.createDirectories(Paths.get(videoFolder, today,
+                    title));
 
             LOGGER.info("target folder：{}", targetFolder);
             Files.createDirectories(targetFolder);
@@ -182,7 +188,8 @@ public class PostController {
             // Start transcoding
             LOGGER.info("Start transcoding");
             try {
-                FFmpegUtils.transcodeToM3u8(tempFile.toString(), targetFolder.toString(), transcodeConfig);
+                FFmpegUtils.transcodeToM3u8(tempFile.toString(), targetFolder.toString(),
+                        transcodeConfig);
             } catch (Exception e) {
                 LOGGER.error("The transcoding is abnormal：{}", e.getMessage());
                 Map<String, Object> result = new HashMap<>();
@@ -196,8 +203,8 @@ public class PostController {
             // Encapsulation results
             Map<String, Object> videoInfo = new HashMap<>();
             videoInfo.put("title", title);
-            videoInfo.put("m3u8", String.join("/", "", today, title, "index.m3u8"));
-            videoInfo.put("poster", String.join("/", "", today, title, "poster.jpg"));
+            videoInfo.put("m3u8", videoFolder + String.join("/", "", today, title, "index.m3u8"));
+            videoInfo.put("poster", videoFolder + String.join("/", "", today, title, "poster.jpg"));
 
             Map<String, Object> result = new HashMap<>();
             result.put("success", true);
