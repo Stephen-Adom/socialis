@@ -1,4 +1,4 @@
-package com.alaska.socialis.config;
+package com.alaska.socialis.ffmpeg;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,12 +18,15 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.KeyGenerator;
 
-public class FFmpegUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FFmpegUtils.class);
+@Service
+public class FFmpegUtilsService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FFmpegUtilsService.class);
 
     // Cross-platform line breaks
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -100,7 +103,7 @@ public class FFmpegUtils {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void transcodeToM3u8(String source, String destFolder, TranscodeConfig config)
+    public void transcodeToM3u8(String source, String destFolder, TranscodeConfig config)
             throws IOException, InterruptedException {
 
         // Check whether the source video exists

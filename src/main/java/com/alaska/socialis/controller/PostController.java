@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alaska.socialis.config.FFmpegUtils;
-import com.alaska.socialis.config.TranscodeConfig;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
+import com.alaska.socialis.ffmpeg.FFmpegUtilsService;
+import com.alaska.socialis.ffmpeg.TranscodeConfig;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.services.PostService;
@@ -43,6 +43,9 @@ import org.slf4j.LoggerFactory;
 public class PostController {
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private FFmpegUtilsService ffmpegservice;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostController.class);
 
@@ -188,7 +191,8 @@ public class PostController {
             // Start transcoding
             LOGGER.info("Start transcoding");
             try {
-                FFmpegUtils.transcodeToM3u8(tempFile.toString(), targetFolder.toString(),
+                // FFmpegUtils fFmpegUtils = new FFmpegUtils();
+                ffmpegservice.transcodeToM3u8(tempFile.toString(), targetFolder.toString(),
                         transcodeConfig);
             } catch (Exception e) {
                 LOGGER.error("The transcoding is abnormal：{}", e.getMessage());

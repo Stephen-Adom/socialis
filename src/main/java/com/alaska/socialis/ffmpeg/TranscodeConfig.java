@@ -1,4 +1,4 @@
-package com.alaska.socialis.config;
+package com.alaska.socialis.ffmpeg;
 
 public class TranscodeConfig {
     private String poster;

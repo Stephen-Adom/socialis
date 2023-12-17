@@ -1,6 +1,7 @@
 package com.alaska.socialis.services;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,16 @@ public class ImageUploadService {
                 "folder", path);
 
         Map<String, Object> uploadResult = this.cloudinary.uploader().upload(file.getBytes(), params);
+        return uploadResult;
+    }
+
+    public Map<String, Object> uploadImageToCloud2(String path, InputStream file, String resourceType)
+            throws IOException {
+        Map<String, String> params = ObjectUtils.asMap(
+                "resource_type", resourceType,
+                "folder", path);
+
+        Map<String, Object> uploadResult = this.cloudinary.uploader().upload(file, params);
         return uploadResult;
     }
 

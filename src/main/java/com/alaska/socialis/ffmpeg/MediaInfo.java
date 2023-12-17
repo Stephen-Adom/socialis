@@ -1,4 +1,4 @@
-package com.alaska.socialis.config;
+package com.alaska.socialis.ffmpeg;
 
 import java.util.List;
 
