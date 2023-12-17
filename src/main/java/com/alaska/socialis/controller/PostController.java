@@ -31,6 +31,7 @@ import com.alaska.socialis.ffmpeg.TranscodeConfig;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.services.PostService;
+import com.cloudinary.Cloudinary;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,6 +47,9 @@ public class PostController {
 
     @Autowired
     private FFmpegUtilsService ffmpegservice;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostController.class);
 
@@ -194,6 +198,9 @@ public class PostController {
                 // FFmpegUtils fFmpegUtils = new FFmpegUtils();
                 ffmpegservice.transcodeToM3u8(tempFile.toString(), targetFolder.toString(),
                         transcodeConfig);
+
+                ffmpegservice.uploadToCloudinaryAndDelete(cloudinary, "stories",
+                        "C:/Users/steph/Documents/tmp/" + today + "/" + title);
             } catch (Exception e) {
                 LOGGER.error("The transcoding is abnormal：{}", e.getMessage());
                 Map<String, Object> result = new HashMap<>();
