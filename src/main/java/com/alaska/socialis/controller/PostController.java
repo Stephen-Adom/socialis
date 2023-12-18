@@ -1,5 +1,6 @@
 package com.alaska.socialis.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +32,7 @@ import com.alaska.socialis.ffmpeg.TranscodeConfig;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.services.PostService;
+import com.alaska.socialis.services.VideoService;
 import com.cloudinary.Cloudinary;
 
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,9 @@ public class PostController {
 
     @Autowired
     private Cloudinary cloudinary;
+
+    @Autowired
+    private VideoService videoservice;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostController.class);
 
@@ -149,82 +154,104 @@ public class PostController {
         return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
     }
 
+    // @PostMapping(value = "/stories", headers =
+    // "Content-Type=multipart/form-data")
+    // public Object postStories(@RequestParam(required = true, value = "video")
+    // MultipartFile video)
+    // throws IOException {
+
+    // System.out.println(
+    // "===================================== uploaded video
+    // =======================================");
+    // System.out.println(video);
+
+    // TranscodeConfig transcodeConfig = new TranscodeConfig();
+    // transcodeConfig.setCutEnd("");
+    // transcodeConfig.setCutStart("");
+    // transcodeConfig.setPoster("00:00:00.001");
+    // transcodeConfig.setTsSeconds("15");
+
+    // LOGGER.info("File Information：title={}, size={}",
+    // video.getOriginalFilename(),
+    // video.getSize());
+    // LOGGER.info("Transcoding configuration：{}", transcodeConfig);
+
+    // // The name of the original file, which is the title of the video
+    // String title = video.getOriginalFilename();
+
+    // // io to temporary files
+    // Path tempFile = tempDir.resolve(title);
+    // LOGGER.info("io to temporary files：{}", tempFile.toString());
+
+    // try {
+
+    // video.transferTo(tempFile);
+
+    // // Remove the suffix
+    // title = title.substring(0, title.lastIndexOf("."));
+
+    // // Generate subdirectories by date
+    // String today =
+    // DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDate.now());
+
+    // // Try creating a video catalog
+    // Path targetFolder = Files.createDirectories(Paths.get(videoFolder, today,
+    // title));
+
+    // LOGGER.info("target folder：{}", targetFolder);
+    // Files.createDirectories(targetFolder);
+
+    // // Start transcoding
+    // LOGGER.info("Start transcoding");
+    // try {
+    // // FFmpegUtils fFmpegUtils = new FFmpegUtils();
+    // ffmpegservice.sliceVideo(tempFile.toString(), targetFolder.toString(),
+    // transcodeConfig);
+    // } catch (Exception e) {
+    // LOGGER.error("The transcoding is abnormal：{}", e.getMessage());
+    // Map<String, Object> result = new HashMap<>();
+    // result.put("success", false);
+    // result.put("message", e.getMessage());
+
+    // System.out.println(result);
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+    // }
+
+    // // Encapsulation results
+    // Map<String, Object> videoInfo = new HashMap<>();
+    // videoInfo.put("title", title);
+    // videoInfo.put("m3u8", videoFolder + String.join("/", "", today, title,
+    // "index.m3u8"));
+    // videoInfo.put("poster", videoFolder + String.join("/", "", today, title,
+    // "poster.jpg"));
+
+    // Map<String, Object> result = new HashMap<>();
+    // result.put("success", true);
+    // result.put("data", videoInfo);
+    // System.out.println(result);
+    // return result;
+    // } finally {
+    // // Always delete temporary files
+    // Files.delete(tempFile);
+    // }
+    // }
+
     @PostMapping(value = "/stories", headers = "Content-Type=multipart/form-data")
-    public Object postStories(@RequestParam(required = true, value = "video") MultipartFile video)
+    public String postStories(@RequestParam(required = true, value = "video") MultipartFile file)
             throws IOException {
 
-        System.out.println(
-                "===================================== uploaded video =======================================");
-        System.out.println(video);
+        // Save the uploaded file to a temporary location
+        File tempFile = File.createTempFile("temp", null);
+        file.transferTo(tempFile);
 
-        TranscodeConfig transcodeConfig = new TranscodeConfig();
-        transcodeConfig.setCutEnd("");
-        transcodeConfig.setCutStart("");
-        transcodeConfig.setPoster("00:00:00.001");
-        transcodeConfig.setTsSeconds("15");
+        // Upload the sliced video to Cloudinary and get the public URL
+        String videoUrl = videoservice.uploadAndSliceVideo(tempFile);
 
-        LOGGER.info("File Information：title={}, size={}",
-                video.getOriginalFilename(),
-                video.getSize());
-        LOGGER.info("Transcoding configuration：{}", transcodeConfig);
+        System.out.println(" ========================= operation done ===========================");
 
-        // The name of the original file, which is the title of the video
-        String title = video.getOriginalFilename();
+        // Clean up the temporary file
+        tempFile.delete();
 
-        // io to temporary files
-        Path tempFile = tempDir.resolve(title);
-        LOGGER.info("io to temporary files：{}", tempFile.toString());
-
-        try {
-
-            video.transferTo(tempFile);
-
-            // Remove the suffix
-            title = title.substring(0, title.lastIndexOf("."));
-
-            // Generate subdirectories by date
-            String today = DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDate.now());
-
-            // Try creating a video catalog
-            Path targetFolder = Files.createDirectories(Paths.get(videoFolder, today,
-                    title));
-
-            LOGGER.info("target folder：{}", targetFolder);
-            Files.createDirectories(targetFolder);
-
-            // Start transcoding
-            LOGGER.info("Start transcoding");
-            try {
-                // FFmpegUtils fFmpegUtils = new FFmpegUtils();
-                ffmpegservice.transcodeToM3u8(tempFile.toString(), targetFolder.toString(),
-                        transcodeConfig);
-
-                ffmpegservice.uploadToCloudinaryAndDelete(cloudinary, "stories",
-                        "C:/Users/steph/Documents/tmp/" + today + "/" + title);
-            } catch (Exception e) {
-                LOGGER.error("The transcoding is abnormal：{}", e.getMessage());
-                Map<String, Object> result = new HashMap<>();
-                result.put("success", false);
-                result.put("message", e.getMessage());
-
-                System.out.println(result);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
-            }
-
-            // Encapsulation results
-            Map<String, Object> videoInfo = new HashMap<>();
-            videoInfo.put("title", title);
-            videoInfo.put("m3u8", videoFolder + String.join("/", "", today, title, "index.m3u8"));
-            videoInfo.put("poster", videoFolder + String.join("/", "", today, title, "poster.jpg"));
-
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", true);
-            result.put("data", videoInfo);
-            System.out.println(result);
-            return result;
-        } finally {
-            // Always delete temporary files
-            Files.delete(tempFile);
-        }
+        return videoUrl;
     }
 }

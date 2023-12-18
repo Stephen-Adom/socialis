@@ -292,4 +292,67 @@ public class FFmpegUtilsService {
 
         return process.waitFor() == 0;
     }
+
+    public void sliceVideo(String source, String destFolder, TranscodeConfig config)
+            throws IOException, InterruptedException {
+
+        // Check whether the source video exists
+        if (!Files.exists(Paths.get(source))) {
+            throw new IllegalArgumentException("The file does not exist: " + source);
+        }
+
+        // Create a working directory
+        Path workDir = Paths.get(destFolder, "sliced");
+        Files.createDirectories(workDir);
+
+        // Build commands
+        List<String> commands = new ArrayList<>();
+        commands.add("ffmpeg");
+        commands.add("-i");
+        commands.add(source); // Source files
+        commands.add("-c:v");
+        commands.add("copy"); // Video codec copy
+        commands.add("-c:a");
+        commands.add("copy"); // Audio codec copy
+        commands.add("-ss");
+        commands.add(config.getCutStart()); // Start time
+        commands.add("-to");
+        commands.add(config.getCutEnd()); // End time
+        commands.add("-avoid_negative_ts");
+        commands.add("1"); // Avoid negative timestamps
+        commands.add("output.mp4"); // Output file name
+
+        // Build the process
+        Process process = new ProcessBuilder()
+                .command(commands)
+                .directory(workDir.toFile())
+                .start();
+
+        // Read process standard output
+        new Thread(() -> {
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line = null;
+                while ((line = bufferedReader.readLine()) != null) {
+                    LOGGER.info(line);
+                }
+            } catch (IOException e) {
+            }
+        }).start();
+
+        // Read the output of the process exception
+        new Thread(() -> {
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String line = null;
+                while ((line = bufferedReader.readLine()) != null) {
+                    LOGGER.info(line);
+                }
+            } catch (IOException e) {
+            }
+        }).start();
+
+        // Blocks until the end of the mission
+        if (process.waitFor() != 0) {
+            throw new RuntimeException("Video slicing failed");
+        }
+    }
 }

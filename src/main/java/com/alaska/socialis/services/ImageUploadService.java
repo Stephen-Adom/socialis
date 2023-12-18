@@ -27,13 +27,13 @@ public class ImageUploadService {
         return uploadResult;
     }
 
-    public Map<String, Object> uploadImageToCloud2(String path, InputStream file, String resourceType)
+    public Map<String, Object> uploadStoriesToCloud(String path, String file, String resourceType)
             throws IOException {
         Map<String, String> params = ObjectUtils.asMap(
                 "resource_type", resourceType,
                 "folder", path);
 
-        Map<String, Object> uploadResult = this.cloudinary.uploader().upload(file, params);
+        Map<String, Object> uploadResult = this.cloudinary.uploader().upload(file.getBytes(), params);
         return uploadResult;
     }
 
