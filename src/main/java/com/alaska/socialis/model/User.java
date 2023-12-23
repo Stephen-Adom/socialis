@@ -157,6 +157,10 @@ public class User implements UserDetails {
     @Builder.Default
     private List<Notification> notifications = new ArrayList<Notification>();
 
+    @OneToMany(mappedBy = "user")
+    @Builder.Default
+    private List<UserStory> userStories = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("USER"));
