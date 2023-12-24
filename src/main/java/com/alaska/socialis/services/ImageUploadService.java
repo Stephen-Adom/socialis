@@ -27,16 +27,6 @@ public class ImageUploadService {
         return uploadResult;
     }
 
-    public Map<String, Object> uploadStoriesToCloud(String path, String file, String resourceType)
-            throws IOException {
-        Map<String, String> params = ObjectUtils.asMap(
-                "resource_type", resourceType,
-                "folder", path);
-
-        Map<String, Object> uploadResult = this.cloudinary.uploader().upload(file.getBytes(), params);
-        return uploadResult;
-    }
-
     public void deleteUploadedImage(String delimiter, String imageUrl) {
         try {
             String[] imagUrlArray = imageUrl.split(delimiter);

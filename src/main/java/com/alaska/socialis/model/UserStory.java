@@ -33,6 +33,9 @@ public class UserStory {
     @Column(name = "media_caption", nullable = true)
     private String mediaCaption;
 
+    @Column(name = "media_type", nullable = false)
+    private String mediaType;
+
     @Column(name = "expired_at", nullable = false)
     private Date expiredAt;
 
