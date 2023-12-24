@@ -1,6 +1,7 @@
 package com.alaska.socialis.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
+import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
-import com.alaska.socialis.model.dto.UserStoryDto;
 import com.alaska.socialis.services.StoriesService;
 
 @RestController
@@ -29,7 +30,7 @@ public class StoriesController {
     @GetMapping("/{userId}/all")
     private ResponseEntity<SuccessResponse> fetchAuthUserStories(@PathVariable("userId") Long userId)
             throws EntityNotFoundException {
-        UserStoryDto userStories = this.storiesservice.fetchAuthUserStories(userId);
+        List<StoryDto> userStories = this.storiesservice.fetchAuthUserStories(userId);
 
         SuccessResponse response = SuccessResponse.builder().data(userStories).status(HttpStatus.OK).build();
 

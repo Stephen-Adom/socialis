@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserStory;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.StoryDto;
-import com.alaska.socialis.model.dto.UserStoryDto;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.repository.UserStoryRepository;
 import com.alaska.socialis.repository.WatchedStoryRepository;
@@ -55,7 +53,7 @@ public class StoriesService {
 
     private final String storyFilePath = "socialis/user/stories";
 
-    public UserStoryDto fetchAuthUserStories(Long userId) throws EntityNotFoundException {
+    public List<StoryDto> fetchAuthUserStories(Long userId) throws EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
 
         if (user.isEmpty()) {
@@ -64,7 +62,7 @@ public class StoriesService {
 
         List<UserStory> allAuthStories = this.storyRepository.findAllByUserIdOrderByUploadedAtDesc(userId);
 
-        UserStoryDto allStories = this.buildUserStory(allAuthStories, user.get());
+        List<StoryDto> allStories = this.buildUserStory(allAuthStories);
 
         return allStories;
     }
@@ -170,13 +168,7 @@ public class StoriesService {
         return uploadResult;
     }
 
-    public UserStoryDto buildUserStory(List<UserStory> userStories, User user) {
-        UserStoryDto buildUserStoryDto = new UserStoryDto();
-
-        SimpleUserDto userInfo = SimpleUserDto.builder().id(user.getId()).firstname(user.getFirstname())
-                .lastname(user.getLastname()).username(user.getUsername()).bio(user.getBio())
-                .imageUrl(user.getImageUrl()).build();
-
+    public List<StoryDto> buildUserStory(List<UserStory> userStories) {
         List<StoryDto> storyLists = userStories.stream().map(story -> {
             List<SimpleUserDto> watchedUsers = this.watchedStoryRespository
                     .findAllByStoryIdOrderByWatchedAtDesc(story.getId())
@@ -199,9 +191,6 @@ public class StoriesService {
             return storyDto;
         }).collect(Collectors.toList());
 
-        buildUserStoryDto.setUser(userInfo);
-        buildUserStoryDto.setStories(storyLists);
-
-        return buildUserStoryDto;
+        return storyLists;
     }
 }
