@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,14 +15,26 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.dto.SuccessMessage;
-import com.alaska.socialis.services.VideoService;
+import com.alaska.socialis.model.dto.SuccessResponse;
+import com.alaska.socialis.model.dto.UserStoryDto;
+import com.alaska.socialis.services.StoriesService;
 
 @RestController
 @RequestMapping("/api/stories")
 public class StoriesController {
 
     @Autowired
-    private VideoService videoservice;
+    private StoriesService storiesservice;
+
+    @GetMapping("/{userId}/all")
+    private ResponseEntity<SuccessResponse> fetchAuthUserStories(@PathVariable("userId") Long userId)
+            throws EntityNotFoundException {
+        UserStoryDto userStories = this.storiesservice.fetchAuthUserStories(userId);
+
+        SuccessResponse response = SuccessResponse.builder().data(userStories).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    }
 
     @PostMapping(value = "/{userId}/upload", headers = "Content-Type=multipart/form-data")
     public ResponseEntity<SuccessMessage> postStories(
@@ -30,7 +43,7 @@ public class StoriesController {
             @PathVariable("userId") Long userId)
             throws IOException, EntityNotFoundException {
 
-        this.videoservice.uploadStory(file, caption, userId);
+        this.storiesservice.uploadStory(file, caption, userId);
 
         SuccessMessage message = SuccessMessage.builder().message("User story uploaded successfully")
                 .status(HttpStatus.OK).build();
