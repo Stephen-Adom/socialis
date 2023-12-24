@@ -1,10 +1,8 @@
 package com.alaska.socialis.controller;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,16 +22,11 @@ public class StoriesController {
 
     @PostMapping(value = "/{userId}/upload", headers = "Content-Type=multipart/form-data")
     public String postStories(@RequestParam(required = true, value = "video") MultipartFile file,
+            @RequestParam(required = false, value = "caption") String caption,
             @PathVariable("userId") Long userId)
             throws IOException, EntityNotFoundException {
 
-        // Save the uploaded file to a temporary location
-        // File tempFile = File.createTempFile("temp", null);
-        // file.transferTo(tempFile);
-
-        // Upload the sliced video to Cloudinary and get the public URL
-        // String videoUrl = videoservice.uploadAndSliceVideo(tempFile);
-        this.videoservice.uploadStory(file, userId);
+        this.videoservice.uploadStory(file, caption, userId);
 
         System.out.println(" ========================= operation done ===========================");
 

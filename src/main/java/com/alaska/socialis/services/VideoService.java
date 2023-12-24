@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.jpa.domain.JpaSort.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +22,7 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserStory;
 import com.alaska.socialis.repository.UserRepository;
+import com.alaska.socialis.repository.UserStoryRepository;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
@@ -37,27 +37,50 @@ public class VideoService {
     @Autowired
     private ImageUploadService imageUploadService;
 
+    @Autowired
+    private UserStoryRepository storyRepository;
+
     @Value("${app.video-folder}")
     private String videoFolder;
 
     private final String storyFilePath = "socialis/user/stories";
 
-    public void uploadStory(MultipartFile file, Long userId) throws IOException, EntityNotFoundException {
+    public void uploadStory(MultipartFile file, String caption, Long userId)
+            throws IOException, EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
-        Map<String, Object> mediaUrl = new HashMap<>();
+        Map<String, Object> mediaObject = new HashMap<>();
 
         if (user.isEmpty()) {
             throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
         if (file.getContentType().contains("video")) {
-            mediaUrl = this.uploadAndSliceVideo(file);
+            mediaObject = this.uploadAndSliceVideo(file);
         } else {
-            mediaUrl = this.uploadStoryImage(file);
+            mediaObject = this.uploadStoryImage(file);
         }
 
-        if (Objects.nonNull(mediaUrl)) {
+        if (Objects.nonNull(mediaObject)) {
+            String mediaUrl = (String) mediaObject.get("secure_url");
+            String mediaType = (String) mediaObject.get("resource_type");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+
+            Date currentDate = calendar.getTime();
+
+            calendar.add(Calendar.HOUR, 24);
+
+            Date expiredDate = calendar.getTime();
+
             UserStory newStory = new UserStory();
+            newStory.setUser(user.get());
+            newStory.setMediaCaption(caption);
+            newStory.setMediaUrl(mediaUrl);
+            newStory.setMediaType(mediaType);
+            newStory.setUploadedAt(currentDate);
+            newStory.setExpiredAt(expiredDate);
+
+            this.storyRepository.save(newStory);
         }
     }
 
