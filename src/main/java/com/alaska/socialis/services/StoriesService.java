@@ -25,7 +25,6 @@ import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.repository.UserRepository;
-import com.alaska.socialis.repository.UserStoryRepository;
 import com.alaska.socialis.repository.WatchedStoryRepository;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
