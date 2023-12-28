@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 // import com.alaska.socialis.model.UserStory;
 
-@Repository
-public interface UserStoryRepository extends JpaRepository<Object, Long> {
+public interface UserStoryRepository {
     // public List<UserStory> findAllByUserIdOrderByUploadedAtDesc(Long userId);
 }

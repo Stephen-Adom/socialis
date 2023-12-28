@@ -24,9 +24,6 @@ import com.alaska.socialis.services.StoriesService;
 @RequestMapping("/api/stories")
 public class StoriesController {
 
-    @Autowired
-    private StoriesService storiesservice;
-
     @GetMapping("/{userId}/all")
     private void fetchAuthUserStories(@PathVariable("userId") Long userId)
             throws EntityNotFoundException {
@@ -39,18 +36,20 @@ public class StoriesController {
         // return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/{userId}/upload", headers = "Content-Type=multipart/form-data")
-    public ResponseEntity<SuccessMessage> postStories(
-            @RequestParam(required = true, value = "storyMedia") MultipartFile file,
-            @RequestParam(required = false, value = "caption") String caption,
-            @PathVariable("userId") Long userId)
-            throws IOException, EntityNotFoundException {
+    // @PostMapping(value = "/{userId}/upload", headers =
+    // "Content-Type=multipart/form-data")
+    // public ResponseEntity<SuccessMessage> postStories(
+    // @RequestParam(required = true, value = "storyMedia") MultipartFile file,
+    // @RequestParam(required = false, value = "caption") String caption,
+    // @PathVariable("userId") Long userId)
+    // throws IOException, EntityNotFoundException {
 
-        this.storiesservice.uploadStory(file, caption, userId);
+    // this.storiesservice.uploadStory(file, caption, userId);
 
-        SuccessMessage message = SuccessMessage.builder().message("User story uploaded successfully")
-                .status(HttpStatus.OK).build();
+    // SuccessMessage message = SuccessMessage.builder().message("User story
+    // uploaded successfully")
+    // .status(HttpStatus.OK).build();
 
-        return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
-    }
+    // return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
+    // }
 }

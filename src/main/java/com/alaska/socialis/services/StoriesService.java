@@ -30,22 +30,21 @@ import com.alaska.socialis.repository.WatchedStoryRepository;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
-@Service
 public class StoriesService {
-    @Autowired
-    private Cloudinary cloudinary;
+    // @Autowired
+    // private Cloudinary cloudinary;
 
-    @Autowired
-    private UserRepository userRepository;
+    // @Autowired
+    // private UserRepository userRepository;
 
-    @Autowired
-    private ImageUploadService imageUploadService;
+    // @Autowired
+    // private ImageUploadService imageUploadService;
 
-    @Autowired
-    private UserStoryRepository storyRepository;
+    // @Autowired
+    // private UserStoryRepository storyRepository;
 
-    @Autowired
-    private WatchedStoryRepository watchedStoryRespository;
+    // @Autowired
+    // private WatchedStoryRepository watchedStoryRespository;
 
     @Value("${app.video-folder}")
     private String videoFolder;
@@ -109,67 +108,73 @@ public class StoriesService {
         // }
     }
 
-    public Map<String, Object> uploadStoryImage(MultipartFile file) throws IOException {
-        Map<String, Object> uploadResult = this.imageUploadService.uploadImageToCloud(storyFilePath, file, "image");
+    // public Map<String, Object> uploadStoryImage(MultipartFile file) throws
+    // IOException {
+    // Map<String, Object> uploadResult =
+    // this.imageUploadService.uploadImageToCloud(storyFilePath, file, "image");
 
-        return uploadResult;
-    }
+    // return uploadResult;
+    // }
 
-    public Map<String, Object> uploadAndSliceVideo(MultipartFile file) throws IOException {
+    // public Map<String, Object> uploadAndSliceVideo(MultipartFile file) throws
+    // IOException {
 
-        // Save the uploaded file to a temporary location
-        File tempFile = File.createTempFile("temp", null);
-        file.transferTo(tempFile);
+    // // Save the uploaded file to a temporary location
+    // File tempFile = File.createTempFile("temp", null);
+    // file.transferTo(tempFile);
 
-        // Step 1: Use FFmpeg to slice the video
-        String slicedVideoPath = videoFolder + "/output.mp4";
+    // // Step 1: Use FFmpeg to slice the video
+    // String slicedVideoPath = videoFolder + "/output.mp4";
 
-        String ffmpegCommand = "ffmpeg -i " + tempFile.getAbsolutePath() + " -ss 0 -t 60 -c copy " + slicedVideoPath;
+    // String ffmpegCommand = "ffmpeg -i " + tempFile.getAbsolutePath() + " -ss 0 -t
+    // 60 -c copy " + slicedVideoPath;
 
-        Process process = Runtime.getRuntime().exec(ffmpegCommand);
+    // Process process = Runtime.getRuntime().exec(ffmpegCommand);
 
-        // Wait for the process to finish
-        int exitValue = 0;
-        try {
-            exitValue = process.waitFor();
-            // Get the error stream
-            InputStream errorStream = process.getErrorStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
-            String line;
+    // // Wait for the process to finish
+    // int exitValue = 0;
+    // try {
+    // exitValue = process.waitFor();
+    // // Get the error stream
+    // InputStream errorStream = process.getErrorStream();
+    // BufferedReader reader = new BufferedReader(new
+    // InputStreamReader(errorStream));
+    // String line;
 
-            // Log error messages
-            while ((line = reader.readLine()) != null) {
-                System.err.println(line);
-            }
+    // // Log error messages
+    // while ((line = reader.readLine()) != null) {
+    // System.err.println(line);
+    // }
 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+    // } catch (InterruptedException e) {
+    // Thread.currentThread().interrupt();
+    // }
 
-        // Check if FFmpeg completed successfully
-        if (exitValue != 0) {
-            throw new IOException("FFmpeg process did not complete successfully");
-        }
+    // // Check if FFmpeg completed successfully
+    // if (exitValue != 0) {
+    // throw new IOException("FFmpeg process did not complete successfully");
+    // }
 
-        // Step 2: Upload the sliced video to Cloudinary
-        Map<String, String> params = ObjectUtils.asMap(
-                "resource_type", "video",
-                "folder", storyFilePath);
+    // // Step 2: Upload the sliced video to Cloudinary
+    // Map<String, String> params = ObjectUtils.asMap(
+    // "resource_type", "video",
+    // "folder", storyFilePath);
 
-        Map<String, Object> uploadResult = cloudinary.uploader().upload(slicedVideoPath, params);
+    // Map<String, Object> uploadResult =
+    // cloudinary.uploader().upload(slicedVideoPath, params);
 
-        // Clean up: Delete the temporary sliced video file
-        File slicedVideoFile = new File(slicedVideoPath);
-        if (slicedVideoFile.exists()) {
-            slicedVideoFile.delete();
-        }
+    // // Clean up: Delete the temporary sliced video file
+    // File slicedVideoFile = new File(slicedVideoPath);
+    // if (slicedVideoFile.exists()) {
+    // slicedVideoFile.delete();
+    // }
 
-        // Clean up the temporary file
-        tempFile.delete();
+    // // Clean up the temporary file
+    // tempFile.delete();
 
-        // Return the public URL of the uploaded video
-        return uploadResult;
-    }
+    // // Return the public URL of the uploaded video
+    // return uploadResult;
+    // }
 
     // public List<StoryDto> buildUserStory(List<> userStories) {
     // List<StoryDto> storyLists = userStories.stream().map(story -> {
