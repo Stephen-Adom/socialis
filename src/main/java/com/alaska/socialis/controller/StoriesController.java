@@ -25,6 +25,7 @@ import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.repository.StoryMediaRepository;
+import com.alaska.socialis.repository.StoryRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.StoriesService;
 
@@ -36,6 +37,9 @@ public class StoriesController {
 
     @Autowired
     private StoryMediaRepository storyMediaRepository;
+
+    @Autowired
+    private StoryRepository storyRepository;
 
     @GetMapping("/{userId}/all")
     private void fetchAuthUserStories(@PathVariable("userId") Long userId)
@@ -67,21 +71,9 @@ public class StoriesController {
     // }
 
     @GetMapping(value = "/upload/story/test")
-    public void uploadStoryTest() {
-        Optional<User> user = this.userRepository.findById((long) 1);
-        Story story = new Story();
-        story.setUser(user.get());
-        story.setLastUpdated(LocalDateTime.now());
+    public int uploadStoryTest() {
+        Optional<Story> story = this.storyRepository.findByUserId((long) 1);
 
-        StoryMedia newMedia = new StoryMedia();
-        newMedia.setStory(story);
-        newMedia.setMediaUrl("new url");
-        newMedia.setMediaCaption("caption");
-        newMedia.setMediaType("image");
-        newMedia.setExpiredAt(new Date());
-        newMedia.setUploadedAt(new Date());
-
-        storyMediaRepository.save(newMedia);
-
+        return story.get().getStoryMedia().size();
     }
 }
