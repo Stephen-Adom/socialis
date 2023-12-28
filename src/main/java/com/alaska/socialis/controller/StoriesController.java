@@ -71,9 +71,9 @@ public class StoriesController {
     // }
 
     @GetMapping(value = "/upload/story/test")
-    public int uploadStoryTest() {
-        Optional<Story> story = this.storyRepository.findByUserId((long) 1);
+    public List<Story> uploadStoryTest() {
+        List<Story> story = this.storyRepository.findAll();
 
-        return story.get().getStoryMedia().size();
+        return story;
     }
 }
