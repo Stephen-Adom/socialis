@@ -13,6 +13,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -22,7 +23,6 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,7 +33,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "comments", uniqueConstraints = @UniqueConstraint(name = "comment_uid_unique", columnNames = "uid"))
+@Table(name = "comments", uniqueConstraints = @UniqueConstraint(name = "comment_uid_unique", columnNames = "uid"), indexes = {
+        @Index(name = "UNIQUE_COMMENT_LABEL", columnList = "uid"),
+        @Index(name = "FK_COMMENT_USER_ID", columnList = "user_id"),
+        @Index(name = "FK_COMMENT_POST_ID", columnList = "post_id"),
+        @Index(name = "FK_COMMENT_USER_POST_ID", columnList = "user_id, post_id"),
+})
 public class Comment {
 
     @Id

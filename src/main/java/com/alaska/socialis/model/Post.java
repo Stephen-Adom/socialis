@@ -15,6 +15,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -32,7 +33,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "posts", uniqueConstraints = @UniqueConstraint(name = "post_uid_unique", columnNames = "uid"))
+@Table(name = "posts", uniqueConstraints = @UniqueConstraint(name = "post_uid_unique", columnNames = "uid"), indexes = {
+        @Index(name = "UNIQUE_POST_LABEL", columnList = "uid"),
+        @Index(name = "FK_POST_USER_ID", columnList = "user_id"),
+})
 public class Post {
 
     @Id

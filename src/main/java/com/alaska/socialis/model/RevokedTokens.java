@@ -9,8 +9,10 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.Getter;
@@ -19,6 +21,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(indexes = @Index(name = "FK_REVOKED_USER_ID", columnList = "user_id"))
 public class RevokedTokens {
 
     @Id

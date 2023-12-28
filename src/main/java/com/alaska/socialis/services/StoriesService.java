@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.User;
-import com.alaska.socialis.model.UserStory;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.repository.UserRepository;
@@ -53,57 +52,61 @@ public class StoriesService {
 
     private final String storyFilePath = "socialis/user/stories";
 
-    public List<StoryDto> fetchAuthUserStories(Long userId) throws EntityNotFoundException {
-        Optional<User> user = this.userRepository.findById(userId);
+    // public List<StoryDto> fetchAuthUserStories(Long userId) throws
+    // EntityNotFoundException {
+    // Optional<User> user = this.userRepository.findById(userId);
 
-        if (user.isEmpty()) {
-            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
-        }
+    // if (user.isEmpty()) {
+    // throw new EntityNotFoundException("User with id " + userId + " does not
+    // exist", HttpStatus.NOT_FOUND);
+    // }
 
-        List<UserStory> allAuthStories = this.storyRepository.findAllByUserIdOrderByUploadedAtDesc(userId);
+    // List<Object> allAuthStories =
+    // this.storyRepository.findAllByUserIdOrderByUploadedAtDesc(userId);
 
-        List<StoryDto> allStories = this.buildUserStory(allAuthStories);
+    // List<StoryDto> allStories = this.buildUserStory(allAuthStories);
 
-        return allStories;
-    }
+    // return allStories;
+    // }
 
     public void uploadStory(MultipartFile file, String caption, Long userId)
             throws IOException, EntityNotFoundException {
-        Optional<User> user = this.userRepository.findById(userId);
-        Map<String, Object> mediaObject = new HashMap<>();
+        // Optional<User> user = this.userRepository.findById(userId);
+        // Map<String, Object> mediaObject = new HashMap<>();
 
-        if (user.isEmpty()) {
-            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
-        }
+        // if (user.isEmpty()) {
+        // throw new EntityNotFoundException("User with id " + userId + " does not
+        // exist", HttpStatus.NOT_FOUND);
+        // }
 
-        if (file.getContentType().contains("video")) {
-            mediaObject = this.uploadAndSliceVideo(file);
-        } else {
-            mediaObject = this.uploadStoryImage(file);
-        }
+        // if (file.getContentType().contains("video")) {
+        // mediaObject = this.uploadAndSliceVideo(file);
+        // } else {
+        // mediaObject = this.uploadStoryImage(file);
+        // }
 
-        if (Objects.nonNull(mediaObject)) {
-            String mediaUrl = (String) mediaObject.get("secure_url");
-            String mediaType = (String) mediaObject.get("resource_type");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
+        // if (Objects.nonNull(mediaObject)) {
+        // String mediaUrl = (String) mediaObject.get("secure_url");
+        // String mediaType = (String) mediaObject.get("resource_type");
+        // Calendar calendar = Calendar.getInstance();
+        // calendar.setTimeInMillis(System.currentTimeMillis());
 
-            Date currentDate = calendar.getTime();
+        // Date currentDate = calendar.getTime();
 
-            calendar.add(Calendar.HOUR, 24);
+        // calendar.add(Calendar.HOUR, 24);
 
-            Date expiredDate = calendar.getTime();
+        // Date expiredDate = calendar.getTime();
 
-            UserStory newStory = new UserStory();
-            newStory.setUser(user.get());
-            newStory.setMediaCaption(caption);
-            newStory.setMediaUrl(mediaUrl);
-            newStory.setMediaType(mediaType);
-            newStory.setUploadedAt(currentDate);
-            newStory.setExpiredAt(expiredDate);
+        // UserStory newStory = new UserStory();
+        // newStory.setUser(user.get());
+        // newStory.setMediaCaption(caption);
+        // newStory.setMediaUrl(mediaUrl);
+        // newStory.setMediaType(mediaType);
+        // newStory.setUploadedAt(currentDate);
+        // newStory.setExpiredAt(expiredDate);
 
-            this.storyRepository.save(newStory);
-        }
+        // this.storyRepository.save(newStory);
+        // }
     }
 
     public Map<String, Object> uploadStoryImage(MultipartFile file) throws IOException {
@@ -168,29 +171,29 @@ public class StoriesService {
         return uploadResult;
     }
 
-    public List<StoryDto> buildUserStory(List<UserStory> userStories) {
-        List<StoryDto> storyLists = userStories.stream().map(story -> {
-            List<SimpleUserDto> watchedUsers = this.watchedStoryRespository
-                    .findAllByStoryIdOrderByWatchedAtDesc(story.getId())
-                    .stream().map(watched -> {
-                        return SimpleUserDto.builder().id(watched.getUser().getId())
-                                .firstname(watched.getUser().getFirstname()).lastname(watched.getUser().getLastname())
-                                .username(watched.getUser().getUsername()).bio(watched.getUser().getBio())
-                                .imageUrl(watched.getUser().getImageUrl()).build();
-                    }).collect(Collectors.toList());
+    // public List<StoryDto> buildUserStory(List<> userStories) {
+    // List<StoryDto> storyLists = userStories.stream().map(story -> {
+    // List<SimpleUserDto> watchedUsers = this.watchedStoryRespository
+    // .findAllByStoryIdOrderByWatchedAtDesc(story.getId())
+    // .stream().map(watched -> {
+    // return SimpleUserDto.builder().id(watched.getUser().getId())
+    // .firstname(watched.getUser().getFirstname()).lastname(watched.getUser().getLastname())
+    // .username(watched.getUser().getUsername()).bio(watched.getUser().getBio())
+    // .imageUrl(watched.getUser().getImageUrl()).build();
+    // }).collect(Collectors.toList());
 
-            StoryDto storyDto = new StoryDto();
-            storyDto.setId(story.getId());
-            storyDto.setMediaUrl(story.getMediaUrl());
-            storyDto.setMediaCaption(story.getMediaCaption());
-            storyDto.setMediaType(story.getMediaType());
-            storyDto.setExpiredAt(story.getExpiredAt());
-            storyDto.setUploadedAt(story.getUploadedAt());
-            storyDto.setWatchedBy(watchedUsers);
+    // StoryDto storyDto = new StoryDto();
+    // storyDto.setId(story.getId());
+    // storyDto.setMediaUrl(story.getMediaUrl());
+    // storyDto.setMediaCaption(story.getMediaCaption());
+    // storyDto.setMediaType(story.getMediaType());
+    // storyDto.setExpiredAt(story.getExpiredAt());
+    // storyDto.setUploadedAt(story.getUploadedAt());
+    // storyDto.setWatchedBy(watchedUsers);
 
-            return storyDto;
-        }).collect(Collectors.toList());
+    // return storyDto;
+    // }).collect(Collectors.toList());
 
-        return storyLists;
-    }
+    // return storyLists;
+    // }
 }
