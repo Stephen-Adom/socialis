@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Story;
 import com.alaska.socialis.model.dto.StoryDto;
+import com.alaska.socialis.model.dto.WatchedStoryDto;
 
 public interface StoriesServiceInterface {
 
@@ -21,4 +22,7 @@ public interface StoriesServiceInterface {
     public Map<String, Object> uploadAndSliceVideo(MultipartFile file) throws IOException;
 
     public StoryDto buildUserStory(Story userStories);
+
+    public WatchedStoryDto recordStoryWatchedByUser(Long userId, Long mediaId)
+            throws EntityNotFoundException;
 }

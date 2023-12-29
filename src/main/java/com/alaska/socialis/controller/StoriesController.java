@@ -17,6 +17,7 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
+import com.alaska.socialis.model.dto.WatchedStoryDto;
 import com.alaska.socialis.services.StoriesService;
 
 @RestController
@@ -48,5 +49,17 @@ public class StoriesController {
                 .status(HttpStatus.OK).build();
 
         return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
+    }
+
+    @GetMapping("/{userId}/{mediaId}/watched")
+    public ResponseEntity<SuccessResponse> storyWatchedByUser(
+            @PathVariable(required = true, value = "userId") Long userId,
+            @PathVariable(required = true, value = "mediaId") Long mediaId) throws EntityNotFoundException {
+
+        WatchedStoryDto watchedStory = this.storiesService.recoredStoryWatchedByUser(userId, mediaId);
+
+        SuccessResponse response = SuccessResponse.builder().data(watchedStory).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 }

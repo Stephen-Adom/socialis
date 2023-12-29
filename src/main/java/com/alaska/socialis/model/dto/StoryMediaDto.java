@@ -1,8 +1,8 @@
 package com.alaska.socialis.model.dto;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,5 +22,5 @@ public class StoryMediaDto {
 
     private Date uploadedAt;
 
-    private List<WatchedStoryDto> watchedBy = new ArrayList<>();
+    private Set<WatchedStoryDto> watchedBy = new HashSet<>();
 }

@@ -24,10 +24,13 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Story;
 import com.alaska.socialis.model.StoryMedia;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.WatchedStory;
 import com.alaska.socialis.model.dto.StoryDto;
+import com.alaska.socialis.model.dto.WatchedStoryDto;
 import com.alaska.socialis.repository.StoryMediaRepository;
 import com.alaska.socialis.repository.StoryRepository;
 import com.alaska.socialis.repository.UserRepository;
+import com.alaska.socialis.repository.WatchedStoryRepository;
 import com.alaska.socialis.services.serviceInterface.StoriesServiceInterface;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -48,6 +51,9 @@ public class StoriesService implements StoriesServiceInterface {
 
     @Autowired
     private StoryMediaRepository storyMediaRepository;
+
+    @Autowired
+    private WatchedStoryRepository watchedStoryRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -201,10 +207,58 @@ public class StoriesService implements StoriesServiceInterface {
     }
 
     @Override
+    public WatchedStoryDto recordStoryWatchedByUser(Long userId, Long mediaId)
+            throws EntityNotFoundException {
+        Optional<User> userExist = this.userRepository.findById(userId);
+        Optional<StoryMedia> storyMediaExist = this.storyMediaRepository.findById(mediaId);
+
+        if (userExist.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " not found",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        if (storyMediaExist.isEmpty()) {
+            throw new EntityNotFoundException("Story media with id " + mediaId + " not found", HttpStatus.NOT_FOUND);
+        }
+
+        Optional<WatchedStory> watchedUserExist = this.watchedStoryRepository.findByUserIdAndMediaId(userId, mediaId);
+
+        if (watchedUserExist.isEmpty()) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+
+            watchedUserExist.get().setWatchedAt(calendar.getTime());
+
+            WatchedStory savedWatched = this.watchedStoryRepository.save(watchedUserExist.get());
+
+            return this.buildWatchStory(savedWatched);
+
+        } else {
+            WatchedStory newWatched = new WatchedStory();
+            newWatched.setUser(userExist.get());
+            newWatched.setMedia(storyMediaExist.get());
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+
+            newWatched.setWatchedAt(calendar.getTime());
+
+            WatchedStory savedWatched = this.watchedStoryRepository.save(newWatched);
+
+            return this.buildWatchStory(savedWatched);
+        }
+
+    }
+
+    @Override
     public StoryDto buildUserStory(Story userStories) {
 
         StoryDto allStories = this.modelMapper.map(userStories, StoryDto.class);
 
         return allStories;
+    }
+
+    private WatchedStoryDto buildWatchStory(WatchedStory savedWatched) {
+        return this.modelMapper.map(savedWatched, WatchedStoryDto.class);
     }
 }
