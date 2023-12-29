@@ -13,4 +13,6 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
     public Optional<Story> findByUserId(Long userId);
 
     public List<Story> findAllByUserIdOrderByLastUpdatedDesc(Long userId);
+
+    public Story findByUserIdOrderByLastUpdatedDesc(Long userId);
 }

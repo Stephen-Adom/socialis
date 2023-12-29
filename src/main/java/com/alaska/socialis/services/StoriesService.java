@@ -9,11 +9,9 @@ import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,16 +58,16 @@ public class StoriesService implements StoriesServiceInterface {
     private final String storyFilePath = "socialis/user/stories";
 
     @Override
-    public List<StoryDto> fetchAuthUserStories(Long userId) throws EntityNotFoundException {
+    public StoryDto fetchAuthUserStories(Long userId) throws EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
 
         if (user.isEmpty()) {
             throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
         }
 
-        List<Story> allAuthStories = this.storyRepository.findAllByUserIdOrderByLastUpdatedDesc(userId);
+        Story allAuthStories = this.storyRepository.findByUserIdOrderByLastUpdatedDesc(userId);
 
-        List<StoryDto> allStories = this.buildUserStory(allAuthStories);
+        StoryDto allStories = this.buildUserStory(allAuthStories);
 
         return allStories;
     }
@@ -203,10 +201,9 @@ public class StoriesService implements StoriesServiceInterface {
     }
 
     @Override
-    public List<StoryDto> buildUserStory(List<Story> userStories) {
+    public StoryDto buildUserStory(Story userStories) {
 
-        List<StoryDto> allStories = userStories.stream().map(story -> this.modelMapper.map(story, StoryDto.class))
-                .collect(Collectors.toList());
+        StoryDto allStories = this.modelMapper.map(userStories, StoryDto.class);
 
         return allStories;
     }

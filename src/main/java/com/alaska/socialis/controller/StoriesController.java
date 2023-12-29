@@ -1,7 +1,6 @@
 package com.alaska.socialis.controller;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,7 +29,7 @@ public class StoriesController {
     @GetMapping("/{userId}/all")
     private ResponseEntity<SuccessResponse> fetchAuthUserStories(@PathVariable("userId") Long userId)
             throws EntityNotFoundException {
-        List<StoryDto> userStories = this.storiesService.fetchAuthUserStories(userId);
+        StoryDto userStories = this.storiesService.fetchAuthUserStories(userId);
 
         SuccessResponse response = SuccessResponse.builder().data(userStories).status(HttpStatus.OK).build();
 
