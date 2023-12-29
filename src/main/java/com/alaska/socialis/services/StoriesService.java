@@ -59,6 +59,7 @@ public class StoriesService implements StoriesServiceInterface {
 
     private final String storyFilePath = "socialis/user/stories";
 
+    @Override
     public List<StoryDto> fetchAuthUserStories(Long userId) throws EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
 
@@ -73,6 +74,7 @@ public class StoriesService implements StoriesServiceInterface {
         return allStories;
     }
 
+    @Override
     public void uploadStory(MultipartFile file, String caption, Long userId)
             throws IOException, EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
@@ -138,12 +140,14 @@ public class StoriesService implements StoriesServiceInterface {
         return this.storyMediaRepository.save(newMedia);
     }
 
+    @Override
     public Map<String, Object> uploadStoryImage(MultipartFile file) throws IOException {
         Map<String, Object> uploadResult = this.imageUploadService.uploadImageToCloud(storyFilePath, file, "image");
 
         return uploadResult;
     }
 
+    @Override
     public Map<String, Object> uploadAndSliceVideo(MultipartFile file) throws IOException {
 
         // Save the uploaded file to a temporary location
@@ -198,6 +202,7 @@ public class StoriesService implements StoriesServiceInterface {
         return uploadResult;
     }
 
+    @Override
     public List<StoryDto> buildUserStory(List<Story> userStories) {
 
         List<StoryDto> allStories = userStories.stream().map(story -> this.modelMapper.map(story, StoryDto.class))
