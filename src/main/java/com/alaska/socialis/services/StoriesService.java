@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Story;
 import com.alaska.socialis.model.StoryMedia;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.repository.StoryMediaRepository;
@@ -51,6 +53,9 @@ public class StoriesService implements StoriesServiceInterface {
 
     @Autowired
     private StoryMediaRepository storyMediaRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     // @Autowired
     // private WatchedStoryRepository watchedStoryRespository;
@@ -199,29 +204,34 @@ public class StoriesService implements StoriesServiceInterface {
         return uploadResult;
     }
 
-    // public List<StoryDto> buildUserStory(List<> userStories) {
-    // List<StoryDto> storyLists = userStories.stream().map(story -> {
-    // List<SimpleUserDto> watchedUsers = this.watchedStoryRespository
-    // .findAllByStoryIdOrderByWatchedAtDesc(story.getId())
-    // .stream().map(watched -> {
-    // return SimpleUserDto.builder().id(watched.getUser().getId())
-    // .firstname(watched.getUser().getFirstname()).lastname(watched.getUser().getLastname())
-    // .username(watched.getUser().getUsername()).bio(watched.getUser().getBio())
-    // .imageUrl(watched.getUser().getImageUrl()).build();
-    // }).collect(Collectors.toList());
+    public List<StoryDto> buildUserStory(List<Story> userStories) {
 
-    // StoryDto storyDto = new StoryDto();
-    // storyDto.setId(story.getId());
-    // storyDto.setMediaUrl(story.getMediaUrl());
-    // storyDto.setMediaCaption(story.getMediaCaption());
-    // storyDto.setMediaType(story.getMediaType());
-    // storyDto.setExpiredAt(story.getExpiredAt());
-    // storyDto.setUploadedAt(story.getUploadedAt());
-    // storyDto.setWatchedBy(watchedUsers);
+        List<StoryDto> allStories = userStories.stream().map(story -> this.modelMapper.map(story, StoryDto.class))
+                .collect(Collectors.toList());
 
-    // return storyDto;
-    // }).collect(Collectors.toList());
+        return allStories;
+        // List<StoryDto> storyLists = userStories.stream().map(story -> {
+        // List<SimpleUserDto> watchedUsers = this.watchedStoryRespository
+        // .findAllByStoryIdOrderByWatchedAtDesc(story.getId())
+        // .stream().map(watched -> {
+        // return SimpleUserDto.builder().id(watched.getUser().getId())
+        // .firstname(watched.getUser().getFirstname()).lastname(watched.getUser().getLastname())
+        // .username(watched.getUser().getUsername()).bio(watched.getUser().getBio())
+        // .imageUrl(watched.getUser().getImageUrl()).build();
+        // }).collect(Collectors.toList());
 
-    // return storyLists;
-    // }
+        // StoryDto storyDto = new StoryDto();
+        // storyDto.setId(story.getId());
+        // storyDto.setMediaUrl(story.getMediaUrl());
+        // storyDto.setMediaCaption(story.getMediaCaption());
+        // storyDto.setMediaType(story.getMediaType());
+        // storyDto.setExpiredAt(story.getExpiredAt());
+        // storyDto.setUploadedAt(story.getUploadedAt());
+        // storyDto.setWatchedBy(watchedUsers);
+
+        // return storyDto;
+        // }).collect(Collectors.toList());
+
+        // return storyLists;
+    }
 }
