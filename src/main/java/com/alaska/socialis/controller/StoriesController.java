@@ -51,7 +51,7 @@ public class StoriesController {
         return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
     }
 
-    @GetMapping("/{userId}/{mediaId}/watched")
+    @GetMapping("/{userId}/watched/{mediaId}")
     public ResponseEntity<SuccessResponse> storyWatchedByUser(
             @PathVariable(required = true, value = "userId") Long userId,
             @PathVariable(required = true, value = "mediaId") Long mediaId) throws EntityNotFoundException {
