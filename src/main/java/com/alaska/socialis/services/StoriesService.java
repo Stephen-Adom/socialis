@@ -26,13 +26,10 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Story;
 import com.alaska.socialis.model.StoryMedia;
 import com.alaska.socialis.model.User;
-import com.alaska.socialis.model.UserDto;
-import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.repository.StoryMediaRepository;
 import com.alaska.socialis.repository.StoryRepository;
 import com.alaska.socialis.repository.UserRepository;
-import com.alaska.socialis.repository.WatchedStoryRepository;
 import com.alaska.socialis.services.serviceInterface.StoriesServiceInterface;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -56,9 +53,6 @@ public class StoriesService implements StoriesServiceInterface {
 
     @Autowired
     private ModelMapper modelMapper;
-
-    // @Autowired
-    // private WatchedStoryRepository watchedStoryRespository;
 
     @Value("${app.video-folder}")
     private String videoFolder;
@@ -210,28 +204,5 @@ public class StoriesService implements StoriesServiceInterface {
                 .collect(Collectors.toList());
 
         return allStories;
-        // List<StoryDto> storyLists = userStories.stream().map(story -> {
-        // List<SimpleUserDto> watchedUsers = this.watchedStoryRespository
-        // .findAllByStoryIdOrderByWatchedAtDesc(story.getId())
-        // .stream().map(watched -> {
-        // return SimpleUserDto.builder().id(watched.getUser().getId())
-        // .firstname(watched.getUser().getFirstname()).lastname(watched.getUser().getLastname())
-        // .username(watched.getUser().getUsername()).bio(watched.getUser().getBio())
-        // .imageUrl(watched.getUser().getImageUrl()).build();
-        // }).collect(Collectors.toList());
-
-        // StoryDto storyDto = new StoryDto();
-        // storyDto.setId(story.getId());
-        // storyDto.setMediaUrl(story.getMediaUrl());
-        // storyDto.setMediaCaption(story.getMediaCaption());
-        // storyDto.setMediaType(story.getMediaType());
-        // storyDto.setExpiredAt(story.getExpiredAt());
-        // storyDto.setUploadedAt(story.getUploadedAt());
-        // storyDto.setWatchedBy(watchedUsers);
-
-        // return storyDto;
-        // }).collect(Collectors.toList());
-
-        // return storyLists;
     }
 }
