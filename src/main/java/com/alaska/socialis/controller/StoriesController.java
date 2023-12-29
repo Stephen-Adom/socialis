@@ -56,7 +56,7 @@ public class StoriesController {
             @PathVariable(required = true, value = "userId") Long userId,
             @PathVariable(required = true, value = "mediaId") Long mediaId) throws EntityNotFoundException {
 
-        WatchedStoryDto watchedStory = this.storiesService.recoredStoryWatchedByUser(userId, mediaId);
+        WatchedStoryDto watchedStory = this.storiesService.recordStoryWatchedByUser(userId, mediaId);
 
         SuccessResponse response = SuccessResponse.builder().data(watchedStory).status(HttpStatus.OK).build();
 

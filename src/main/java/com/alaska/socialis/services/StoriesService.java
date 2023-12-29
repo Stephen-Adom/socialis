@@ -223,7 +223,7 @@ public class StoriesService implements StoriesServiceInterface {
 
         Optional<WatchedStory> watchedUserExist = this.watchedStoryRepository.findByUserIdAndMediaId(userId, mediaId);
 
-        if (watchedUserExist.isEmpty()) {
+        if (watchedUserExist.isPresent()) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
 
