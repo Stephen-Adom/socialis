@@ -1,10 +1,7 @@
 package com.alaska.socialis.controller;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,15 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
-import com.alaska.socialis.model.Story;
-import com.alaska.socialis.model.StoryMedia;
-import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.dto.SuccessResponse;
-import com.alaska.socialis.repository.StoryMediaRepository;
-import com.alaska.socialis.repository.StoryRepository;
-import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.StoriesService;
 
 @RestController
