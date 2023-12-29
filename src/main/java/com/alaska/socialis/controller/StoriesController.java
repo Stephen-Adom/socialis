@@ -32,20 +32,14 @@ import com.alaska.socialis.services.StoriesService;
 @RestController
 @RequestMapping("/api/stories")
 public class StoriesController {
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
-    private StoryMediaRepository storyMediaRepository;
-
-    @Autowired
-    private StoryRepository storyRepository;
+    private StoriesService storiesService;
 
     @GetMapping("/{userId}/all")
     private void fetchAuthUserStories(@PathVariable("userId") Long userId)
             throws EntityNotFoundException {
-        // List<StoryDto> userStories =
-        // this.storiesservice.fetchAuthUserStories(userId);
+        List<StoryDto> userStories = this.storiesService.fetchAuthUserStories(userId);
 
         // SuccessResponse response =
         // SuccessResponse.builder().data(userStories).status(HttpStatus.OK).build();
@@ -53,27 +47,17 @@ public class StoriesController {
         // return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 
-    // @PostMapping(value = "/{userId}/upload", headers =
-    // "Content-Type=multipart/form-data")
-    // public ResponseEntity<SuccessMessage> postStories(
-    // @RequestParam(required = true, value = "storyMedia") MultipartFile file,
-    // @RequestParam(required = false, value = "caption") String caption,
-    // @PathVariable("userId") Long userId)
-    // throws IOException, EntityNotFoundException {
+    @PostMapping(value = "/{userId}/upload", headers = "Content-Type=multipart/form-data")
+    public ResponseEntity<SuccessMessage> postStories(
+            @RequestParam(required = true, value = "storyMedia") MultipartFile file,
+            @RequestParam(required = false, value = "caption") String caption, @PathVariable("userId") Long userId)
+            throws IOException, EntityNotFoundException {
 
-    // this.storiesservice.uploadStory(file, caption, userId);
+        this.storiesService.uploadStory(file, caption, userId);
 
-    // SuccessMessage message = SuccessMessage.builder().message("User story
-    // uploaded successfully")
-    // .status(HttpStatus.OK).build();
+        SuccessMessage message = SuccessMessage.builder().message("User story uploaded successfully")
+                .status(HttpStatus.OK).build();
 
-    // return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
-    // }
-
-    @GetMapping(value = "/upload/story/test")
-    public List<Story> uploadStoryTest() {
-        List<Story> story = this.storyRepository.findAll();
-
-        return story;
+        return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
     }
 }

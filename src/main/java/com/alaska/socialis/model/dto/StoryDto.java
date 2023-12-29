@@ -1,7 +1,6 @@
 package com.alaska.socialis.model.dto;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import lombok.Getter;
@@ -13,15 +12,9 @@ public class StoryDto {
 
     private Long id;
 
-    private String mediaUrl;
+    private SimpleUserDto user;
 
-    private String mediaCaption;
+    private int numberOfMedia;
 
-    private String mediaType;
-
-    private Date expiredAt;
-
-    private Date uploadedAt;
-
-    private List<SimpleUserDto> watchedBy = new ArrayList<>();
+    private List<StoryMediaDto> storyMedia = new ArrayList<>();
 }

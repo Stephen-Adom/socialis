@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,26 +22,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
+import com.alaska.socialis.model.Story;
+import com.alaska.socialis.model.StoryMedia;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.StoryDto;
+import com.alaska.socialis.repository.StoryMediaRepository;
+import com.alaska.socialis.repository.StoryRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.repository.WatchedStoryRepository;
+import com.alaska.socialis.services.serviceInterface.StoriesServiceInterface;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
-public class StoriesService {
-    // @Autowired
-    // private Cloudinary cloudinary;
+@Service
+public class StoriesService implements StoriesServiceInterface {
+    @Autowired
+    private Cloudinary cloudinary;
 
-    // @Autowired
-    // private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    // @Autowired
-    // private ImageUploadService imageUploadService;
+    @Autowired
+    private ImageUploadService imageUploadService;
 
-    // @Autowired
-    // private UserStoryRepository storyRepository;
+    @Autowired
+    private StoryRepository storyRepository;
+
+    @Autowired
+    private StoryMediaRepository storyMediaRepository;
 
     // @Autowired
     // private WatchedStoryRepository watchedStoryRespository;
@@ -50,130 +60,144 @@ public class StoriesService {
 
     private final String storyFilePath = "socialis/user/stories";
 
-    // public List<StoryDto> fetchAuthUserStories(Long userId) throws
-    // EntityNotFoundException {
-    // Optional<User> user = this.userRepository.findById(userId);
+    public List<StoryDto> fetchAuthUserStories(Long userId) throws EntityNotFoundException {
+        Optional<User> user = this.userRepository.findById(userId);
 
-    // if (user.isEmpty()) {
-    // throw new EntityNotFoundException("User with id " + userId + " does not
-    // exist", HttpStatus.NOT_FOUND);
-    // }
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
+        }
 
-    // List<Object> allAuthStories =
-    // this.storyRepository.findAllByUserIdOrderByUploadedAtDesc(userId);
+        List<Story> allAuthStories = this.storyRepository.findAllByUserIdOrderByLastUpdatedDesc(userId);
 
-    // List<StoryDto> allStories = this.buildUserStory(allAuthStories);
+        List<StoryDto> allStories = this.buildUserStory(allAuthStories);
 
-    // return allStories;
-    // }
+        return allStories;
+    }
 
     public void uploadStory(MultipartFile file, String caption, Long userId)
             throws IOException, EntityNotFoundException {
-        // Optional<User> user = this.userRepository.findById(userId);
-        // Map<String, Object> mediaObject = new HashMap<>();
+        Optional<User> user = this.userRepository.findById(userId);
+        Map<String, Object> mediaObject = new HashMap<>();
 
-        // if (user.isEmpty()) {
-        // throw new EntityNotFoundException("User with id " + userId + " does not
-        // exist", HttpStatus.NOT_FOUND);
-        // }
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
+        }
 
-        // if (file.getContentType().contains("video")) {
-        // mediaObject = this.uploadAndSliceVideo(file);
-        // } else {
-        // mediaObject = this.uploadStoryImage(file);
-        // }
+        if (file.getContentType().contains("video")) {
+            mediaObject = this.uploadAndSliceVideo(file);
+        } else {
+            mediaObject = this.uploadStoryImage(file);
+        }
 
-        // if (Objects.nonNull(mediaObject)) {
-        // String mediaUrl = (String) mediaObject.get("secure_url");
-        // String mediaType = (String) mediaObject.get("resource_type");
-        // Calendar calendar = Calendar.getInstance();
-        // calendar.setTimeInMillis(System.currentTimeMillis());
+        if (Objects.nonNull(mediaObject)) {
+            String mediaUrl = (String) mediaObject.get("secure_url");
+            String mediaType = (String) mediaObject.get("resource_type");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
 
-        // Date currentDate = calendar.getTime();
+            Date currentDate = calendar.getTime();
 
-        // calendar.add(Calendar.HOUR, 24);
+            calendar.add(Calendar.HOUR, 24);
 
-        // Date expiredDate = calendar.getTime();
+            Date expiredDate = calendar.getTime();
 
-        // UserStory newStory = new UserStory();
-        // newStory.setUser(user.get());
-        // newStory.setMediaCaption(caption);
-        // newStory.setMediaUrl(mediaUrl);
-        // newStory.setMediaType(mediaType);
-        // newStory.setUploadedAt(currentDate);
-        // newStory.setExpiredAt(expiredDate);
+            Optional<Story> storyExist = this.storyRepository.findByUserId(userId);
 
-        // this.storyRepository.save(newStory);
-        // }
+            if (storyExist.isEmpty()) {
+                // create new story instance
+                Story newStory = new Story();
+                newStory.setUser(user.get());
+                newStory.setNumberOfMedia(newStory.getNumberOfMedia() + 1);
+                newStory.setLastUpdated(LocalDateTime.now());
+
+                this.storyRepository.save(newStory);
+
+                // create story media object
+                this.createStoryMedia(newStory, mediaUrl, caption, mediaType, currentDate, expiredDate);
+            } else {
+
+                Story story = storyExist.get();
+                story.setNumberOfMedia(story.getNumberOfMedia() + 1);
+                story.setLastUpdated(LocalDateTime.now());
+
+                this.createStoryMedia(story, mediaUrl, caption, mediaType, currentDate, expiredDate);
+            }
+
+        }
     }
 
-    // public Map<String, Object> uploadStoryImage(MultipartFile file) throws
-    // IOException {
-    // Map<String, Object> uploadResult =
-    // this.imageUploadService.uploadImageToCloud(storyFilePath, file, "image");
+    private StoryMedia createStoryMedia(Story story, String mediaUrl, String caption, String mediaType,
+            Date currentDate, Date expiredDate) {
+        StoryMedia newMedia = new StoryMedia();
+        newMedia.setStory(story);
+        newMedia.setMediaUrl(mediaUrl);
+        newMedia.setMediaCaption(caption);
+        newMedia.setMediaType(mediaType);
+        newMedia.setUploadedAt(currentDate);
+        newMedia.setExpiredAt(expiredDate);
 
-    // return uploadResult;
-    // }
+        return this.storyMediaRepository.save(newMedia);
+    }
 
-    // public Map<String, Object> uploadAndSliceVideo(MultipartFile file) throws
-    // IOException {
+    public Map<String, Object> uploadStoryImage(MultipartFile file) throws IOException {
+        Map<String, Object> uploadResult = this.imageUploadService.uploadImageToCloud(storyFilePath, file, "image");
 
-    // // Save the uploaded file to a temporary location
-    // File tempFile = File.createTempFile("temp", null);
-    // file.transferTo(tempFile);
+        return uploadResult;
+    }
 
-    // // Step 1: Use FFmpeg to slice the video
-    // String slicedVideoPath = videoFolder + "/output.mp4";
+    public Map<String, Object> uploadAndSliceVideo(MultipartFile file) throws IOException {
 
-    // String ffmpegCommand = "ffmpeg -i " + tempFile.getAbsolutePath() + " -ss 0 -t
-    // 60 -c copy " + slicedVideoPath;
+        // Save the uploaded file to a temporary location
+        File tempFile = File.createTempFile("temp", null);
+        file.transferTo(tempFile);
 
-    // Process process = Runtime.getRuntime().exec(ffmpegCommand);
+        // Step 1: Use FFmpeg to slice the video
+        String slicedVideoPath = videoFolder + "/output.mp4";
 
-    // // Wait for the process to finish
-    // int exitValue = 0;
-    // try {
-    // exitValue = process.waitFor();
-    // // Get the error stream
-    // InputStream errorStream = process.getErrorStream();
-    // BufferedReader reader = new BufferedReader(new
-    // InputStreamReader(errorStream));
-    // String line;
+        String ffmpegCommand = "ffmpeg -i " + tempFile.getAbsolutePath() + " -ss 0 -t 60 -c copy " + slicedVideoPath;
 
-    // // Log error messages
-    // while ((line = reader.readLine()) != null) {
-    // System.err.println(line);
-    // }
+        Process process = Runtime.getRuntime().exec(ffmpegCommand);
 
-    // } catch (InterruptedException e) {
-    // Thread.currentThread().interrupt();
-    // }
+        // Wait for the process to finish
+        int exitValue = 0;
+        try {
+            exitValue = process.waitFor();
+            // Get the error stream
+            InputStream errorStream = process.getErrorStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
+            String line;
 
-    // // Check if FFmpeg completed successfully
-    // if (exitValue != 0) {
-    // throw new IOException("FFmpeg process did not complete successfully");
-    // }
+            // Log error messages
+            while ((line = reader.readLine()) != null) {
+                System.err.println(line);
+            }
 
-    // // Step 2: Upload the sliced video to Cloudinary
-    // Map<String, String> params = ObjectUtils.asMap(
-    // "resource_type", "video",
-    // "folder", storyFilePath);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
-    // Map<String, Object> uploadResult =
-    // cloudinary.uploader().upload(slicedVideoPath, params);
+        // Check if FFmpeg completed successfully
+        if (exitValue != 0) {
+            throw new IOException("FFmpeg process did not complete successfully");
+        }
 
-    // // Clean up: Delete the temporary sliced video file
-    // File slicedVideoFile = new File(slicedVideoPath);
-    // if (slicedVideoFile.exists()) {
-    // slicedVideoFile.delete();
-    // }
+        // Step 2: Upload the sliced video to Cloudinary
+        Map<String, String> params = ObjectUtils.asMap("resource_type", "video", "folder", storyFilePath);
 
-    // // Clean up the temporary file
-    // tempFile.delete();
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(slicedVideoPath, params);
 
-    // // Return the public URL of the uploaded video
-    // return uploadResult;
-    // }
+        // Clean up: Delete the temporary sliced video file
+        File slicedVideoFile = new File(slicedVideoPath);
+        if (slicedVideoFile.exists()) {
+            slicedVideoFile.delete();
+        }
+
+        // Clean up the temporary file
+        tempFile.delete();
+
+        // Return the public URL of the uploaded video
+        return uploadResult;
+    }
 
     // public List<StoryDto> buildUserStory(List<> userStories) {
     // List<StoryDto> storyLists = userStories.stream().map(story -> {
