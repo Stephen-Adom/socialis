@@ -9,9 +9,11 @@ import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -248,6 +250,17 @@ public class StoriesService implements StoriesServiceInterface {
             return this.buildWatchStory(savedWatched);
         }
 
+    }
+
+    @Override
+    public List<WatchedStoryDto> usersWatchedAMedia(Long mediaId) {
+        List<WatchedStory> allWatchedStories = this.watchedStoryRepository
+                .findAllByMediaIdOrderByWatchedAtDesc(mediaId);
+
+        List<WatchedStoryDto> allWatchedStoryDto = allWatchedStories.stream()
+                .map(watched -> this.buildWatchStory(watched)).collect(Collectors.toList());
+
+        return allWatchedStoryDto;
     }
 
     @Override

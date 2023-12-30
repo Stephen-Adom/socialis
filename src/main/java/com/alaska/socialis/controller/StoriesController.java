@@ -1,6 +1,7 @@
 package com.alaska.socialis.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -59,6 +60,17 @@ public class StoriesController {
         WatchedStoryDto watchedStory = this.storiesService.recordStoryWatchedByUser(userId, mediaId);
 
         SuccessResponse response = SuccessResponse.builder().data(watchedStory).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{mediaId}/watched/users")
+    public ResponseEntity<SuccessResponse> usersWatchedAMedia(
+            @PathVariable(required = true, value = "mediaId") Long mediaId) {
+
+        List<WatchedStoryDto> allwatchedUsers = this.storiesService.usersWatchedAMedia(mediaId);
+
+        SuccessResponse response = SuccessResponse.builder().data(allwatchedUsers).status(HttpStatus.OK).build();
 
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
