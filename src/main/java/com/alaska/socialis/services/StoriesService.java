@@ -19,6 +19,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,10 +61,15 @@ public class StoriesService implements StoriesServiceInterface {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     @Value("${app.video-folder}")
     private String videoFolder;
 
     private final String storyFilePath = "socialis/user/stories";
+
+    private static final String UPDATE_USER_STORY_URI = "/feed/user/story/";
 
     @Override
     public StoryDto fetchAuthUserStories(Long userId) throws EntityNotFoundException {
@@ -130,6 +136,9 @@ public class StoriesService implements StoriesServiceInterface {
                 this.createStoryMedia(story, mediaUrl, caption, mediaType, currentDate, expiredDate);
             }
 
+            Optional<Story> updatedStory = this.storyRepository.findByUserId(userId);
+            messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + user.get().getUsername(),
+                    this.buildUserStory(updatedStory.get()));
         }
     }
 
@@ -209,7 +218,7 @@ public class StoriesService implements StoriesServiceInterface {
     }
 
     @Override
-    public WatchedStoryDto recordStoryWatchedByUser(Long userId, Long mediaId)
+    public void recordStoryWatchedByUser(Long userId, Long mediaId)
             throws EntityNotFoundException {
         Optional<User> userExist = this.userRepository.findById(userId);
         Optional<StoryMedia> storyMediaExist = this.storyMediaRepository.findById(mediaId);
@@ -233,7 +242,10 @@ public class StoriesService implements StoriesServiceInterface {
 
             WatchedStory savedWatched = this.watchedStoryRepository.save(watchedUserExist.get());
 
-            return this.buildWatchStory(savedWatched);
+            String storyOwner = savedWatched.getMedia().getStory().getUser().getUsername();
+
+            messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + storyOwner,
+                    this.buildUserStory(savedWatched.getMedia().getStory()));
 
         } else {
             WatchedStory newWatched = new WatchedStory();
@@ -247,7 +259,10 @@ public class StoriesService implements StoriesServiceInterface {
 
             WatchedStory savedWatched = this.watchedStoryRepository.save(newWatched);
 
-            return this.buildWatchStory(savedWatched);
+            String storyOwner = savedWatched.getMedia().getStory().getUser().getUsername();
+
+            messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + storyOwner,
+                    this.buildUserStory(savedWatched.getMedia().getStory()));
         }
 
     }
@@ -266,9 +281,9 @@ public class StoriesService implements StoriesServiceInterface {
     @Override
     public StoryDto buildUserStory(Story userStories) {
 
-        StoryDto allStories = this.modelMapper.map(userStories, StoryDto.class);
+        StoryDto story = this.modelMapper.map(userStories, StoryDto.class);
 
-        return allStories;
+        return story;
     }
 
     private WatchedStoryDto buildWatchStory(WatchedStory savedWatched) {

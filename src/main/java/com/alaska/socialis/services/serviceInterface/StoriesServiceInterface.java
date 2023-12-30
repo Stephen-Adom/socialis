@@ -24,7 +24,7 @@ public interface StoriesServiceInterface {
 
         public StoryDto buildUserStory(Story userStories);
 
-        public WatchedStoryDto recordStoryWatchedByUser(Long userId, Long mediaId)
+        public void recordStoryWatchedByUser(Long userId, Long mediaId)
                         throws EntityNotFoundException;
 
         public List<WatchedStoryDto> usersWatchedAMedia(Long mediaId);

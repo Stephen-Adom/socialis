@@ -4,7 +4,6 @@ import java.util.Map;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,7 +15,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.OffsetScrollPosition;
 import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Window;
-import org.springframework.data.support.WindowIterator;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -30,12 +28,10 @@ import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.ReplyImage;
 import com.alaska.socialis.model.User;
-import com.alaska.socialis.model.dto.CommentDto;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.repository.BookmarkRepository;
-import com.alaska.socialis.repository.CommentRepository;
 import com.alaska.socialis.repository.PostImageRepository;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
@@ -57,9 +53,6 @@ public class PostService implements PostServiceInterface {
 
     @Autowired
     private PostRepository postRepository;
-
-    @Autowired
-    private CommentRepository commentRepository;
 
     @Autowired
     private PostImageRepository postImageRepository;

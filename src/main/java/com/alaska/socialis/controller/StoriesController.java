@@ -53,15 +53,16 @@ public class StoriesController {
     }
 
     @GetMapping("/{userId}/watched/{mediaId}")
-    public ResponseEntity<SuccessResponse> storyWatchedByUser(
+    public ResponseEntity<SuccessMessage> storyWatchedByUser(
             @PathVariable(required = true, value = "userId") Long userId,
             @PathVariable(required = true, value = "mediaId") Long mediaId) throws EntityNotFoundException {
 
-        WatchedStoryDto watchedStory = this.storiesService.recordStoryWatchedByUser(userId, mediaId);
+        this.storiesService.recordStoryWatchedByUser(userId, mediaId);
 
-        SuccessResponse response = SuccessResponse.builder().data(watchedStory).status(HttpStatus.OK).build();
+        SuccessMessage message = SuccessMessage.builder().message("user watched saved")
+                .status(HttpStatus.OK).build();
 
-        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+        return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
     }
 
     @GetMapping("/{mediaId}/watched/users")
