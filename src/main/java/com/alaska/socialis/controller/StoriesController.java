@@ -2,6 +2,7 @@ package com.alaska.socialis.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,16 @@ public class StoriesController {
         List<WatchedStoryDto> allwatchedUsers = this.storiesService.usersWatchedAMedia(mediaId);
 
         SuccessResponse response = SuccessResponse.builder().data(allwatchedUsers).status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{userId}/following/stories")
+    public ResponseEntity<SuccessResponse> getAllStoriesForMyFollowings(
+            @PathVariable(required = true, value = "userId") Long userId) throws EntityNotFoundException {
+        Set<StoryDto> allFollowingStories = this.storiesService.getAllStoriesForMyFollowings(userId);
+
+        SuccessResponse response = SuccessResponse.builder().data(allFollowingStories).status(HttpStatus.OK).build();
 
         return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }

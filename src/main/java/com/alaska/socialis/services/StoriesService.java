@@ -9,10 +9,12 @@ import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -27,11 +29,13 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.model.Story;
 import com.alaska.socialis.model.StoryMedia;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.UserFollows;
 import com.alaska.socialis.model.WatchedStory;
 import com.alaska.socialis.model.dto.StoryDto;
 import com.alaska.socialis.model.dto.WatchedStoryDto;
 import com.alaska.socialis.repository.StoryMediaRepository;
 import com.alaska.socialis.repository.StoryRepository;
+import com.alaska.socialis.repository.UserFollowsRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.repository.WatchedStoryRepository;
 import com.alaska.socialis.services.serviceInterface.StoriesServiceInterface;
@@ -63,6 +67,9 @@ public class StoriesService implements StoriesServiceInterface {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private UserFollowsRepository userFollowsRepository;
 
     @Value("${app.video-folder}")
     private String videoFolder;
@@ -266,6 +273,31 @@ public class StoriesService implements StoriesServiceInterface {
                     this.buildUserStory(savedWatched.getMedia().getStory()));
         }
 
+    }
+
+    @Override
+    public Set<StoryDto> getAllStoriesForMyFollowings(Long userId) throws EntityNotFoundException {
+        Optional<User> userExist = this.userRepository.findById(userId);
+
+        if (userExist.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " not found",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        Set<UserFollows> allFollowings = this.userFollowsRepository.findAllByFollowerId(userId);
+
+        Set<StoryDto> allFollowingStories = allFollowings.stream().map(following -> {
+            Story followingStory = this.storyRepository
+                    .findByUserIdOrderByLastUpdatedDesc(following.getFollowing().getId());
+
+            if (Objects.nonNull(followingStory)) {
+                return this.buildUserStory(followingStory);
+            }
+
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
+
+        return allFollowingStories;
     }
 
     @Override

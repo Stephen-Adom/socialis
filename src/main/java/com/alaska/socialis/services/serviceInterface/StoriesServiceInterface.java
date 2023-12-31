@@ -3,6 +3,7 @@ package com.alaska.socialis.services.serviceInterface;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,4 +29,6 @@ public interface StoriesServiceInterface {
                         throws EntityNotFoundException;
 
         public List<WatchedStoryDto> usersWatchedAMedia(Long mediaId);
+
+        public Set<StoryDto> getAllStoriesForMyFollowings(Long userId) throws EntityNotFoundException;
 }
