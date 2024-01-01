@@ -79,7 +79,7 @@ public class StoriesService implements StoriesServiceInterface {
     private static final String UPDATE_USER_STORY_URI = "/feed/user/story/";
 
     @Override
-    public void fetchAuthUserStories(Long userId) throws EntityNotFoundException {
+    public Object fetchAuthUserStories(Long userId) throws EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
 
         if (user.isEmpty()) {
@@ -89,9 +89,10 @@ public class StoriesService implements StoriesServiceInterface {
         Story allAuthStories = this.storyRepository.findByUserIdOrderByLastUpdatedDesc(userId);
 
         if (!Objects.isNull(allAuthStories)) {
-            messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + user.get().getUsername(),
-                    this.buildUserStory(allAuthStories));
+            return this.buildUserStory(allAuthStories);
         }
+
+        return null;
     }
 
     @Override

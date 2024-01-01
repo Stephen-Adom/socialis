@@ -30,14 +30,14 @@ public class StoriesController {
     private StoriesService storiesService;
 
     @GetMapping("/{userId}/all")
-    private ResponseEntity<SuccessMessage> fetchAuthUserStories(@PathVariable("userId") Long userId)
+    private ResponseEntity<SuccessResponse> fetchAuthUserStories(@PathVariable("userId") Long userId)
             throws EntityNotFoundException {
-        this.storiesService.fetchAuthUserStories(userId);
+        Object story = this.storiesService.fetchAuthUserStories(userId);
 
-        SuccessMessage message = SuccessMessage.builder().message("User stories fetched")
+        SuccessResponse response = SuccessResponse.builder().data(story)
                 .status(HttpStatus.OK).build();
 
-        return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
+        return new ResponseEntity<SuccessResponse>(response, HttpStatus.OK);
     }
 
     @PostMapping(value = "/{userId}/upload", headers = "Content-Type=multipart/form-data")

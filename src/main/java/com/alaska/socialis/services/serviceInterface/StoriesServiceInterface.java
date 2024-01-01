@@ -14,7 +14,7 @@ import com.alaska.socialis.model.dto.WatchedStoryDto;
 
 public interface StoriesServiceInterface {
 
-        public void fetchAuthUserStories(Long userId) throws EntityNotFoundException;
+        public Object fetchAuthUserStories(Long userId) throws EntityNotFoundException;
 
         public void uploadStory(MultipartFile file, String caption, Long userId)
                         throws IOException, EntityNotFoundException;
