@@ -78,6 +78,10 @@ public class StoriesService implements StoriesServiceInterface {
 
     private static final String UPDATE_USER_STORY_URI = "/feed/user/story/";
 
+    private static final String UPDATE_STORIES = "/feed/user/stories";
+
+    private static final String UPDATE_WATCHED_STORIES = "/feed/user/stories/watched";
+
     @Override
     public Object fetchAuthUserStories(Long userId) throws EntityNotFoundException {
         Optional<User> user = this.userRepository.findById(userId);
@@ -147,6 +151,8 @@ public class StoriesService implements StoriesServiceInterface {
 
             Optional<Story> updatedStory = this.storyRepository.findByUserId(userId);
             messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + user.get().getUsername(),
+                    this.buildUserStory(updatedStory.get()));
+            messagingTemplate.convertAndSend(UPDATE_STORIES,
                     this.buildUserStory(updatedStory.get()));
         }
     }
@@ -258,6 +264,9 @@ public class StoriesService implements StoriesServiceInterface {
             String storyOwner = savedWatched.getMedia().getStory().getUser().getUsername();
 
             messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + storyOwner,
+                    this.buildUserStory(savedWatched.getMedia().getStory()));
+
+            messagingTemplate.convertAndSend(UPDATE_WATCHED_STORIES,
                     this.buildUserStory(savedWatched.getMedia().getStory()));
 
         }
