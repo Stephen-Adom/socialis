@@ -243,20 +243,7 @@ public class StoriesService implements StoriesServiceInterface {
 
         Optional<WatchedStory> watchedUserExist = this.watchedStoryRepository.findByUserIdAndMediaId(userId, mediaId);
 
-        if (watchedUserExist.isPresent()) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-
-            watchedUserExist.get().setWatchedAt(calendar.getTime());
-
-            WatchedStory savedWatched = this.watchedStoryRepository.save(watchedUserExist.get());
-
-            String storyOwner = savedWatched.getMedia().getStory().getUser().getUsername();
-
-            messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + storyOwner,
-                    this.buildUserStory(savedWatched.getMedia().getStory()));
-
-        } else {
+        if (watchedUserExist.isEmpty()) {
             WatchedStory newWatched = new WatchedStory();
             newWatched.setUser(userExist.get());
             newWatched.setMedia(storyMediaExist.get());
@@ -272,8 +259,8 @@ public class StoriesService implements StoriesServiceInterface {
 
             messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + storyOwner,
                     this.buildUserStory(savedWatched.getMedia().getStory()));
-        }
 
+        }
     }
 
     @Override
