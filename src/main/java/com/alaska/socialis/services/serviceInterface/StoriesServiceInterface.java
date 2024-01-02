@@ -19,6 +19,9 @@ public interface StoriesServiceInterface {
         public void uploadStory(MultipartFile file, String caption, Long userId)
                         throws IOException, EntityNotFoundException;
 
+        public void uploadMultipleStory(MultipartFile[] file, String[] caption, Long userId)
+                        throws IOException, EntityNotFoundException;
+
         public Map<String, Object> uploadStoryImage(MultipartFile file) throws IOException;
 
         public Map<String, Object> uploadAndSliceVideo(MultipartFile file) throws IOException;

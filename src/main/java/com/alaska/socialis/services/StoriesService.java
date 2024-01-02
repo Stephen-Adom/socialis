@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,8 +18,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.internal.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -136,7 +140,7 @@ public class StoriesService implements StoriesServiceInterface {
                 newStory.setNumberOfMedia(newStory.getNumberOfMedia() + 1);
                 newStory.setLastUpdated(LocalDateTime.now());
 
-                this.storyRepository.save(newStory);
+                newStory = this.storyRepository.save(newStory);
 
                 // create story media object
                 this.createStoryMedia(newStory, mediaUrl, caption, mediaType, currentDate, expiredDate);
@@ -155,6 +159,69 @@ public class StoriesService implements StoriesServiceInterface {
             messagingTemplate.convertAndSend(UPDATE_STORIES,
                     this.buildUserStory(updatedStory.get()));
         }
+    }
+
+    @Override
+    public void uploadMultipleStory(MultipartFile[] storyFiles, String[] captions, Long userId)
+            throws IOException, EntityNotFoundException {
+        Optional<User> user = this.userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        List<Map<String, Object>> mediaObject = Arrays.stream(storyFiles).map(file -> {
+            try {
+                return this.uploadStoryImage(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        Optional<Story> storyExist = this.storyRepository.findByUserId(userId);
+
+        if (storyExist.isEmpty()) {
+            // create new story instance
+            Story newStory = new Story();
+            newStory.setUser(user.get());
+            newStory.setNumberOfMedia(newStory.getNumberOfMedia() + 1);
+            newStory.setLastUpdated(LocalDateTime.now());
+
+            newStory = this.storyRepository.save(newStory);
+
+            this.saveMultipleStoryMedia(mediaObject, captions, newStory);
+
+        } else {
+
+            Story story = storyExist.get();
+            story.setNumberOfMedia(story.getNumberOfMedia() + 1);
+            story.setLastUpdated(LocalDateTime.now());
+
+            this.saveMultipleStoryMedia(mediaObject, captions, story);
+        }
+
+        Optional<Story> updatedStory = this.storyRepository.findByUserId(userId);
+        messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI + user.get().getUsername(),
+                this.buildUserStory(updatedStory.get()));
+        messagingTemplate.convertAndSend(UPDATE_STORIES,
+                this.buildUserStory(updatedStory.get()));
+
+    }
+
+    public void saveMultipleStoryMedia(List<Map<String, Object>> mediaObject, String[] captions, Story currentStory) {
+        IntStream.range(0, mediaObject.size()).forEach(index -> {
+            Map<String, Object> media = mediaObject.get(index);
+            String mediaCaption = captions[index];
+            String mediaUrl = (String) media.get("secure_url");
+            String mediaType = (String) media.get("resource_type");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            Date currentDate = calendar.getTime();
+            calendar.add(Calendar.HOUR, 24);
+            Date expiredDate = calendar.getTime();
+            this.createStoryMedia(currentStory, mediaUrl, mediaCaption, mediaType, currentDate, expiredDate);
+        });
     }
 
     private StoryMedia createStoryMedia(Story story, String mediaUrl, String caption, String mediaType,

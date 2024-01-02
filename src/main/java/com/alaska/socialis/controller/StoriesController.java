@@ -54,6 +54,20 @@ public class StoriesController {
         return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
     }
 
+    @PostMapping(value = "/{userId}/upload/multiple", headers = "Content-Type=multipart/form-data")
+    public ResponseEntity<SuccessMessage> postMultipleStories(
+            @RequestParam(required = true, value = "storyMedia") MultipartFile[] file,
+            @RequestParam(required = false, value = "caption") String[] caption, @PathVariable("userId") Long userId)
+            throws IOException, EntityNotFoundException {
+
+        this.storiesService.uploadMultipleStory(file, caption, userId);
+
+        SuccessMessage message = SuccessMessage.builder().message("User story uploaded successfully")
+                .status(HttpStatus.OK).build();
+
+        return new ResponseEntity<SuccessMessage>(message, HttpStatus.OK);
+    }
+
     @GetMapping("/{userId}/watched/{mediaId}")
     public ResponseEntity<SuccessMessage> storyWatchedByUser(
             @PathVariable(required = true, value = "userId") Long userId,
