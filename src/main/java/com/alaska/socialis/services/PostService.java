@@ -4,6 +4,7 @@ import java.util.Map;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,6 +48,10 @@ public class PostService implements PostServiceInterface {
     private static final String UPDATE_LIVE_POST_FEED_URL = "/feed/post/update";
 
     private static final String UPDATE_LIVE_USER_PATH = "/feed/user/update";
+
+    private static final String POST_IMAGE_CLOUD_PATH = "socialis/post/images";
+
+    private static final String POST_VIDEO_CLOUD_PATH = "socialis/post/videos";
 
     @Autowired
     private UserRepository userRepository;
@@ -119,8 +124,8 @@ public class PostService implements PostServiceInterface {
 
             List<PostImage> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    String filePath = file.getContentType().contains("image") ? "socialis/post/images"
-                            : "socialis/post/videos";
+                    String filePath = file.getContentType().contains("image") ? POST_IMAGE_CLOUD_PATH
+                            : POST_VIDEO_CLOUD_PATH;
 
                     String resourceType = file.getContentType().contains("image") ? "image" : "video";
 
@@ -184,8 +189,8 @@ public class PostService implements PostServiceInterface {
         if (Objects.nonNull(multipartFiles) && multipartFiles.length > 0) {
             List<PostImage> allMedia = Arrays.stream(multipartFiles).map((file) -> {
                 try {
-                    String filePath = file.getContentType().contains("image") ? "socialis/post/images"
-                            : "socialis/post/videos";
+                    String filePath = file.getContentType().contains("image") ? POST_IMAGE_CLOUD_PATH
+                            : POST_VIDEO_CLOUD_PATH;
 
                     String resourceType = file.getContentType().contains("image") ? "image" : "video";
 
@@ -222,7 +227,6 @@ public class PostService implements PostServiceInterface {
     }
 
     @Override
-    @Transactional
     public void deletePost(Long id) throws EntityNotFoundException {
         Optional<Post> existPost = this.postRepository.findById(id);
 
@@ -240,30 +244,55 @@ public class PostService implements PostServiceInterface {
 
         this.postRepository.deleteById(id);
 
-        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" + updatedUser.getUsername(),
+        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" +
+                updatedUser.getUsername(),
                 this.userService.buildDto(updatedUser));
     }
 
     private void deleteAllPostImages(Post post) {
-        List<String> images = new ArrayList<String>();
+        List<Map<String, String>> images = new ArrayList<Map<String, String>>();
 
         images.addAll(
-                post.getPostImages().stream().map(PostImage::getMediaUrl).collect(Collectors.toList()));
+                post.getPostImages().stream().map(postImage -> {
+                    Map<String, String> postObject = new HashMap<>();
+                    postObject.put("image", postImage.getMediaUrl());
+                    postObject.put("mediaType", postImage.getMediaType());
 
-        post.getComments().forEach((comment) -> {
-            images.addAll(
-                    comment.getCommentImages().stream().map(CommentImages::getMediaUrl).collect(Collectors.toList()));
+                    return postObject;
+                }).collect(Collectors.toList()));
 
-            comment.getReplies().stream().forEach((reply) -> {
+        if (post.getComments().size() > 0) {
+            post.getComments().forEach((comment) -> {
                 images.addAll(
-                        reply.getReplyImages().stream().map(ReplyImage::getMediaUrl).collect(Collectors.toList()));
+                        comment.getCommentImages().stream().map(commentImage -> {
+                            Map<String, String> commentObject = new HashMap<>();
+                            commentObject.put("image", commentImage.getMediaUrl());
+                            commentObject.put("mediaType", commentImage.getMediaType());
+
+                            return commentObject;
+                        }).collect(Collectors.toList()));
+
+                comment.getReplies().stream().forEach((reply) -> {
+                    images.addAll(
+                            reply.getReplyImages().stream().map(replyImage -> {
+                                Map<String, String> replyObject = new HashMap<>();
+                                replyObject.put("image", replyImage.getMediaUrl());
+                                replyObject.put("mediaType", replyImage.getMediaType());
+
+                                return replyObject;
+                            }).collect(Collectors.toList()));
+                });
             });
-        });
+        }
 
         if (images.size() > 0) {
             images.stream().forEach((imageUrl) -> {
-                this.imageUploadService.deleteUploadedImage("socialis/post/images/",
-                        imageUrl);
+                if (imageUrl.get("mediaType").equalsIgnoreCase("image")) {
+                    this.imageUploadService.deleteUploadedImage(POST_IMAGE_CLOUD_PATH, imageUrl.get("image"));
+                } else {
+                    this.imageUploadService.deleteUploadedImage(POST_VIDEO_CLOUD_PATH, imageUrl.get("image"));
+                }
+
             });
         }
 

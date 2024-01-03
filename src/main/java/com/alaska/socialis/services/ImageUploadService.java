@@ -28,6 +28,7 @@ public class ImageUploadService {
     }
 
     public void deleteUploadedImage(String delimiter, String imageUrl) {
+
         try {
             String[] imagUrlArray = imageUrl.split(delimiter);
             String imageName = imagUrlArray[1].split("\\.")[0];
