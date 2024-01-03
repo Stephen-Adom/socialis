@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.exceptions.EntityNotFoundException;
+import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
@@ -118,6 +119,20 @@ public class PostController {
         this.postService.deletePost(id);
 
         SuccessMessage response = SuccessMessage.builder().message("Post Successfully deleted").status(HttpStatus.OK)
+                .build();
+
+        return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/post/{userId}/repost/{postId}")
+    public ResponseEntity<SuccessMessage> repostWithNoContent(
+            @PathVariable(required = true, value = "userId") Long userId,
+            @PathVariable(required = true, value = "postId") Long postId)
+            throws EntityNotFoundException, UserAlreadyExistException {
+
+        this.postService.repostWithNoContent(userId, postId);
+
+        SuccessMessage response = SuccessMessage.builder().message("Repost successful").status(HttpStatus.OK)
                 .build();
 
         return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);

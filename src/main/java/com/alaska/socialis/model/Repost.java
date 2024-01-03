@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -40,6 +41,12 @@ public class Repost {
     private Post post;
 
     private String content;
+
+    private int numberOfLikes = 0;
+
+    private int numberOfComments = 0;
+
+    private int numberOfBookmarks = 0;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

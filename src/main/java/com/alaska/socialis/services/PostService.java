@@ -24,10 +24,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.event.NewPostEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
+import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.ReplyImage;
+import com.alaska.socialis.model.Repost;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
@@ -35,6 +37,7 @@ import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.repository.BookmarkRepository;
 import com.alaska.socialis.repository.PostImageRepository;
 import com.alaska.socialis.repository.PostRepository;
+import com.alaska.socialis.repository.RepostRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.PostServiceInterface;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +79,9 @@ public class PostService implements PostServiceInterface {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private RepostRepository repostRepository;
 
     @Override
     public List<PostDto> fetchAllPost() {
@@ -294,6 +300,35 @@ public class PostService implements PostServiceInterface {
                 }
 
             });
+        }
+
+    }
+
+    @Override
+    public void repostWithNoContent(Long userId, Long postId)
+            throws EntityNotFoundException, UserAlreadyExistException {
+        Optional<User> user = this.userRepository.findById(userId);
+        Optional<Post> post = this.postRepository.findById(postId);
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        if (post.isEmpty()) {
+            throw new EntityNotFoundException("Post with id " + postId + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Repost> repostExist = this.repostRepository.findByUserIdAndPostIdWithNoContent(userId, postId);
+
+        if (repostExist.isEmpty()) {
+            Repost newRepost = new Repost();
+            post.get().setNumberOfRepost(post.get().getNumberOfRepost() + 1);
+            newRepost.setPost(post.get());
+            newRepost.setUser(user.get());
+
+            this.repostRepository.save(newRepost);
+        } else {
+            throw new UserAlreadyExistException("Post already reposted", HttpStatus.BAD_REQUEST);
         }
 
     }
