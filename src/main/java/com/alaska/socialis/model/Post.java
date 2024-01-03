@@ -57,6 +57,9 @@ public class Post {
     @Builder.Default
     private int numberOfBookmarks = 0;
 
+    @Builder.Default
+    private int numberOfRepost = 0;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -80,6 +83,10 @@ public class Post {
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     List<PostLike> likes = new ArrayList<PostLike>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Repost> reposts = new ArrayList<Repost>();
 
     @Column(name = "scheduled_at", nullable = true)
     private LocalDateTime scheduledAt;
