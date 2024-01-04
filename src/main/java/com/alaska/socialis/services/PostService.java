@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.OffsetScrollPosition;
@@ -27,7 +26,11 @@ import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
+import com.alaska.socialis.model.dto.SimpleUserDto;
+import com.alaska.socialis.model.dto.SinglePostDto;
+import com.alaska.socialis.repository.BookmarkRepository;
 import com.alaska.socialis.repository.PostImageRepository;
 import com.alaska.socialis.repository.PostRepository;
 import com.alaska.socialis.repository.UserRepository;
@@ -61,6 +64,9 @@ public class PostService implements PostServiceInterface {
     private ImageUploadService imageUploadService;
 
     @Autowired
+    private BookmarkRepository bookmarkRepository;
+
+    @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
@@ -69,14 +75,13 @@ public class PostService implements PostServiceInterface {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
     @Override
     public List<PostDto> fetchAllPost() {
         List<Post> allPost = this.postRepository.findAllByOrderByCreatedAtDesc();
 
-        return this.buildPostDto(allPost);
+        List<PostDto> allPostDto = allPost.stream().map(post -> this.buildPostDto(post)).collect(Collectors.toList());
+
+        return allPostDto;
     }
 
     public List<PostDto> fetchAllPostUsingOffsetFilteringAndWindowIterator(int offsetCount) {
@@ -85,11 +90,11 @@ public class PostService implements PostServiceInterface {
         System.out.println(
                 "====================================== scroll position offset ================================");
         System.out.println(offset);
-        List<Post> postWindowIterator = this.postRepository.findFirst5ByScheduledAtIsNullOrderByCreatedAtDesc(offset);
+        List<Post> postList = this.postRepository.findFirst5ByScheduledAtIsNullOrderByCreatedAtDesc(offset);
 
-        List<Post> posts = new ArrayList<>();
-        postWindowIterator.forEach(posts::add);
-        return this.buildPostDto(postWindowIterator);
+        List<PostDto> allPostDto = postList.stream().map(post -> this.buildPostDto(post)).collect(Collectors.toList());
+
+        return allPostDto;
     }
 
     @Override
@@ -102,7 +107,9 @@ public class PostService implements PostServiceInterface {
 
         List<Post> allPosts = this.postRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
 
-        return this.buildPostDto(allPosts);
+        List<PostDto> allPostDto = allPosts.stream().map(post -> this.buildPostDto(post)).collect(Collectors.toList());
+
+        return allPostDto;
     }
 
     @Override
@@ -330,45 +337,65 @@ public class PostService implements PostServiceInterface {
     }
 
     public PostDto buildPostDto(Post post) {
+        List<Long> bookmarks = getBookmarkUsers(post);
 
-        return this.modelMapper.map(post, PostDto.class);
+        PostDto buildPost = PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
+                .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                .numberOfBookmarks(post.getNumberOfBookmarks())
+                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(buildSimpleUserDto(post))
+                .bookmarkedUsers(bookmarks)
+                .postImages(post.getPostImages()).likes(buildLikeDto(post)).numberOfRepost(post.getNumberOfRepost())
+                .originalPost(buildSimplePostDto(post.getOriginalPost())).build();
 
-        // List<Long> userIds =
-        // bookmarkRepository.findAllByContentIdAndContentType(post.getId(),
-        // "post").stream()
-        // .map((bookmark) ->
-        // bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
+        return buildPost;
 
-        // List<LikeDto> likes = post.getLikes().stream().map((like) -> {
-        // LikeDto currentLike = new LikeDto();
-        // currentLike.setImageUrl(like.getUser().getImageUrl());
-        // currentLike.setUsername(like.getUser().getUsername());
-        // currentLike.setFirstname(like.getUser().getFirstname());
-        // currentLike.setLastname(like.getUser().getLastname());
-
-        // return currentLike;
-        // }).collect(Collectors.toList());
-
-        // SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
-        // .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
-        // .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
-        // .bio(post.getUser().getBio()).build();
-
-        // PostDto buildPost =
-        // PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
-        // .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
-        // .numberOfBookmarks(post.getNumberOfBookmarks())
-        // .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)
-        // .postImages(post.getPostImages()).likes(likes).build();
-
-        // return buildPost;
     }
 
-    public List<PostDto> buildPostDto(List<Post> allPost) {
+    public SinglePostDto buildSimplePostDto(Post post) {
+        if (Objects.nonNull(post)) {
+            List<Long> bookmarks = getBookmarkUsers(post);
 
-        List<PostDto> allBuildPosts = allPost.stream().map((post) -> this.modelMapper.map(post, PostDto.class))
-                .collect(Collectors.toList());
+            SinglePostDto buildPost = SinglePostDto.builder().id(post.getId()).uid(post.getUid())
+                    .content(post.getContent())
+                    .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+                    .numberOfBookmarks(post.getNumberOfBookmarks())
+                    .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(buildSimpleUserDto(post))
+                    .bookmarkedUsers(bookmarks)
+                    .postImages(post.getPostImages()).likes(buildLikeDto(post)).numberOfRepost(post.getNumberOfRepost())
+                    .build();
 
-        return allBuildPosts;
+            return buildPost;
+        }
+
+        return null;
+
+    }
+
+    private SimpleUserDto buildSimpleUserDto(Post post) {
+        return SimpleUserDto.builder().id(post.getUser().getId())
+                .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
+                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
+                .bio(post.getUser().getBio()).build();
+    }
+
+    private List<LikeDto> buildLikeDto(Post post) {
+        List<LikeDto> likes = post.getLikes().stream().map((like) -> {
+            LikeDto currentLike = new LikeDto();
+            currentLike.setImageUrl(like.getUser().getImageUrl());
+            currentLike.setUsername(like.getUser().getUsername());
+            currentLike.setFirstname(like.getUser().getFirstname());
+            currentLike.setLastname(like.getUser().getLastname());
+
+            return currentLike;
+        }).collect(Collectors.toList());
+
+        return likes;
+    }
+
+    private List<Long> getBookmarkUsers(Post post) {
+        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(post.getId(), "post").stream()
+                .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
+
+        return userIds;
     }
 }

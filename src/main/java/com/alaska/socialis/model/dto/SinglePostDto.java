@@ -11,7 +11,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class PostDto {
+public class SinglePostDto {
+
     private Long id;
 
     private String uid;
@@ -44,6 +45,4 @@ public class PostDto {
 
     @Builder.Default
     List<Long> bookmarkedUsers = new ArrayList<Long>();
-
-    private SinglePostDto originalPost;
 }

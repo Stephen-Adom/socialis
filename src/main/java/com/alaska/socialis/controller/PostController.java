@@ -22,7 +22,6 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
-import com.alaska.socialis.model.PostRepostDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.requestModel.RepostRequest;
