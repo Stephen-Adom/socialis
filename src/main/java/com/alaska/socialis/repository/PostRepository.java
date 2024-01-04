@@ -34,4 +34,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query(value = "SELECT * FROM posts p where p.user_id = ?1 AND p.original_post_id=?2 and p.content IS NULL", nativeQuery = true)
     Optional<Post> findByUserIdAndOriginalPostIdWithNoContent(Long userId, Long postId);
+
+    @Query(value = "SELECT * FROM posts p where p.user_id = ?1 AND p.original_post_id=?2 and p.content IS NOT NULL", nativeQuery = true)
+    Optional<Post> findByUserIdAndOriginalPostIdWithContent(Long userId, Long postId);
 }

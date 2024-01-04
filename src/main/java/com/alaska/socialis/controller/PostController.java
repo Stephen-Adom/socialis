@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,9 +25,11 @@ import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
+import com.alaska.socialis.model.requestModel.RepostBody;
 import com.alaska.socialis.model.requestModel.RepostRequest;
 import com.alaska.socialis.services.PostService;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -134,6 +137,20 @@ public class PostController {
             throws EntityNotFoundException, UserAlreadyExistException {
 
         this.postService.repostWithNoContent(userId, postId);
+
+        SuccessMessage response = SuccessMessage.builder().message("Repost successful").status(HttpStatus.OK)
+                .build();
+
+        return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/post/{userId}/repost")
+    public ResponseEntity<SuccessMessage> repostWithContent(
+            @PathVariable(required = true, value = "userId") Long userId, @RequestBody @Valid RepostBody requestBody,
+            BindingResult validationResult)
+            throws EntityNotFoundException, UserAlreadyExistException, ValidationErrorsException {
+
+        this.postService.repostWithContent(userId, requestBody, validationResult);
 
         SuccessMessage response = SuccessMessage.builder().message("Repost successful").status(HttpStatus.OK)
                 .build();

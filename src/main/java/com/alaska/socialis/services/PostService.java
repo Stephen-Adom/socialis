@@ -18,11 +18,13 @@ import org.springframework.data.domain.ScrollPosition;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.event.NewPostEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
+import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.User;
@@ -30,6 +32,7 @@ import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.SinglePostDto;
+import com.alaska.socialis.model.requestModel.RepostBody;
 import com.alaska.socialis.repository.BookmarkRepository;
 import com.alaska.socialis.repository.PostImageRepository;
 import com.alaska.socialis.repository.PostRepository;
@@ -327,7 +330,6 @@ public class PostService implements PostServiceInterface {
             postObj.setUser(user.get());
             post.get().setNumberOfRepost(post.get().getNumberOfRepost() + 1);
             postObj.setOriginalPost(post.get());
-            ;
 
             Post newRepost = this.postRepository.save(postObj);
 
@@ -365,6 +367,56 @@ public class PostService implements PostServiceInterface {
         messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" +
                 updatedUser.getUsername(),
                 this.userService.buildDto(updatedUser));
+    }
+
+    @Override
+    public void repostWithContent(Long userId, RepostBody requestBody, BindingResult validationResult)
+            throws EntityNotFoundException, ValidationErrorsException, UserAlreadyExistException {
+        Optional<User> user = this.userRepository.findById(userId);
+        Optional<Post> post = this.postRepository.findById(requestBody.getPostId());
+
+        if (user.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + userId + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        if (post.isEmpty()) {
+            throw new EntityNotFoundException("Post with id " + requestBody.getPostId() + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        if (validationResult.hasErrors()) {
+            throw new ValidationErrorsException(validationResult.getFieldErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        String uid = "post-" + UUID.randomUUID().toString();
+
+        // check if original_post_id is null => reposting an original post
+        Optional<Post> repostExist = this.postRepository.findByUserIdAndOriginalPostIdWithContent(userId,
+                requestBody.getPostId());
+
+        if (repostExist.isEmpty()) {
+            Post postObj = new Post();
+            user.get().setNoOfPosts(user.get().getNoOfPosts() + 1);
+            postObj.setUid(uid);
+            postObj.setUser(user.get());
+            post.get().setNumberOfRepost(post.get().getNumberOfRepost() + 1);
+            postObj.setOriginalPost(post.get());
+            postObj.setContent(requestBody.getContent());
+
+            Post newRepost = this.postRepository.save(postObj);
+
+            messagingTemplate.convertAndSend(NEW_LIVE_POST_FEED_URL,
+                    this.buildPostDto(newRepost));
+            messagingTemplate.convertAndSend(UPDATE_LIVE_POST_FEED_URL,
+                    this.buildPostDto(post.get()));
+            messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" +
+                    user.get().getUsername(),
+                    this.userService.buildDto(user.get()));
+
+            // ! send notification about repost
+        } else {
+            throw new UserAlreadyExistException("Post already reposted", HttpStatus.BAD_REQUEST);
+        }
     }
 
     public PostDto buildPostDto(Post post) {
