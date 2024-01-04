@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
-import com.alaska.socialis.model.requestModel.UserInfoRequeset;
+import com.alaska.socialis.model.requestModel.UserInfoRequest;
 
 public interface UserServiceInterface {
         public UserDetails fetchUserDetailsByUsername(String username) throws EntityNotFoundException;
@@ -21,7 +21,7 @@ public interface UserServiceInterface {
         public void updateUserProfileImage(Long userId, MultipartFile multipartFile)
                         throws EntityNotFoundException, IOException;
 
-        public void updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
+        public void updateUserInfo(Long userId, UserInfoRequest requestBody, BindingResult validationResult)
                         throws EntityNotFoundException, ValidationErrorsException;
 
         public UserSummaryFollowingDto fetchUserInfoFullInformation(String username) throws EntityNotFoundException;

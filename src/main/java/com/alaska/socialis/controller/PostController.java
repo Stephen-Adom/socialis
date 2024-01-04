@@ -22,11 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
-import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.dto.PostDto;
 import com.alaska.socialis.model.dto.SuccessMessage;
 import com.alaska.socialis.model.requestModel.RepostBody;
-import com.alaska.socialis.model.requestModel.RepostRequest;
 import com.alaska.socialis.services.PostService;
 
 import jakarta.validation.Valid;
@@ -144,7 +142,7 @@ public class PostController {
         return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/post/{userId}/repost")
+    @PostMapping("/post/{userId}/repost")
     public ResponseEntity<SuccessMessage> repostWithContent(
             @PathVariable(required = true, value = "userId") Long userId, @RequestBody @Valid RepostBody requestBody,
             BindingResult validationResult)

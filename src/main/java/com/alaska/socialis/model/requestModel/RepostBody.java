@@ -1,16 +1,15 @@
 package com.alaska.socialis.model.requestModel;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-@Data
 @Setter
 @Getter
 public class RepostBody {
 
-    @NotBlank(message = "Post id is required")
+    @NotNull(message = "Post id is required")
     private Long postId;
 
     @NotBlank(message = "Content is required")

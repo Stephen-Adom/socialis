@@ -26,7 +26,7 @@ import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.UserFollows;
 import com.alaska.socialis.model.dto.UserSummaryDto;
 import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
-import com.alaska.socialis.model.requestModel.UserInfoRequeset;
+import com.alaska.socialis.model.requestModel.UserInfoRequest;
 import com.alaska.socialis.repository.UserFollowsRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.UserServiceInterface;
@@ -125,7 +125,7 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public void updateUserInfo(Long userId, UserInfoRequeset requestBody, BindingResult validationResult)
+    public void updateUserInfo(Long userId, UserInfoRequest requestBody, BindingResult validationResult)
             throws EntityNotFoundException, ValidationErrorsException {
         Optional<User> user = this.userRepository.findById(userId);
 

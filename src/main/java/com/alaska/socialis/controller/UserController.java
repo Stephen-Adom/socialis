@@ -22,7 +22,7 @@ import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.dto.SuccessResponse;
 import com.alaska.socialis.model.dto.UserSummaryFollowingDto;
-import com.alaska.socialis.model.requestModel.UserInfoRequeset;
+import com.alaska.socialis.model.requestModel.UserInfoRequest;
 import com.alaska.socialis.services.UserService;
 
 import jakarta.validation.Valid;
@@ -65,7 +65,7 @@ public class UserController {
 
     @PostMapping("/{id}/update_user_info")
     public ResponseEntity<Map<String, Object>> updateUserInfo(@PathVariable("id") Long userId,
-            @RequestBody @Valid UserInfoRequeset requestBody, BindingResult bindingResult)
+            @RequestBody @Valid UserInfoRequest requestBody, BindingResult bindingResult)
             throws EntityNotFoundException, ValidationErrorsException {
         this.userService.updateUserInfo(userId, requestBody, bindingResult);
 
