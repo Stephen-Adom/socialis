@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
 
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ public class PostDto {
     private Date createdAt;
     private Date updatedAt;
     private SimpleUserDto user;
+    private PostDto originalPost;
     List<PostImage> postImages = new ArrayList<PostImage>();
     List<LikeDto> likes = new ArrayList<LikeDto>();
     List<Long> bookmarkedUsers = new ArrayList<Long>();

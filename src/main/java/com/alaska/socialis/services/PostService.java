@@ -11,33 +11,25 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.OffsetScrollPosition;
 import org.springframework.data.domain.ScrollPosition;
-import org.springframework.data.domain.Window;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alaska.socialis.event.NewPostEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
-import com.alaska.socialis.model.CommentImages;
 import com.alaska.socialis.model.Post;
 import com.alaska.socialis.model.PostImage;
-import com.alaska.socialis.model.ReplyImage;
-import com.alaska.socialis.model.Repost;
 import com.alaska.socialis.model.User;
-import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
-import com.alaska.socialis.model.dto.SimpleUserDto;
-import com.alaska.socialis.repository.BookmarkRepository;
 import com.alaska.socialis.repository.PostImageRepository;
 import com.alaska.socialis.repository.PostRepository;
-import com.alaska.socialis.repository.RepostRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.PostServiceInterface;
 import lombok.extern.slf4j.Slf4j;
@@ -69,9 +61,6 @@ public class PostService implements PostServiceInterface {
     private ImageUploadService imageUploadService;
 
     @Autowired
-    private BookmarkRepository bookmarkRepository;
-
-    @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
@@ -81,7 +70,7 @@ public class PostService implements PostServiceInterface {
     private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    private RepostRepository repostRepository;
+    private ModelMapper modelMapper;
 
     @Override
     public List<PostDto> fetchAllPost() {
@@ -96,11 +85,11 @@ public class PostService implements PostServiceInterface {
         System.out.println(
                 "====================================== scroll position offset ================================");
         System.out.println(offset);
-        Window<Post> postWindowIterator = this.postRepository.findFirst5ByScheduledAtIsNullOrderByCreatedAtDesc(offset);
+        List<Post> postWindowIterator = this.postRepository.findFirst5ByScheduledAtIsNullOrderByCreatedAtDesc(offset);
 
         List<Post> posts = new ArrayList<>();
         postWindowIterator.forEach(posts::add);
-        return this.buildPostDto(posts);
+        return this.buildPostDto(postWindowIterator);
     }
 
     @Override
@@ -315,18 +304,25 @@ public class PostService implements PostServiceInterface {
         }
 
         if (post.isEmpty()) {
-            throw new EntityNotFoundException("Post with id " + postId + " does not exist", HttpStatus.NOT_FOUND);
+            throw new EntityNotFoundException("Post with id " + postId + " does not exist",
+                    HttpStatus.NOT_FOUND);
         }
 
-        Optional<Repost> repostExist = this.repostRepository.findByUserIdAndPostIdWithNoContent(userId, postId);
+        String uid = "post-" + UUID.randomUUID().toString();
+
+        // check if original_post_id is null => reposting an original post
+        Optional<Post> repostExist = this.postRepository.findByUserIdAndOriginalPostIdWithNoContent(userId, postId);
 
         if (repostExist.isEmpty()) {
-            Repost newRepost = new Repost();
+            Post postObj = new Post();
+            user.get().setNoOfPosts(user.get().getNoOfPosts() + 1);
+            postObj.setUid(uid);
+            postObj.setUser(user.get());
             post.get().setNumberOfRepost(post.get().getNumberOfRepost() + 1);
-            newRepost.setPost(post.get());
-            newRepost.setUser(user.get());
+            postObj.setOriginalPost(post.get());
+            ;
 
-            this.repostRepository.save(newRepost);
+            this.postRepository.save(postObj);
         } else {
             throw new UserAlreadyExistException("Post already reposted", HttpStatus.BAD_REQUEST);
         }
@@ -335,61 +331,43 @@ public class PostService implements PostServiceInterface {
 
     public PostDto buildPostDto(Post post) {
 
-        List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(post.getId(), "post").stream()
-                .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
+        return this.modelMapper.map(post, PostDto.class);
 
-        List<LikeDto> likes = post.getLikes().stream().map((like) -> {
-            LikeDto currentLike = new LikeDto();
-            currentLike.setImageUrl(like.getUser().getImageUrl());
-            currentLike.setUsername(like.getUser().getUsername());
-            currentLike.setFirstname(like.getUser().getFirstname());
-            currentLike.setLastname(like.getUser().getLastname());
+        // List<Long> userIds =
+        // bookmarkRepository.findAllByContentIdAndContentType(post.getId(),
+        // "post").stream()
+        // .map((bookmark) ->
+        // bookmark.getUser().getId()).filter(Objects::nonNull).collect(Collectors.toList());
 
-            return currentLike;
-        }).collect(Collectors.toList());
+        // List<LikeDto> likes = post.getLikes().stream().map((like) -> {
+        // LikeDto currentLike = new LikeDto();
+        // currentLike.setImageUrl(like.getUser().getImageUrl());
+        // currentLike.setUsername(like.getUser().getUsername());
+        // currentLike.setFirstname(like.getUser().getFirstname());
+        // currentLike.setLastname(like.getUser().getLastname());
 
-        SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
-                .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
-                .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
-                .bio(post.getUser().getBio()).build();
+        // return currentLike;
+        // }).collect(Collectors.toList());
 
-        PostDto buildPost = PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
-                .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
-                .numberOfBookmarks(post.getNumberOfBookmarks())
-                .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)
-                .postImages(post.getPostImages()).likes(likes).build();
+        // SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
+        // .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
+        // .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
+        // .bio(post.getUser().getBio()).build();
 
-        return buildPost;
+        // PostDto buildPost =
+        // PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
+        // .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
+        // .numberOfBookmarks(post.getNumberOfBookmarks())
+        // .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)
+        // .postImages(post.getPostImages()).likes(likes).build();
+
+        // return buildPost;
     }
 
     public List<PostDto> buildPostDto(List<Post> allPost) {
 
-        List<PostDto> allBuildPosts = allPost.stream().map((post) -> {
-            List<Long> userIds = bookmarkRepository.findAllByContentIdAndContentType(post.getId(), "post").stream()
-                    .map((bookmark) -> bookmark.getUser().getId()).filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            List<LikeDto> likes = post.getLikes().stream().map((like) -> {
-                LikeDto currentLike = new LikeDto();
-                currentLike.setImageUrl(like.getUser().getImageUrl());
-                currentLike.setUsername(like.getUser().getUsername());
-                currentLike.setFirstname(like.getUser().getFirstname());
-                currentLike.setLastname(like.getUser().getLastname());
-
-                return currentLike;
-            }).collect(Collectors.toList());
-
-            SimpleUserDto user = SimpleUserDto.builder().id(post.getUser().getId())
-                    .firstname(post.getUser().getFirstname()).lastname(post.getUser().getLastname())
-                    .username(post.getUser().getUsername()).imageUrl(post.getUser().getImageUrl())
-                    .bio(post.getUser().getBio()).build();
-
-            return PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
-                    .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
-                    .numberOfBookmarks(post.getNumberOfBookmarks())
-                    .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(user).bookmarkedUsers(userIds)
-                    .postImages(post.getPostImages()).likes(likes).build();
-        }).collect(Collectors.toList());
+        List<PostDto> allBuildPosts = allPost.stream().map((post) -> this.modelMapper.map(post, PostDto.class))
+                .collect(Collectors.toList());
 
         return allBuildPosts;
     }

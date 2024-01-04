@@ -12,4 +12,8 @@ import com.alaska.socialis.model.Repost;
 public interface RepostRepository extends JpaRepository<Repost, Long> {
     @Query(value = "select * from Repost r where r.user_id = ?1 AND r.post_id=?2 and r.content IS NULL", nativeQuery = true)
     Optional<Repost> findByUserIdAndPostIdWithNoContent(Long userId, Long postId);
+
+    @Query(value = "select * from Repost r where r.user_id = ?1 AND r.post_id=?2 and r.original_post_id=?3 and r.content IS NULL", nativeQuery = true)
+    Optional<Repost> findByUserIdAndPostIdAndOriginalPostIdWithNoContent(Long userId, Long postId,
+            Long original_post_id);
 }

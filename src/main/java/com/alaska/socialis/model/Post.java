@@ -36,6 +36,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "posts", uniqueConstraints = @UniqueConstraint(name = "post_uid_unique", columnNames = "uid"), indexes = {
         @Index(name = "UNIQUE_POST_LABEL", columnList = "uid"),
         @Index(name = "FK_POST_USER_ID", columnList = "user_id"),
+        @Index(name = "FK_ORIGINAL_POST_ID", columnList = "original_post_id"),
+        @Index(name = "FK_USER_ORIGINAL_POST_ID", columnList = "user_id, original_post_id"),
 })
 public class Post {
 
@@ -91,4 +93,7 @@ public class Post {
     @Column(name = "scheduled_at", nullable = true)
     private LocalDateTime scheduledAt;
 
+    @ManyToOne
+    @JoinColumn(name = "original_post_id", referencedColumnName = "id")
+    private Post originalPost;
 }
