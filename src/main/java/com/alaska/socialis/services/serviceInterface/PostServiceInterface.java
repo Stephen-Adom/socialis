@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.model.dto.PostDto;
-import com.alaska.socialis.model.requestModel.RepostRequest;
 
 public interface PostServiceInterface {
         public void createPost(Long userId, String content, MultipartFile[] multipartFiles)
@@ -26,4 +25,6 @@ public interface PostServiceInterface {
 
         public void repostWithNoContent(Long userId, Long postId)
                         throws EntityNotFoundException, UserAlreadyExistException;
+
+        public void undoRepost(Long postId) throws EntityNotFoundException;
 }

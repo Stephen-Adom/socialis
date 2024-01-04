@@ -140,4 +140,16 @@ public class PostController {
 
         return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/post/remove/repost/{postId}")
+    public ResponseEntity<SuccessMessage> undoRepost(@PathVariable(required = true, value = "postId") Long postId)
+            throws EntityNotFoundException {
+
+        this.postService.undoRepost(postId);
+
+        SuccessMessage response = SuccessMessage.builder().message("Repost deleted successfully").status(HttpStatus.OK)
+                .build();
+
+        return new ResponseEntity<SuccessMessage>(response, HttpStatus.OK);
+    }
 }

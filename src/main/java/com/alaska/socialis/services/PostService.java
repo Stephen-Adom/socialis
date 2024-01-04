@@ -329,11 +329,42 @@ public class PostService implements PostServiceInterface {
             postObj.setOriginalPost(post.get());
             ;
 
-            this.postRepository.save(postObj);
+            Post newRepost = this.postRepository.save(postObj);
+
+            messagingTemplate.convertAndSend(NEW_LIVE_POST_FEED_URL,
+                    this.buildPostDto(newRepost));
+            messagingTemplate.convertAndSend(UPDATE_LIVE_POST_FEED_URL,
+                    this.buildPostDto(post.get()));
+            messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" +
+                    user.get().getUsername(),
+                    this.userService.buildDto(user.get()));
+
+            // ! send notification about repost
         } else {
             throw new UserAlreadyExistException("Post already reposted", HttpStatus.BAD_REQUEST);
         }
 
+    }
+
+    @Override
+    public void undoRepost(Long postId) throws EntityNotFoundException {
+        Optional<Post> post = this.postRepository.findById(postId);
+
+        if (post.isEmpty()) {
+            throw new EntityNotFoundException("Post with id " + postId + " does not exist",
+                    HttpStatus.NOT_FOUND);
+        }
+
+        User user = post.get().getUser();
+        user.setNoOfPosts(user.getNoOfPosts() - 1);
+
+        User updatedUser = this.userRepository.save(user);
+
+        this.postRepository.deleteById(postId);
+
+        messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" +
+                updatedUser.getUsername(),
+                this.userService.buildDto(updatedUser));
     }
 
     public PostDto buildPostDto(Post post) {
