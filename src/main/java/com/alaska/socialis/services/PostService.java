@@ -366,6 +366,9 @@ public class PostService implements PostServiceInterface {
 
         this.postRepository.deleteById(postId);
 
+        messagingTemplate.convertAndSend(UPDATE_LIVE_POST_FEED_URL,
+                this.buildPostDto(post.get().getOriginalPost()));
+
         messagingTemplate.convertAndSend(UPDATE_LIVE_USER_PATH + "-" +
                 updatedUser.getUsername(),
                 this.userService.buildDto(updatedUser));
