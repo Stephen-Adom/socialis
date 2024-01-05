@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -45,7 +46,7 @@ public class StoryMedia {
     @Column(name = "uploaded_at", nullable = false)
     private Date uploadedAt;
 
-    @OneToMany(mappedBy = "media")
+    @OneToMany(mappedBy = "media", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<WatchedStory> watchedBy = new ArrayList<>();
 
 }

@@ -21,8 +21,11 @@ import java.util.stream.IntStream;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +45,8 @@ import com.alaska.socialis.repository.WatchedStoryRepository;
 import com.alaska.socialis.services.serviceInterface.StoriesServiceInterface;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+
+import org.springframework.data.domain.Sort;
 
 @Service
 public class StoriesService implements StoriesServiceInterface {
@@ -382,5 +387,55 @@ public class StoriesService implements StoriesServiceInterface {
 
     private WatchedStoryDto buildWatchStory(WatchedStory savedWatched) {
         return this.modelMapper.map(savedWatched, WatchedStoryDto.class);
+    }
+
+    @Scheduled(fixedRate = 300000) // Run every 5 minutes
+    public void checkExpiredStoriesBatch() {
+        int batchSize = 100; // Adjust batch size based on your needs
+        int page = 0;
+
+        Page<StoryMedia> expiredStoriesPage;
+
+        do {
+            expiredStoriesPage = storyMediaRepository.findAllByExpiredAtLessThanEqual(
+                    new Date(), PageRequest.of(page, batchSize, Sort.by("expiredAt")));
+
+            List<StoryMedia> expiredStories = expiredStoriesPage.getContent();
+
+            // Process the batch of expired stories
+            processExpiredStories(expiredStories);
+
+            page++;
+        } while (!expiredStoriesPage.isEmpty());
+    }
+
+    public void processExpiredStories(List<StoryMedia> allExpiredMedia) {
+
+        for (StoryMedia media : allExpiredMedia) {
+            try {
+                deleteStoryMediaFromCloud(media);
+                storyMediaRepository.deleteById(media.getId());
+
+                Story story = media.getStory();
+                story.setNumberOfMedia(story.getNumberOfMedia() - 1);
+
+                if (story.getNumberOfMedia() == 0) {
+                    storyRepository.deleteById(story.getId());
+                } else {
+                    storyRepository.save(story);
+                    messagingTemplate.convertAndSend(UPDATE_USER_STORY_URI +
+                            story.getUser().getUsername(),
+                            buildUserStory(story));
+                    messagingTemplate.convertAndSend(UPDATE_STORIES, buildUserStory(story));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void deleteStoryMediaFromCloud(StoryMedia media) {
+        this.imageUploadService.deleteUploadedImage(storyFilePath,
+                media.getMediaUrl());
     }
 }
