@@ -7,5 +7,6 @@ import lombok.Setter;
 @Setter
 public class ResharedUserDto {
     private Long userId;
+    private Long resharedId;
     private Boolean withContent;
 }

@@ -360,6 +360,7 @@ public class PostService implements PostServiceInterface {
 
         User user = post.get().getUser();
         user.setNoOfPosts(user.getNoOfPosts() - 1);
+        post.get().getOriginalPost().setNumberOfRepost(post.get().getOriginalPost().getNumberOfRepost() - 1);
 
         User updatedUser = this.userRepository.save(user);
 
@@ -441,7 +442,8 @@ public class PostService implements PostServiceInterface {
                 .map(resharedpost -> {
                     ResharedUserDto user = new ResharedUserDto();
                     user.setUserId(resharedpost.getUser().getId());
-                    user.setWithContent(resharedpost.getContent().isEmpty() ? false : true);
+                    user.setResharedId(resharedpost.getId());
+                    user.setWithContent(Objects.isNull(resharedpost.getContent()) ? false : true);
 
                     return user;
                 }).collect(Collectors.toList());
