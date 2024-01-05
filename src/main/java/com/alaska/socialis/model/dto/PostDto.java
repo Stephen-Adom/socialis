@@ -46,4 +46,7 @@ public class PostDto {
     List<Long> bookmarkedUsers = new ArrayList<Long>();
 
     private SinglePostDto originalPost;
+
+    @Builder.Default
+    List<ResharedUserDto> resharedBy = new ArrayList<>();
 }

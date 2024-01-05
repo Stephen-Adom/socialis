@@ -30,6 +30,7 @@ import com.alaska.socialis.model.PostImage;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.dto.LikeDto;
 import com.alaska.socialis.model.dto.PostDto;
+import com.alaska.socialis.model.dto.ResharedUserDto;
 import com.alaska.socialis.model.dto.SimpleUserDto;
 import com.alaska.socialis.model.dto.SinglePostDto;
 import com.alaska.socialis.model.requestModel.RepostBody;
@@ -421,6 +422,7 @@ public class PostService implements PostServiceInterface {
 
     public PostDto buildPostDto(Post post) {
         List<Long> bookmarks = getBookmarkUsers(post);
+        List<ResharedUserDto> resharedBy = postResharedBy(post);
 
         PostDto buildPost = PostDto.builder().id(post.getId()).uid(post.getUid()).content(post.getContent())
                 .numberOfComments(post.getNumberOfComments()).numberOfLikes(post.getNumberOfLikes())
@@ -428,10 +430,23 @@ public class PostService implements PostServiceInterface {
                 .createdAt(post.getCreatedAt()).updatedAt(post.getUpdatedAt()).user(buildSimpleUserDto(post))
                 .bookmarkedUsers(bookmarks)
                 .postImages(post.getPostImages()).likes(buildLikeDto(post)).numberOfRepost(post.getNumberOfRepost())
-                .originalPost(buildSimplePostDto(post.getOriginalPost())).build();
+                .originalPost(buildSimplePostDto(post.getOriginalPost())).resharedBy(resharedBy).build();
 
         return buildPost;
 
+    }
+
+    public List<ResharedUserDto> postResharedBy(Post post) {
+        List<ResharedUserDto> resharedBy = this.postRepository.findAllByOriginalPostId(post.getId()).stream()
+                .map(resharedpost -> {
+                    ResharedUserDto user = new ResharedUserDto();
+                    user.setUserId(resharedpost.getUser().getId());
+                    user.setWithContent(resharedpost.getContent().isEmpty() ? false : true);
+
+                    return user;
+                }).collect(Collectors.toList());
+
+        return resharedBy;
     }
 
     public SinglePostDto buildSimplePostDto(Post post) {
