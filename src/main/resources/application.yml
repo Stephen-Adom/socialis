@@ -1,0 +1,47 @@
+JWT:
+  SECRET_KEY: Du539h0K7Cd5fat0sBx6oPR/Chi+rSp35/FXdqSy380TgHTEjEXZxlUmXta52w29
+
+SENDER_DOMAIN: stephen.alaska94@gmail.com
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/socialis
+    username: root
+    password: i@mthebest
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 587
+    username: b45f5679d9d5a4
+    password: ed555aae84cbd1
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+
+# spring.mail.host=smtp.gmail.com
+# spring.mail.port=587
+# spring.mail.username=stephen.alaska94@gmail.com
+# spring.mail.password=kqrv gisp davu qhur
+# spring.mail.properties.mail.smtp.auth=true
+# spring.mail.properties.mail.smtp.starttls.enable=true
+
+cloudinary:
+  cloud-name: dt8tdf7uu
+  api-key: 565976543429981
+  api-secret: GUEQLAPe9bMYru7nbhEJ6v1rXpE
+
+# spring.servlet.multipart.max-request-size=5MB
+
+app:
+  video-folder: C:/Utils/tmp
