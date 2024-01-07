@@ -256,6 +256,8 @@ public class AuthenticationController {
     public ResponseEntity<UrlDto> auth() {
         String url = new GoogleAuthorizationCodeRequestUrl(clientId, "http://localhost:4200",
                 Arrays.asList("email", "profile", "openid")).build();
+        System.out.println("=========================== url dto =============================");
+        System.out.println(new UrlDto(url));
 
         return ResponseEntity.ok(new UrlDto(url));
     }

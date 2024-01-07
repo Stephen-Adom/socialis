@@ -29,8 +29,8 @@ spring:
       resourceserver:
         opaque-token:
           intropsection-uri: https://www.googleapis.com
-          client-id: Iv1.7369b09c4c569edd
-          client-secret: 1ad2bacbc1114ac28aed56bc118f9f5fa5911bd2
+          client-id: 752731306131-k6biq6c3ts8da0831u9lst8js4ffhscd.apps.googleusercontent.com
+          client-secret: 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
 
   servlet:
     multipart:

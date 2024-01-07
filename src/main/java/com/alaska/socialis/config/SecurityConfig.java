@@ -40,12 +40,13 @@ public class SecurityConfig {
         http.cors(cors -> corsConfigurer());
         http.csrf(csrf -> csrf.disable());
 
-        http.exceptionHandling(
-                exception -> exception.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
+        // http.exceptionHandling(
+        // exception -> exception.authenticationEntryPoint(new
+        // HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().authenticated());
+        // http.authorizeHttpRequests(authorize -> authorize
+        // .requestMatchers("/api/auth/**").permitAll()
+        // .anyRequest().authenticated());
         http.sessionManagement(
                 sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authenticationProvider(authenticationProvider).addFilterBefore(jwtAuthConfig,
@@ -60,7 +61,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("*")
+                        .allowedOrigins("http://localhost:4200")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                         .allowedHeaders("*")
                         .allowCredentials(true)
