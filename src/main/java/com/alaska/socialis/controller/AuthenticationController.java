@@ -1,5 +1,6 @@
 package com.alaska.socialis.controller;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +26,9 @@ import com.alaska.socialis.exceptions.UnauthorizedRequestException;
 import com.alaska.socialis.exceptions.UserAlreadyExistException;
 import com.alaska.socialis.exceptions.ValidationErrorsException;
 import com.alaska.socialis.model.NewPasswordModel;
+import com.alaska.socialis.model.TokenDto;
 import com.alaska.socialis.model.TokenRequest;
+import com.alaska.socialis.model.UrlDto;
 import com.alaska.socialis.model.User;
 import com.alaska.socialis.model.UserDto;
 import com.alaska.socialis.model.dto.AuthResponse;
@@ -40,6 +43,11 @@ import com.alaska.socialis.model.validationGroups.RegisterValidationGroup;
 import com.alaska.socialis.services.AuthenticationService;
 import com.alaska.socialis.services.JwtService;
 import com.alaska.socialis.services.UserService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.Value;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -63,6 +71,12 @@ public class AuthenticationController {
     private ApplicationEventPublisher publisher;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+    @Value("${spring.security.oauth2.resourceserver.opaque-token.client-id}")
+    private String clientId;
+
+    @Value("${spring.security.oauth2.resourceserver.opaque-token.client-secret}")
+    private String clientSecret;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(
@@ -236,5 +250,26 @@ public class AuthenticationController {
         responseBody.put("status", HttpStatus.OK);
 
         return new ResponseEntity<Map<String, Object>>(responseBody, HttpStatus.OK);
+    }
+
+    @GetMapping("/oauth/google/url")
+    public ResponseEntity<UrlDto> auth() {
+        String url = new GoogleAuthorizationCodeRequestUrl(clientId, "http://localhost:4200",
+                Arrays.asList("email", "profile", "openid")).build();
+
+        return ResponseEntity.ok(new UrlDto(url));
+    }
+
+    @GetMapping("/oauth/callback")
+    public ResponseEntity<TokenDto> callback(@RequestParam("code") String code) {
+        String token;
+        try {
+            token = new GoogleAuthorizationCodeTokenRequest(new NetHttpTransport(), new GsonFactory(), clientId,
+                    clientSecret, code, "http://localhost:4200").execute().getAccessToken();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok(new TokenDto(token));
     }
 }
