@@ -8,13 +8,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.alaska.socialis.event.ResetPasswordEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
@@ -28,6 +32,7 @@ import com.alaska.socialis.model.ResetPasswordModel;
 import com.alaska.socialis.model.RevokedTokens;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.User;
+import com.alaska.socialis.model.UserInfoMono;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
 import com.alaska.socialis.model.requestModel.GoogleUserRequest;
 import com.alaska.socialis.model.requestModel.PhoneValidationRequeset;
@@ -39,6 +44,9 @@ import com.alaska.socialis.repository.ResetPasswordRepository;
 import com.alaska.socialis.repository.RevokedTokenRepository;
 import com.alaska.socialis.repository.UserRepository;
 import com.alaska.socialis.services.serviceInterface.AuthenticationServiceInterface;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -71,6 +79,18 @@ public class AuthenticationService implements AuthenticationServiceInterface {
 
     @Autowired
     private ResetPasswordRepository resetPasswordRepository;
+
+    @Value("${spring.security.oauth2.resourceserver.opaque-token.client-id}")
+    private String clientId;
+
+    @Value("${spring.security.oauth2.resourceserver.opaque-token.client-secret}")
+    private String clientSecret;
+
+    private final WebClient userInfoClient;
+
+    public AuthenticationService(WebClient userInfoClient) {
+        this.userInfoClient = userInfoClient;
+    }
 
     @Override
     public User registerUser(BindingResult validationResult, User user)
@@ -333,5 +353,54 @@ public class AuthenticationService implements AuthenticationServiceInterface {
 
     public String applicationUrl(HttpServletRequest request) {
         return "http://localhost:4200/auth" + request.getContextPath();
+    }
+
+    @Override
+    public User authenticateGoogleInfo(String code, HttpServletRequest request) throws UnauthorizedRequestException {
+        try {
+            String token = new GoogleAuthorizationCodeTokenRequest(new NetHttpTransport(), new GsonFactory(), clientId,
+                    clientSecret, code, "http://localhost:4200/auth/login").execute().getAccessToken();
+            UserInfoMono user = userInfoClient.get()
+                    .uri(uriBuilder -> uriBuilder.path("/oauth2/v3/userinfo").queryParam("access_token", token).build())
+                    .retrieve()
+                    .bodyToMono(UserInfoMono.class).block();
+
+            Optional<User> userExist = this.userRepository.findByEmail(user.email());
+            User newUser;
+
+            if (userExist.isEmpty()) {
+                newUser = this.registerNewGoogleUser(user);
+            } else {
+                newUser = this.signInGoogleUser(userExist.get(), request);
+            }
+
+            return newUser;
+
+        } catch (Exception e) {
+            throw new UnauthorizedRequestException("User Unauthorized " + e.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    public User registerNewGoogleUser(UserInfoMono user) {
+        String uid = "usr-" + UUID.randomUUID().toString();
+        String defaultUsername = user.family_name() + uid.substring(0, 5);
+
+        User newUser = User.builder().uid(uid).firstname(user.given_name()).lastname(user.family_name())
+                .email(user.email()).username(defaultUsername)
+                .password("").enabled(user.email_verified()).build();
+
+        return this.userRepository.save(newUser);
+    }
+
+    public User signInGoogleUser(User user, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                user.getUsername(), user.getPassword(),
+                user.getAuthorities());
+        authToken.setDetails(
+                new WebAuthenticationDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+
+        return user;
     }
 }

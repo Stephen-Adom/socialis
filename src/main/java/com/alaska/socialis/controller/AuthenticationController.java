@@ -76,15 +76,6 @@ public class AuthenticationController {
     @Value("${spring.security.oauth2.resourceserver.opaque-token.client-id}")
     private String clientId;
 
-    @Value("${spring.security.oauth2.resourceserver.opaque-token.client-secret}")
-    private String clientSecret;
-
-    private final WebClient userInfoClient;
-
-    public AuthenticationController(WebClient userInfoClient) {
-        this.userInfoClient = userInfoClient;
-    }
-
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(
             @Validated(RegisterValidationGroup.class) @RequestBody User user,
@@ -268,23 +259,18 @@ public class AuthenticationController {
     }
 
     @GetMapping("/oauth/callback")
-    public ResponseEntity<TokenDto> callback(@RequestParam("code") String code) {
-        String token;
-        try {
-            token = new GoogleAuthorizationCodeTokenRequest(new NetHttpTransport(), new GsonFactory(), clientId,
-                    clientSecret, code, "http://localhost:4200/auth/login").execute().getAccessToken();
-            UserInfoMono user = userInfoClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/oauth2/v3/userinfo").queryParam("access_token", token).build())
-                    .retrieve()
-                    .bodyToMono(UserInfoMono.class).block();
+    public ResponseEntity<AuthResponse> callback(@RequestParam("code") String code, HttpServletRequest request)
+            throws UnauthorizedRequestException {
+        User user = this.authService.authenticateGoogleInfo(code, request);
 
-            System.out.println("=========================== url dto =============================");
+        User updatedAuthUser = this.authService.updateLoginCount(user);
 
-            System.out.println(user);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        String token = this.authService.generateJwt(updatedAuthUser, request);
+        String refreshToken = this.jwtService.generateRefreshToken(updatedAuthUser);
 
-        return ResponseEntity.ok(new TokenDto(token));
+        AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.OK)
+                .data(this.userService.buildDto(updatedAuthUser)).accessToken(token).refreshToken(refreshToken).build();
+
+        return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.OK);
     }
 }

@@ -59,4 +59,6 @@ public interface AuthenticationServiceInterface {
 
         public User validateGoogleUserAndSignInUser(GoogleUserRequest googleUserRequest,
                         BindingResult bindingResult) throws ValidationErrorsException;
+
+        public User authenticateGoogleInfo(String code, HttpServletRequest request) throws UnauthorizedRequestException;
 }
