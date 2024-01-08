@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.alaska.socialis.event.RegistrationCompleteEvent;
 import com.alaska.socialis.exceptions.EntityNotFoundException;
@@ -30,7 +32,7 @@ import com.alaska.socialis.model.TokenDto;
 import com.alaska.socialis.model.TokenRequest;
 import com.alaska.socialis.model.UrlDto;
 import com.alaska.socialis.model.User;
-import com.alaska.socialis.model.UserDto;
+import com.alaska.socialis.model.UserInfoMono;
 import com.alaska.socialis.model.dto.AuthResponse;
 import com.alaska.socialis.model.requestModel.EmailValidationTokenRequest;
 import com.alaska.socialis.model.requestModel.GoogleUserRequest;
@@ -47,7 +49,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeReque
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.Value;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -77,6 +78,12 @@ public class AuthenticationController {
 
     @Value("${spring.security.oauth2.resourceserver.opaque-token.client-secret}")
     private String clientSecret;
+
+    private final WebClient userInfoClient;
+
+    public AuthenticationController(WebClient userInfoClient) {
+        this.userInfoClient = userInfoClient;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(
@@ -254,10 +261,8 @@ public class AuthenticationController {
 
     @GetMapping("/oauth/google/url")
     public ResponseEntity<UrlDto> auth() {
-        String url = new GoogleAuthorizationCodeRequestUrl(clientId, "http://localhost:4200",
+        String url = new GoogleAuthorizationCodeRequestUrl(clientId, "http://localhost:4200/auth/login",
                 Arrays.asList("email", "profile", "openid")).build();
-        System.out.println("=========================== url dto =============================");
-        System.out.println(new UrlDto(url));
 
         return ResponseEntity.ok(new UrlDto(url));
     }
@@ -267,7 +272,15 @@ public class AuthenticationController {
         String token;
         try {
             token = new GoogleAuthorizationCodeTokenRequest(new NetHttpTransport(), new GsonFactory(), clientId,
-                    clientSecret, code, "http://localhost:4200").execute().getAccessToken();
+                    clientSecret, code, "http://localhost:4200/auth/login").execute().getAccessToken();
+            UserInfoMono user = userInfoClient.get()
+                    .uri(uriBuilder -> uriBuilder.path("/oauth2/v3/userinfo").queryParam("access_token", token).build())
+                    .retrieve()
+                    .bodyToMono(UserInfoMono.class).block();
+
+            System.out.println("=========================== url dto =============================");
+
+            System.out.println(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

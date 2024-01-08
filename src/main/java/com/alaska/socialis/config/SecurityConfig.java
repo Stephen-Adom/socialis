@@ -29,29 +29,21 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationConfig jwtAuthConfig;
 
-    private final WebClient userInfoClient;
-
-    public SecurityConfig(WebClient userInfoClient) {
-        this.userInfoClient = userInfoClient;
-    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> corsConfigurer());
         http.csrf(csrf -> csrf.disable());
 
-        // http.exceptionHandling(
-        // exception -> exception.authenticationEntryPoint(new
-        // HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
+        http.exceptionHandling(
+                exception -> exception.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
-        // http.authorizeHttpRequests(authorize -> authorize
-        // .requestMatchers("/api/auth/**").permitAll()
-        // .anyRequest().authenticated());
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated());
         http.sessionManagement(
                 sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authenticationProvider(authenticationProvider).addFilterBefore(jwtAuthConfig,
                 UsernamePasswordAuthenticationFilter.class);
-        http.oauth2ResourceServer(resourceServer -> resourceServer.opaqueToken(Customizer.withDefaults()));
         return http.build();
     }
 
@@ -68,11 +60,6 @@ public class SecurityConfig {
                         .maxAge(3600);
             }
         };
-    }
-
-    @Bean
-    public OpaqueTokenIntrospector introspector() {
-        return new GoogleOpaqueIntrospector(userInfoClient);
     }
 
 }
