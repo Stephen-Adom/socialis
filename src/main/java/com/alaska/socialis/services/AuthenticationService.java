@@ -354,10 +354,10 @@ public class AuthenticationService implements AuthenticationServiceInterface {
 
     public User registerNewGoogleUser(UserInfoMono user) {
         String uid = "usr-" + UUID.randomUUID().toString();
-        String defaultUsername = user.family_name() + uid.substring(0, 5);
+        String defaultUsername = user.family_name().toLowerCase() + uid.substring(4, 8);
 
         User newUser = User.builder().uid(uid).firstname(user.given_name()).lastname(user.family_name())
-                .email(user.email()).username(defaultUsername)
+                .email(user.email()).username(defaultUsername).imageUrl(user.picture())
                 .password("").enabled(user.email_verified()).build();
 
         return this.userRepository.save(newUser);
