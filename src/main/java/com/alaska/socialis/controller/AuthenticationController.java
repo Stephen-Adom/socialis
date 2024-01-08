@@ -112,20 +112,6 @@ public class AuthenticationController {
         return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.OK);
     }
 
-    @PostMapping("/google/login")
-    public ResponseEntity<AuthResponse> authenticateGoogleToken(@RequestBody @Valid GoogleUserRequest googleUserRequest,
-            BindingResult bindingResult, HttpServletRequest request) throws ValidationErrorsException {
-        User newUser = this.authService.validateGoogleUserAndSignInUser(googleUserRequest, bindingResult);
-
-        String token = this.authService.generateJwt(newUser, request);
-        String refreshToken = this.jwtService.generateRefreshToken(newUser);
-
-        AuthResponse responseBody = AuthResponse.builder().status(HttpStatus.CREATED)
-                .data(this.userService.buildDto(newUser)).accessToken(token).refreshToken(refreshToken).build();
-
-        return new ResponseEntity<AuthResponse>(responseBody, HttpStatus.CREATED);
-    }
-
     @PostMapping("/refresh_token")
     public ResponseEntity<Map<String, String>> requestAccessToken(@Valid @RequestBody TokenRequest refreshToken,
             BindingResult validationResult, HttpServletRequest request)

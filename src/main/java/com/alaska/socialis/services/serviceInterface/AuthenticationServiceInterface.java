@@ -57,8 +57,5 @@ public interface AuthenticationServiceInterface {
         public void changePassword(String passwordToken, NewPasswordModel newPassword, BindingResult validationResult)
                         throws UnauthorizedRequestException, ValidationErrorsException;
 
-        public User validateGoogleUserAndSignInUser(GoogleUserRequest googleUserRequest,
-                        BindingResult bindingResult) throws ValidationErrorsException;
-
         public User authenticateGoogleInfo(String code, HttpServletRequest request) throws UnauthorizedRequestException;
 }
