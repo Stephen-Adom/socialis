@@ -56,8 +56,8 @@ public class NewCommentEventListener implements ApplicationListener<NewCommentEv
         notificationObj.setUser(user);
         notificationObj.setActivityType(NotificationActivityType.COMMENTED);
         notificationObj.setSource(source);
-        notificationObj.setTargetId(event.getComment().getId());
-        notificationObj.setTargetType(NotificationTargetType.COMMENT);
+        notificationObj.setTargetId(event.getComment().getPost().getId());
+        notificationObj.setTargetType(NotificationTargetType.POST);
         notificationObj.setRead(false);
 
         Notification newNotification = this.notificationRepository.save(notificationObj);

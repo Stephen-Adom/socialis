@@ -124,7 +124,7 @@ public class AuthenticationService implements AuthenticationServiceInterface {
             this.authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
         } catch (Exception e) {
-            throw new ValidationErrorsException(e.getMessage() + ": Username and/or password is incorrect",
+            throw new ValidationErrorsException(e.getMessage(),
                     HttpStatus.UNAUTHORIZED);
         }
 
