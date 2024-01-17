@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -46,9 +47,10 @@ public class PostLike extends Like {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Column(name = "like_type", nullable = false)
     private String likeType;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    private Date CreatedAt;
+    private Date createdAt;
 }

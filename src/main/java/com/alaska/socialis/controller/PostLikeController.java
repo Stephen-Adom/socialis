@@ -27,10 +27,10 @@ public class PostLikeController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @GetMapping("/{userId}/{postId}/like")
+    @GetMapping("/{userId}/like/{postId}/{likeType}")
     public ResponseEntity<Map<String, Object>> togglePostLike(@PathVariable("userId") Long userId,
-            @PathVariable("postId") Long postId) {
-        PostDto postDto = this.postLikeService.togglePostLike(userId, postId);
+            @PathVariable("postId") Long postId, @PathVariable("likeType") String likeType) {
+        PostDto postDto = this.postLikeService.togglePostLike(userId, postId, likeType);
 
         this.messagingTemplate.convertAndSend("/feed/post/update", postDto);
 
