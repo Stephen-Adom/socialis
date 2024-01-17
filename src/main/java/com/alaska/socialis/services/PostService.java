@@ -488,6 +488,7 @@ public class PostService implements PostServiceInterface {
             currentLike.setUsername(like.getUser().getUsername());
             currentLike.setFirstname(like.getUser().getFirstname());
             currentLike.setLastname(like.getUser().getLastname());
+            currentLike.setLikeType(like.getLikeType());
 
             return currentLike;
         }).collect(Collectors.toList());

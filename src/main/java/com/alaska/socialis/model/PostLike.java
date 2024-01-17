@@ -29,7 +29,9 @@ import lombok.Setter;
 @Table(indexes = {
         @Index(name = "FK_POSTLIKE_POST_ID", columnList = "post_id"),
         @Index(name = "FK_POSTLIKE_USER_ID", columnList = "user_id"),
+        @Index(name = "FK_POSTLIKE_TYPE_ID", columnList = "like_type"),
         @Index(name = "FK_POSTLIKE_POST_USER_ID", columnList = "user_id, post_id"),
+        @Index(name = "FK_POSTLIKE_POST_USER_TYPE_ID", columnList = "user_id, post_id, like_type"),
 })
 public class PostLike extends Like {
     @Id
@@ -43,6 +45,8 @@ public class PostLike extends Like {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    private String likeType;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)

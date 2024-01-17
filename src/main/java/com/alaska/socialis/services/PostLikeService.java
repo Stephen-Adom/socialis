@@ -62,19 +62,20 @@ public class PostLikeService implements PostLikeServiceInterface {
     private ApplicationEventPublisher eventPublisher;
 
     @Override
-    public PostDto togglePostLike(Long userId, Long postId) {
+    public PostDto togglePostLike(Long userId, Long postId, String likeType) {
 
         Optional<PostLike> postLike = this.postLikeRepository.findByUserIdAndPostId(userId, postId);
         Optional<User> user = this.userRepository.findById(userId);
         Optional<Post> post = this.postRepository.findById(postId);
 
-        return this.checkLikeEntity(postLike, user, post);
+        return this.checkLikeEntity(postLike, user, post, likeType);
     }
 
-    private PostDto checkLikeEntity(Optional<PostLike> postLike, Optional<User> user, Optional<Post> post) {
+    private PostDto checkLikeEntity(Optional<PostLike> postLike, Optional<User> user, Optional<Post> post,
+            String likeType) {
         if (postLike.isEmpty()) {
             post.get().setNumberOfLikes(post.get().getNumberOfLikes() + 1);
-            PostLike newLike = PostLike.builder().user(user.get()).post(post.get()).build();
+            PostLike newLike = PostLike.builder().user(user.get()).post(post.get()).likeType(likeType).build();
             this.postLikeRepository.save(newLike);
 
             this.eventPublisher.publishEvent(new PostLikeEvent(newLike));

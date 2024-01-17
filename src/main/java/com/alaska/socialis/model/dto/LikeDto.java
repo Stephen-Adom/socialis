@@ -10,4 +10,5 @@ public class LikeDto {
     private String lastname;
     private String username;
     private String imageUrl;
+    private String likeType;
 }
