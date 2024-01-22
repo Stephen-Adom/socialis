@@ -78,12 +78,12 @@ public class PostLikeService implements PostLikeServiceInterface {
             PostLike newLike = PostLike.builder().user(user.get()).post(post.get()).likeType(likeType).build();
             this.postLikeRepository.save(newLike);
 
-            // this.eventPublisher.publishEvent(new PostLikeEvent(newLike));
+            this.eventPublisher.publishEvent(new PostLikeEvent(newLike));
 
             return this.postService.buildPostDto(post.get());
         } else {
 
-            if (postLike.get().getLikeType() == likeType) {
+            if (postLike.get().getLikeType().equals(likeType)) {
                 post.get().setNumberOfLikes(post.get().getNumberOfLikes() - 1);
                 Post updatedPost = this.postRepository.save(post.get());
                 this.postLikeRepository.delete(postLike.get());
